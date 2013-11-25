@@ -3,13 +3,13 @@ Section: devel
 Priority: optional
 Maintainer: Ilya Paramonov <ivparamonov@gmail.com>
 Build-Depends: debhelper (>= 7), cdbs
-Build-Depends-Indep: ant, openjdk-6-jdk
+Build-Depends-Indep: ant, openjdk-7-jdk
 Standards-Version: 3.8.4
 Homepage: http://plantuml.sourceforge.net
 
 Package: plantuml
 Architecture: all
-Depends: openjdk-6-jre | sun-java5-jre | sun-java6-jre, graphviz, ${misc:Depends}
+Depends: openjdk-7-jre , graphviz, ${misc:Depends}
 Description: Program to generate UML diagram from a text description
  PlantUML is a program allowing to draw UML diagrams, using a simple
  and human readable text description. It is extremely useful for code

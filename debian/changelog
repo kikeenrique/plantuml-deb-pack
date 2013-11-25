@@ -1,3 +1,9 @@
+plantuml (7986-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Enrique <kike+plantuml@eldemonionegro.com>  Wed, 20 Nov 2013 10:55:18 +0400
+
 plantuml (7707-1) unstable; urgency=low
 
   * Created Debian package
