@@ -1,0 +1,2 @@
+?package(plantuml):needs="X11" section="Applications/Programming"\
+  title="plantuml" command="/usr/bin/plantuml"
