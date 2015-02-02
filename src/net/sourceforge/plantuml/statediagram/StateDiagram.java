@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -29,7 +29,6 @@
 package net.sourceforge.plantuml.statediagram;
 
 import net.sourceforge.plantuml.UmlDiagramType;
-import net.sourceforge.plantuml.UniqueSequence;
 import net.sourceforge.plantuml.classdiagram.AbstractEntityDiagram;
 import net.sourceforge.plantuml.cucadiagram.Code;
 import net.sourceforge.plantuml.cucadiagram.Display;
@@ -38,51 +37,72 @@ import net.sourceforge.plantuml.cucadiagram.GroupType;
 import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.IGroup;
 import net.sourceforge.plantuml.cucadiagram.LeafType;
+import net.sourceforge.plantuml.graphic.USymbol;
+import net.sourceforge.plantuml.utils.UniqueSequence;
 
 public class StateDiagram extends AbstractEntityDiagram {
 
-	public IEntity getOrCreateLeaf(Code code, LeafType type) {
+	public boolean checkConcurrentStateOk(Code code) {
+		if (leafExist(code) == false) {
+			return true;
+		}
+		final IEntity existing = this.getLeafsget(code);
+		if (getCurrentGroup().getGroupType() == GroupType.CONCURRENT_STATE
+				&& getCurrentGroup() != existing.getParentContainer()) {
+			return false;
+		}
+		if (existing.getParentContainer().getGroupType() == GroupType.CONCURRENT_STATE
+				&& getCurrentGroup() != existing.getParentContainer()) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public IEntity getOrCreateLeaf(Code code, LeafType type, USymbol symbol) {
+		if (checkConcurrentStateOk(code) == false) {
+			throw new IllegalStateException("Concurrent State " + code);
+		}
 		if (type == null) {
-			if (code.getCode().startsWith("[*]")) {
+			if (code.getFullName().startsWith("[*]")) {
 				throw new IllegalArgumentException();
 			}
 			if (isGroup(code)) {
 				return getGroup(code);
 			}
-			return getOrCreateLeafDefault(code, LeafType.STATE);
+			return getOrCreateLeafDefault(code, LeafType.STATE, null);
 		}
-		return getOrCreateLeafDefault(code, type);
+		return getOrCreateLeafDefault(code, type, symbol);
 	}
-
 
 	public IEntity getStart() {
 		final IGroup g = getCurrentGroup();
 		if (EntityUtils.groupRoot(g)) {
-			return getOrCreateLeaf(Code.of("*start"), LeafType.CIRCLE_START);
+			return getOrCreateLeaf(Code.of("*start"), LeafType.CIRCLE_START, null);
 		}
-		return getOrCreateLeaf(Code.of("*start*" + g.getCode().getCode()), LeafType.CIRCLE_START);
+		return getOrCreateLeaf(Code.of("*start*" + g.getCode().getFullName()), LeafType.CIRCLE_START, null);
 	}
 
 	public IEntity getEnd() {
 		final IGroup p = getCurrentGroup();
 		if (EntityUtils.groupRoot(p)) {
-			return getOrCreateLeaf(Code.of("*end"), LeafType.CIRCLE_END);
+			return getOrCreateLeaf(Code.of("*end"), LeafType.CIRCLE_END, null);
 		}
-		return getOrCreateLeaf(Code.of("*end*" + p.getCode().getCode()), LeafType.CIRCLE_END);
+		return getOrCreateLeaf(Code.of("*end*" + p.getCode().getFullName()), LeafType.CIRCLE_END, null);
 	}
 
 	public IEntity getHistorical() {
 		final IGroup g = getCurrentGroup();
 		if (EntityUtils.groupRoot(g)) {
-			return getOrCreateLeaf(Code.of("*historical"), LeafType.PSEUDO_STATE);
+			return getOrCreateLeaf(Code.of("*historical"), LeafType.PSEUDO_STATE, null);
 		}
-		return getOrCreateLeaf(Code.of("*historical*" + g.getCode().getCode()), LeafType.PSEUDO_STATE);
+		return getOrCreateLeaf(Code.of("*historical*" + g.getCode().getFullName()), LeafType.PSEUDO_STATE, null);
 	}
 
 	public IEntity getHistorical(Code codeGroup) {
-		final IEntity g = getOrCreateGroup(codeGroup, Display.getWithNewlines(codeGroup), null, GroupType.STATE,
+		final IEntity g = getOrCreateGroup(codeGroup, Display.getWithNewlines(codeGroup), GroupType.STATE,
 				getRootGroup());
-		final IEntity result = getOrCreateLeaf(Code.of("*historical*" + g.getCode().getCode()), LeafType.PSEUDO_STATE);
+		final IEntity result = getOrCreateLeaf(Code.of("*historical*" + g.getCode().getFullName()), LeafType.PSEUDO_STATE, null);
 		endGroup();
 		return result;
 	}
@@ -93,12 +113,12 @@ public class StateDiagram extends AbstractEntityDiagram {
 		if (EntityUtils.groupRoot(cur) == false && cur.getGroupType() == GroupType.CONCURRENT_STATE) {
 			super.endGroup();
 		}
-		final IGroup conc1 = getOrCreateGroup(UniqueSequence.getCode("CONC"), Display.asList(""), null,
+		final IGroup conc1 = getOrCreateGroup(UniqueSequence.getCode("CONC"), Display.create(""),
 				GroupType.CONCURRENT_STATE, getCurrentGroup());
 		if (EntityUtils.groupRoot(cur) == false && cur.getGroupType() == GroupType.STATE) {
 			cur.moveEntitiesTo(conc1);
 			super.endGroup();
-			getOrCreateGroup(UniqueSequence.getCode("CONC"), Display.asList(""), null, GroupType.CONCURRENT_STATE,
+			getOrCreateGroup(UniqueSequence.getCode("CONC"), Display.create(""), GroupType.CONCURRENT_STATE,
 					getCurrentGroup());
 		}
 		// printlink("AFTER");
@@ -135,6 +155,7 @@ public class StateDiagram extends AbstractEntityDiagram {
 	public final boolean isHideEmptyDescriptionForState() {
 		return hideEmptyDescription;
 	}
+	
 
 	// public Link isEntryPoint(IEntity ent) {
 	// final Stereotype stereotype = ent.getStereotype();

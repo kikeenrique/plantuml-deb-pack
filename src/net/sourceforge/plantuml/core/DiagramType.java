@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -29,7 +29,7 @@
 package net.sourceforge.plantuml.core;
 
 public enum DiagramType {
-	UML, DITAA, DOT, PROJECT, JCCKIT, SALT, TURING, FLOW, CREOLE, UNKNOWN;
+	UML, DITAA, DOT, PROJECT, JCCKIT, SALT, TURING, FLOW, CREOLE, JUNGLE, UNKNOWN;
 
 	static public DiagramType getTypeFromArobaseStart(String s) {
 //		if (s.startsWith("@startuml2")) {
@@ -61,6 +61,9 @@ public enum DiagramType {
 		}
 		if (s.startsWith("@startcreole")) {
 			return CREOLE;
+		}
+		if (s.startsWith("@starttree")) {
+			return JUNGLE;
 		}
 		return UNKNOWN;
 	}

@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -39,24 +39,28 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import net.sourceforge.plantuml.FileFormat;
+
 public class FtpServer {
 
 	private final Map<String, FtpConnexion> datas = new TreeMap<String, FtpConnexion>();
 	private final ExecutorService exeImage = Executors.newFixedThreadPool(2);
 	private final String charset = "UTF-8";
-	
+
 	private final int listenPort;
 
 	private int portFree = 10042;
 	private String ip;
-	
-	public FtpServer(int listenPort) {
+	private final FileFormat defaultfileFormat;
+
+	public FtpServer(int listenPort, FileFormat defaultfileFormat) {
 		this.listenPort = listenPort;
+		this.defaultfileFormat = defaultfileFormat == null ? FileFormat.PNG : defaultfileFormat;
 	}
 
 	public synchronized int getFreePort() {
 		portFree++;
-// Log.println("port=" + portFree);
+		// Log.println("port=" + portFree);
 		return portFree;
 	}
 
@@ -70,11 +74,10 @@ public class FtpServer {
 			exe.submit(new FtpLoop(incoming, this));
 		}
 	}
-	
+
 	public String getIpServer() {
 		return ip;
 	}
-	
 
 	public synchronized FtpConnexion getFtpConnexion(String user) {
 		if (user == null) {
@@ -82,7 +85,7 @@ public class FtpServer {
 		}
 		FtpConnexion data = datas.get(user);
 		if (data == null) {
-			data = new FtpConnexion(user);
+			data = new FtpConnexion(user, defaultfileFormat);
 			datas.put(user, data);
 		}
 		return data;
@@ -96,7 +99,7 @@ public class FtpServer {
 		System.out.println("Server Started...");
 		System.out.println("Waiting for connections...");
 		System.out.println(" ");
-		new FtpServer(24242).go();
+		new FtpServer(24242, FileFormat.SVG).go();
 	}
 
 	public void processImage(final FtpConnexion connexion, final String name) {

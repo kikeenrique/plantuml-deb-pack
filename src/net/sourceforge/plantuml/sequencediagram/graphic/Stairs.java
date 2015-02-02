@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -34,11 +34,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Stairs {
+public class Stairs {
 
 	private final List<Double> ys = new ArrayList<Double>();
 	private final List<Integer> values = new ArrayList<Integer>();
 	private final Map<Double, Integer> cache = new HashMap<Double, Integer>();
+
+	@Override
+	public String toString() {
+		return super.toString() + " " + ys.size();
+	}
 
 	public void addStep(double y, int value) {
 		assert ys.size() == values.size();
@@ -56,6 +61,27 @@ class Stairs {
 		ys.add(y);
 		values.add(value);
 		cache.clear();
+	}
+	
+	public int getMaxValue() {
+		int max = Integer.MIN_VALUE;
+		for (Integer v : values) {
+			if (v > max) {
+				max = v;
+			}
+		}
+		return max;
+	}
+
+	public List<Double> getYs() {
+		return Collections.unmodifiableList(ys);
+	}
+
+	private double getLastY() {
+		if (ys.size() == 0) {
+			return 0;
+		}
+		return ys.get(ys.size() - 1);
 	}
 
 	public int getValue(double y) {

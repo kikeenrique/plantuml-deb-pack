@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -31,6 +31,7 @@ package net.sourceforge.plantuml.creole;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.FontPosition;
 
@@ -40,7 +41,7 @@ public class CommandCreoleExposantChange implements Command {
 	private final FontPosition position;
 
 	private CommandCreoleExposantChange(String p, FontPosition position) {
-		this.pattern = Pattern.compile(p);
+		this.pattern = MyPattern.cmpile(p);
 		this.position = position;
 	}
 

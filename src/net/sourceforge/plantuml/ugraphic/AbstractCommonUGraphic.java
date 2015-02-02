@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -42,11 +42,12 @@ public abstract class AbstractCommonUGraphic implements UGraphic {
 
 	private final ColorMapper colorMapper;
 	private UClip clip;
+	private double scale = 1;
 
 	public UGraphic apply(UChange change) {
 		final AbstractCommonUGraphic copy = copyUGraphic();
 		if (change instanceof UTranslate) {
-			copy.translate = ((UTranslate) change).compose(copy.translate);
+			copy.translate = ((UTranslate) change).scaled(scale).compose(copy.translate);
 		} else if (change instanceof UClip) {
 			copy.clip = (UClip) change;
 			copy.clip = copy.clip.translate(getTranslateX(), getTranslateY());
@@ -60,6 +61,9 @@ public abstract class AbstractCommonUGraphic implements UGraphic {
 			copy.backColor = ((UChangeBackColor) change).getBackColor();
 		} else if (change instanceof UChangeColor) {
 			copy.color = ((UChangeColor) change).getColor();
+		} else if (change instanceof UScale) {
+			final double factor = ((UScale) change).getScale();
+			copy.scale = scale * factor;
 		}
 		return copy;
 	}
@@ -82,6 +86,7 @@ public abstract class AbstractCommonUGraphic implements UGraphic {
 		this.hidden = other.hidden;
 		this.color = other.color;
 		this.backColor = other.backColor;
+		this.scale = other.scale;
 	}
 
 	protected abstract AbstractCommonUGraphic copyUGraphic();
@@ -108,6 +113,10 @@ public abstract class AbstractCommonUGraphic implements UGraphic {
 			public UPattern getPattern() {
 				return pattern;
 			}
+
+			public double getScale() {
+				return scale;
+			}
 		};
 	}
 
@@ -122,9 +131,13 @@ public abstract class AbstractCommonUGraphic implements UGraphic {
 	final public ColorMapper getColorMapper() {
 		return new ColorMapperTransparentWrapper(colorMapper);
 	}
-	
+
 	public void flushUg() {
-		
+
+	}
+	
+	public boolean isSpecialTxt() {
+		return false;
 	}
 
 

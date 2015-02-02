@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -30,6 +30,8 @@ package net.sourceforge.plantuml.activitydiagram3.ftile;
 
 import java.util.List;
 
+import net.sourceforge.plantuml.ISkinSimple;
+import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.activitydiagram3.Branch;
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
 import net.sourceforge.plantuml.cucadiagram.Display;
@@ -37,7 +39,7 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 
-public interface FtileFactory {
+public interface FtileFactory extends ISkinSimple {
 
 	public StringBounder getStringBounder();
 
@@ -51,23 +53,25 @@ public interface FtileFactory {
 
 	public Ftile addNote(Ftile ftile, Display note, NotePosition notePosition);
 
+	public Ftile addUrl(Ftile ftile, Url url);
+
 	public Ftile decorateIn(Ftile ftile, LinkRendering linkRendering);
 
 	public Ftile decorateOut(Ftile ftile, LinkRendering linkRendering);
 
 	public Ftile assembly(Ftile tile1, Ftile tile2);
 
-	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test);
+	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test, Display yes, Display out, HtmlColor color);
 
 	public Ftile createWhile(Swimlane swimlane, Ftile whileBlock, Display test, Display yes, Display out,
-			LinkRendering afterEndwhile);
+			LinkRendering afterEndwhile, HtmlColor color);
 
 	public Ftile createIf(Swimlane swimlane, List<Branch> thens, Branch elseBranch);
 
-	public Ftile createFork(List<Ftile> all);
+	public Ftile createFork(Swimlane swimlane, List<Ftile> all);
 
 	public Ftile createSplit(List<Ftile> all);
 
-	public Ftile createGroup(Ftile list, Display name);
+	public Ftile createGroup(Ftile list, Display name, HtmlColor backColor, HtmlColor titleColor, Display headerNote);
 
 }

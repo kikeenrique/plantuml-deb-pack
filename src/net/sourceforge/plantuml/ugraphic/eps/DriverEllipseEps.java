@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -52,7 +52,11 @@ public class DriverEllipseEps implements UDriver<EpsGraphics> {
 		eps.setStrokeWidth("" + param.getStroke().getThickness(), param.getStroke().getDashVisible(), param.getStroke()
 				.getDashSpace());
 
-		eps.epsEllipse(x + width / 2, y + height / 2, width / 2, height / 2);
+		if (shape.getStart() == 0 && shape.getExtend() == 0) {
+			eps.epsEllipse(x + width / 2, y + height / 2, width / 2, height / 2);
+		} else {
+			eps.epsEllipse(x + width / 2, y + height / 2, width / 2, height / 2, shape.getStart(), shape.getExtend());
+		}
 	}
 
 }

@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -43,6 +43,11 @@ public class LifeEvent implements Event {
 		this.backcolor = backcolor;
 	}
 
+	@Override
+	public String toString() {
+		return "LifeEvent:" + p + " " + type;
+	}
+
 	public Participant getParticipant() {
 		return p;
 	}
@@ -62,5 +67,36 @@ public class LifeEvent implements Event {
 	public Url getUrl() {
 		return null;
 	}
+
+	public boolean hasUrl() {
+		return false;
+	}
+
+//	public double getStrangePos() {
+//		return message.getPosYendLevel();
+//	}
+//
+	private AbstractMessage message;
+
+	public void setMessage(AbstractMessage message) {
+		this.message = message;
+	}
+	
+	public AbstractMessage getMessage() {
+		return message;
+	}
+	
+	private boolean linkedToGroupingEnd;
+
+	public boolean isLinkedToGroupingEnd() {
+		return linkedToGroupingEnd;
+	}
+
+	public void setLinkedToGroupingEnd(boolean linkedToGroupingEnd) {
+		this.linkedToGroupingEnd = linkedToGroupingEnd;
+	}
+	
+
+
 
 }

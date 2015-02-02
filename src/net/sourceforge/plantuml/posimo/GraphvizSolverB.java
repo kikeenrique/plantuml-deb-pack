@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -48,10 +48,11 @@ import java.util.regex.Pattern;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.Log;
 import net.sourceforge.plantuml.OptionFlags;
-import net.sourceforge.plantuml.UniqueSequence;
 import net.sourceforge.plantuml.cucadiagram.dot.Graphviz;
 import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
+import net.sourceforge.plantuml.cucadiagram.dot.ProcessState;
 import net.sourceforge.plantuml.svek.MinFinder;
+import net.sourceforge.plantuml.utils.UniqueSequence;
 
 public class GraphvizSolverB {
 
@@ -83,7 +84,7 @@ public class GraphvizSolverB {
 		}
 	}
 
-	public Dimension2D solve(Cluster root, Collection<Path> paths) throws IOException, InterruptedException {
+	public Dimension2D solve(Cluster root, Collection<Path> paths) throws IOException {
 		final String dotString = new DotxMaker(root, paths).createDotString("nodesep=0.2;", "ranksep=0.2;");
 
 		if (OptionFlags.getInstance().isKeepTmpFiles()) {
@@ -98,8 +99,11 @@ public class GraphvizSolverB {
 
 		final Graphviz graphviz = GraphvizUtils.create(dotString, "svg");
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		graphviz.createFile(baos);
+		final ProcessState state = graphviz.createFile3(baos);
 		baos.close();
+		if (state.differs(ProcessState.TERMINATED_OK())) {
+			throw new IllegalStateException("Timeout2 " + state);
+		}
 		final byte[] result = baos.toByteArray();
 		final String s = new String(result, "UTF-8");
 		// Log.println("result=" + s);
@@ -157,7 +161,7 @@ public class GraphvizSolverB {
 			final String points = s.substring(p2 + " d=\"".length(), p3);
 			final DotPath dotPath = new DotPath(points, height);
 			p.setDotPath(dotPath);
-			minMax.manage(dotPath.getMinMax());
+			minMax.manage(dotPath.getMinFinder());
 
 			// Log.println("pointsList=" + pointsList);
 			if (p.getLabel() != null) {
@@ -233,11 +237,14 @@ public class GraphvizSolverB {
 		return result;
 	}
 
-	private void exportPng(final String dotString, File f) throws IOException, InterruptedException {
+	private void exportPng(final String dotString, File f) throws IOException {
 		final Graphviz graphviz = GraphvizUtils.create(dotString, "png");
 		final OutputStream os = new BufferedOutputStream(new FileOutputStream(f));
-		graphviz.createFile(os);
+		final ProcessState state = graphviz.createFile3(os);
 		os.close();
+		if (state.differs(ProcessState.TERMINATED_OK())) {
+			throw new IllegalStateException("Timeout3 " + state);
+		}
 	}
 
 	private Path getPath(Collection<Path> paths, int start, int end) {

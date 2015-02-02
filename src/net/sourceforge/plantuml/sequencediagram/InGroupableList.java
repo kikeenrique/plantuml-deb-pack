@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.sequencediagram.graphic.GroupingGraphicalElementElse;
 import net.sourceforge.plantuml.sequencediagram.graphic.LivingParticipantBox;
 import net.sourceforge.plantuml.sequencediagram.graphic.MessageExoArrow;
 import net.sourceforge.plantuml.sequencediagram.graphic.ParticipantBox;
@@ -66,6 +67,7 @@ public class InGroupableList implements InGroupable {
 	}
 
 	public void addInGroupable(InGroupable in) {
+		// Thread.dumpStack();
 		this.inGroupables.add(in);
 		cacheMin = null;
 		cacheMax = null;
@@ -92,6 +94,9 @@ public class InGroupableList implements InGroupable {
 	private InGroupable getMinSlow(StringBounder stringBounder) {
 		InGroupable result = null;
 		for (InGroupable in : inGroupables) {
+			if (in instanceof GroupingGraphicalElementElse) {
+				continue;
+			}
 			if (result == null || in.getMinX(stringBounder) < result.getMinX(stringBounder)) {
 				result = in;
 			}
@@ -116,6 +121,8 @@ public class InGroupableList implements InGroupable {
 		if (cacheMin == null) {
 			cacheMin = getMinSlow(stringBounder);
 		}
+		// Since // MODIF42 // the assert does not work...
+		// System.err.println("cacheMin1="+cacheMin+" cacheMin2="+getMinSlow(stringBounder));
 		assert cacheMin == getMinSlow(stringBounder);
 		return cacheMin;
 	}
@@ -161,7 +168,7 @@ public class InGroupableList implements InGroupable {
 	public double getMinX(StringBounder stringBounder) {
 		final InGroupable min = getMin(stringBounder);
 		if (min == null) {
-			return MARGIN10 + MARGIN5 + veryfirst.getStartingX();
+			return MARGIN10 + MARGIN5 + (veryfirst == null ? 0 : veryfirst.getStartingX());
 			// return MARGIN10 + MARGIN5;
 		}
 		double m = min.getMinX(stringBounder);

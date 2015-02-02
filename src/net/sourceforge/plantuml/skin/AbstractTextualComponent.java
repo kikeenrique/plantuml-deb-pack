@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -31,7 +31,7 @@ package net.sourceforge.plantuml.skin;
 import java.awt.geom.Dimension2D;
 
 import net.sourceforge.plantuml.FontParam;
-import net.sourceforge.plantuml.SpriteContainer;
+import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.cucadiagram.BodyEnhanced2;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
@@ -56,16 +56,16 @@ public abstract class AbstractTextualComponent extends AbstractComponent {
 	private final UFont font;
 	private final HtmlColor fontColor;
 
-	public AbstractTextualComponent(CharSequence label, HtmlColor fontColor, UFont font,
+	public AbstractTextualComponent(CharSequence label, HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font,
 			HorizontalAlignment horizontalAlignment, int marginX1, int marginX2, int marginY,
-			SpriteContainer spriteContainer, double maxMessageSize) {
-		this(Display.getWithNewlines(label == null ? "" : label.toString()), fontColor, font, horizontalAlignment,
+			ISkinSimple spriteContainer, double maxMessageSize) {
+		this(Display.getWithNewlines(label == null ? "" : label.toString()), fontColor, hyperlinkColor, useUnderlineForHyperlink, font, horizontalAlignment,
 				marginX1, marginX2, marginY, spriteContainer, maxMessageSize, false);
 	}
 
-	public AbstractTextualComponent(Display strings, HtmlColor fontColor, UFont font,
+	public AbstractTextualComponent(Display strings, HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font,
 			HorizontalAlignment horizontalAlignment, int marginX1, int marginX2, int marginY,
-			SpriteContainer spriteContainer, double maxMessageSize, boolean enhanced) {
+			ISkinSimple spriteContainer, double maxMessageSize, boolean enhanced) {
 		this.font = font;
 		this.fontColor = fontColor;
 		this.marginX1 = marginX1;
@@ -77,10 +77,10 @@ public abstract class AbstractTextualComponent extends AbstractComponent {
 			textBlock = new TextBlockEmpty();
 		} else if (enhanced) {
 			textBlock = new BodyEnhanced2(strings, FontParam.NOTE, spriteContainer, HorizontalAlignment.LEFT, font,
-					fontColor);
+					fontColor, hyperlinkColor, useUnderlineForHyperlink);
 		} else {
-			textBlock = TextBlockUtils.create(strings, new FontConfiguration(font, fontColor), horizontalAlignment,
-					spriteContainer, maxMessageSize);
+			textBlock = TextBlockUtils.create(strings, new FontConfiguration(font, fontColor, hyperlinkColor, useUnderlineForHyperlink), horizontalAlignment,
+					spriteContainer, maxMessageSize, false);
 		}
 	}
 
@@ -90,7 +90,7 @@ public abstract class AbstractTextualComponent extends AbstractComponent {
 
 	final protected double getPureTextWidth(StringBounder stringBounder) {
 		final TextBlock textBlock = getTextBlock();
-		final Dimension2D size = getSize(stringBounder, textBlock);
+		final Dimension2D size = textBlock.calculateDimension(stringBounder);
 		return size.getWidth();
 	}
 
@@ -98,19 +98,19 @@ public abstract class AbstractTextualComponent extends AbstractComponent {
 		return getPureTextWidth(stringBounder) + marginX1 + marginX2;
 	}
 
-	// For cache
-	private Dimension2D size;
-
-	private Dimension2D getSize(StringBounder stringBounder, final TextBlock textBlock) {
-		if (size == null) {
-			size = textBlock.calculateDimension(stringBounder);
-		}
-		return size;
-	}
+	// // For cache
+	// private Dimension2D size;
+	//
+	// private Dimension2D getSize(StringBounder stringBounder, final TextBlock textBlock) {
+	// if (size == null) {
+	// size = textBlock.calculateDimension(stringBounder);
+	// }
+	// return size;
+	// }
 
 	final protected double getTextHeight(StringBounder stringBounder) {
 		final TextBlock textBlock = getTextBlock();
-		final Dimension2D size = getSize(stringBounder, textBlock);
+		final Dimension2D size = textBlock.calculateDimension(stringBounder);
 		return size.getHeight() + 2 * marginY;
 	}
 

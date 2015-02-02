@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -96,13 +96,13 @@ public class EntityImageNote extends AbstractEntityImage implements Stencil {
 		}
 		borderColor = rose.getHtmlColor(skinParam, ColorParam.noteBorder);
 		final HtmlColor fontColor = rose.getFontColor(skinParam, FontParam.NOTE);
-		final UFont fontNote = skinParam.getFont(FontParam.NOTE, null);
+		final UFont fontNote = skinParam.getFont(FontParam.NOTE, null, false);
 
 		if (strings.size() == 1 && strings.get(0).length() == 0) {
 			textBlock = new TextBlockEmpty();
 		} else {
 			textBlock = new BodyEnhanced2(strings, FontParam.NOTE, skinParam, HorizontalAlignment.LEFT, fontNote,
-					fontColor);
+					fontColor, skinParam.getHyperlinkColor(), skinParam.useUnderlineForHyperlink());
 		}
 	}
 
@@ -120,9 +120,8 @@ public class EntityImageNote extends AbstractEntityImage implements Stencil {
 	}
 
 	private static HtmlColor getColorStatic(ISkinParam skinParam, ColorParam colorParam, Stereotype stereo) {
-		final String s = stereo == null ? null : stereo.getLabel();
 		final Rose rose = new Rose();
-		return rose.getHtmlColor(skinParam, colorParam, s);
+		return rose.getHtmlColor(skinParam, colorParam, stereo);
 	}
 
 	final public double getPreferredWidth(StringBounder stringBounder) {
@@ -189,7 +188,7 @@ public class EntityImageNote extends AbstractEntityImage implements Stencil {
 			final Direction strategy = getOpaleStrategy(textWidth, textHeight, p1);
 			final Point2D pp1 = path.getStartPoint();
 			final Point2D pp2 = path.getEndPoint();
-			final Opale opale = new Opale(borderColor, noteBackgroundColor, textBlock, skinParam.shadowing());
+			final Opale opale = new Opale(borderColor, noteBackgroundColor, textBlock, skinParam.shadowing(), true);
 			opale.setOpale(strategy, pp1, pp2);
 			opale.drawU(ug2);
 		}

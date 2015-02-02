@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -34,11 +34,11 @@ import java.util.List;
 
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
-import net.sourceforge.plantuml.SpriteContainerEmpty;
 import net.sourceforge.plantuml.activitydiagram3.Instruction;
 import net.sourceforge.plantuml.activitydiagram3.InstructionList;
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vcompact.FtileFactoryDelegatorAddNote;
+import net.sourceforge.plantuml.activitydiagram3.ftile.vcompact.FtileFactoryDelegatorAddUrl;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vcompact.FtileFactoryDelegatorAssembly;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vcompact.FtileFactoryDelegatorCreateFork;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vcompact.FtileFactoryDelegatorCreateGroup;
@@ -55,7 +55,6 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
-import net.sourceforge.plantuml.graphic.TextBlockInterceptorTextBlockable;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.UGraphicDelegator;
 import net.sourceforge.plantuml.svek.UGraphicForSnake;
@@ -87,13 +86,14 @@ public class Swimlanes implements TextBlock {
 
 	public Swimlanes(ISkinParam skinParam) {
 		this.skinParam = skinParam;
-		final UFont font = skinParam.getFont(FontParam.TITLE, null);
-		this.fontConfiguration = new FontConfiguration(font, HtmlColorUtils.BLACK);
+		final UFont font = skinParam.getFont(FontParam.TITLE, null, false);
+		this.fontConfiguration = new FontConfiguration(font, HtmlColorUtils.BLACK, skinParam.getHyperlinkColor(), skinParam.useUnderlineForHyperlink());
 
 	}
 
 	private FtileFactory getFtileFactory() {
 		FtileFactory factory = new VCompactFactory(skinParam, TextBlockUtils.getDummyStringBounder());
+		factory = new FtileFactoryDelegatorAddUrl(factory, skinParam);
 		factory = new FtileFactoryDelegatorAssembly(factory, skinParam);
 		factory = new FtileFactoryDelegatorIf(factory, skinParam);
 		factory = new FtileFactoryDelegatorWhile(factory, skinParam);
@@ -136,7 +136,7 @@ public class Swimlanes implements TextBlock {
 		public void draw(UShape shape) {
 			if (shape instanceof Ftile) {
 				final Ftile tile = (Ftile) shape;
-				tile.asTextBlock().drawU(this);
+				tile.drawU(this);
 			} else if (shape instanceof Connection) {
 				final Connection connection = (Connection) shape;
 				final Ftile tile1 = connection.getFtile1();
@@ -164,10 +164,10 @@ public class Swimlanes implements TextBlock {
 
 	public void drawU(UGraphic ug) {
 		final FtileFactory factory = getFtileFactory();
-		TextBlock full = root.createFtile(factory).asTextBlock();
+		TextBlock full = root.createFtile(factory);
 		ug = new UGraphicForSnake(ug);
 		if (swinlanes.size() <= 1) {
-			full = new TextBlockInterceptorTextBlockable(full);
+			full = new TextBlockInterceptorUDrawable(full);
 			// BUG42
 			// full.drawU(ug);
 			full.drawU(ug);
@@ -192,7 +192,7 @@ public class Swimlanes implements TextBlock {
 			}
 
 			final TextBlock swTitle = TextBlockUtils.create(swimlane.getDisplay(), fontConfiguration,
-					HorizontalAlignment.LEFT, new SpriteContainerEmpty());
+					HorizontalAlignment.LEFT, skinParam);
 			final double titleWidth = swTitle.calculateDimension(stringBounder).getWidth();
 			final double posTitle = x2 + (swimlane.getTotalWidth() - titleWidth) / 2;
 			swTitle.drawU(ug.apply(new UTranslate(posTitle, 0)));
@@ -226,7 +226,7 @@ public class Swimlanes implements TextBlock {
 
 			final double drawingWidth = minMax.getWidth() + 2 * separationMargin;
 			final TextBlock swTitle = TextBlockUtils.create(swimlane.getDisplay(), fontConfiguration,
-					HorizontalAlignment.LEFT, new SpriteContainerEmpty());
+					HorizontalAlignment.LEFT, skinParam);
 			final double titleWidth = swTitle.calculateDimension(stringBounder).getWidth();
 			final double totalWidth = Math.max(drawingWidth, titleWidth + 2 * separationMargin);
 
@@ -242,7 +242,7 @@ public class Swimlanes implements TextBlock {
 		double titlesHeight = 0;
 		for (Swimlane swimlane : swinlanes) {
 			final TextBlock swTitle = TextBlockUtils.create(swimlane.getDisplay(), fontConfiguration,
-					HorizontalAlignment.LEFT, new SpriteContainerEmpty());
+					HorizontalAlignment.LEFT, skinParam);
 
 			titlesHeight = Math.max(titlesHeight, swTitle.calculateDimension(stringBounder).getHeight());
 		}
@@ -252,7 +252,7 @@ public class Swimlanes implements TextBlock {
 
 	private CollisionDetector getCollisionDetector(UGraphic ug, final UTranslate titleHeightTranslate) {
 		final FtileFactory factory = getFtileFactory();
-		final TextBlock full = root.createFtile(factory).asTextBlock();
+		final TextBlock full = root.createFtile(factory);
 		ug = new UGraphicForSnake(ug);
 
 		final CollisionDetector collisionDetector = new CollisionDetector(ug.getStringBounder());

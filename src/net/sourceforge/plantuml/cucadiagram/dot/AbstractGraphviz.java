@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -29,13 +29,13 @@
 package net.sourceforge.plantuml.cucadiagram.dot;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 
 import net.sourceforge.plantuml.Log;
 import net.sourceforge.plantuml.OptionFlags;
+import net.sourceforge.plantuml.api.Performance;
 import net.sourceforge.plantuml.StringUtils;
 
 abstract class AbstractGraphviz implements Graphviz {
@@ -72,25 +72,29 @@ abstract class AbstractGraphviz implements Graphviz {
 
 	abstract protected File specificDotExe();
 
-	final public void createFile(OutputStream os) throws IOException, InterruptedException {
+	final public ProcessState createFile3(OutputStream os) {
 		if (dotString == null) {
 			throw new IllegalArgumentException();
 		}
 
 		if (illegalDotExe()) {
-			// createPngNoGraphviz(os, new FileFormatOption(FileFormat.valueOf(type[0].toUpperCase())));
+			// createPngNoGraphviz(os, new FileFormatOption(FileFormat.valueOf(type[0].goUpperCase())));
 			throw new IllegalStateException();
 		}
 		final String cmd[] = getCommandLine();
 		ProcessRunner p = null;
+		ProcessState state = null;
+		long startTime2 = -1;
 		try {
 			Log.info("Starting Graphviz process " + Arrays.asList(cmd));
 			Log.info("DotString size: " + dotString.length());
 			p = new ProcessRunner(cmd);
-			p.run(dotString.getBytes(), os);
+			startTime2 = System.currentTimeMillis();
+			state = p.run(dotString.getBytes(), os);
+			// if (state == ProcessState.TERMINATED_OK) {
+			// result = true;
+			// }
 			Log.info("Ending process ok");
-		} catch (InterruptedException e) {
-			Log.error("Interrupted");
 		} catch (Throwable e) {
 			e.printStackTrace();
 			Log.error("Error: " + e);
@@ -99,6 +103,10 @@ abstract class AbstractGraphviz implements Graphviz {
 			Log.error("Try java -jar plantuml.jar -testdot to figure out the issue");
 			Log.error("");
 		} finally {
+			if (startTime2 != -1) {
+				final long duration = System.currentTimeMillis() - startTime2;
+				Performance.updateDotTime2(duration);
+			}
 			Log.info("Ending Graphviz process");
 		}
 		if (OptionFlags.getInstance().isCheckDotError() && p != null && p.getError().length() > 0) {
@@ -113,21 +121,24 @@ abstract class AbstractGraphviz implements Graphviz {
 				throw new IllegalStateException("Dot out " + p.getOut());
 			}
 		}
-
+		return state;
 	}
 
 	private boolean illegalDotExe() {
 		return dotExe == null || dotExe.isFile() == false || dotExe.canRead() == false;
 	}
 
-	final public String dotVersion() throws IOException, InterruptedException {
+	final public String dotVersion() {
 		final String cmd[] = getCommandLineVersion();
 		return executeCmd(cmd);
 	}
 
-	private String executeCmd(final String cmd[]) throws IOException, InterruptedException {
+	private String executeCmd(final String cmd[]) {
 		final ProcessRunner p = new ProcessRunner(cmd);
-		p.run(null, null);
+		final ProcessState state = p.run(null, null);
+		if (state.differs(ProcessState.TERMINATED_OK())) {
+			return "?";
+		}
 		final StringBuilder sb = new StringBuilder();
 		if (StringUtils.isNotEmpty(p.getOut())) {
 			sb.append(p.getOut());
@@ -142,6 +153,17 @@ abstract class AbstractGraphviz implements Graphviz {
 	}
 
 	final String[] getCommandLine() {
+		if (OptionFlags.ADD_NICE_FOR_DOT) {
+			final String[] result = new String[type.length + 1 + 3];
+			result[0] = "/bin/nice";
+			result[1] = "-n";
+			result[2] = "10";
+			result[3] = getDotExe().getAbsolutePath();
+			for (int i = 0; i < type.length; i++) {
+				result[i + 4] = "-T" + type[i];
+			}
+			return result;
+		}
 		final String[] result = new String[type.length + 1];
 		result[0] = getDotExe().getAbsolutePath();
 		for (int i = 0; i < type.length; i++) {

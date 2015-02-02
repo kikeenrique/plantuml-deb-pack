@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -39,6 +39,10 @@ import net.sourceforge.plantuml.graphic.USymbol;
 
 public interface IEntity extends SpecificBackcolorable, Hideable, Removeable, LineConfigurable {
 
+	public Code getCode();
+
+	public LongCode getLongCode();
+
 	public USymbol getUSymbol();
 
 	public void setUSymbol(USymbol symbol);
@@ -65,8 +69,6 @@ public interface IEntity extends SpecificBackcolorable, Hideable, Removeable, Li
 
 	public BlockMember getBody(PortionShower portionShower);
 
-	public Code getCode();
-
 	public BlockMember getMouseOver();
 
 	public void addFieldOrMethod(String s);
@@ -78,5 +80,11 @@ public interface IEntity extends SpecificBackcolorable, Hideable, Removeable, Li
 	public boolean isGroup();
 
 	public boolean hasUrl();
+
+	public int getHectorLayer();
+
+	public void setHectorLayer(int layer);
+
+	public int getRawLayout();
 
 }

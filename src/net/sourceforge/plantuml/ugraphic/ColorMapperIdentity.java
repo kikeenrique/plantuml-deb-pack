@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -33,6 +33,7 @@ import java.awt.Color;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorSimple;
 import net.sourceforge.plantuml.graphic.HtmlColorTransparent;
+import net.sourceforge.plantuml.graphic.HtmlColorUserDef;
 
 public class ColorMapperIdentity implements ColorMapper {
 
@@ -42,6 +43,10 @@ public class ColorMapperIdentity implements ColorMapper {
 		}
 		if (color instanceof HtmlColorTransparent) {
 			throw new UnsupportedOperationException();
+		}
+		if (color instanceof HtmlColorUserDef) {
+			// Impact on JCCKIT
+			return Color.WHITE;
 		}
 		return ((HtmlColorSimple) color).getColor999();
 	}

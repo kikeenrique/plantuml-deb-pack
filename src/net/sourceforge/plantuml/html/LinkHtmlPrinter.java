@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -30,11 +30,11 @@ package net.sourceforge.plantuml.html;
 
 import java.io.PrintWriter;
 
-import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.LeafType;
 import net.sourceforge.plantuml.cucadiagram.Link;
 import net.sourceforge.plantuml.cucadiagram.LinkDecor;
+import net.sourceforge.plantuml.StringUtils;
 
 public final class LinkHtmlPrinter {
 
@@ -58,9 +58,9 @@ public final class LinkHtmlPrinter {
 		final String ent2h;
 		if (chiral) {
 			ent1h = htmlLink(link.getEntity1());
-			ent2h = "<i>" + StringUtils.unicodeForHtml(link.getEntity2().getCode().getCode()) + "</i>";
+			ent2h = "<i>" + StringUtils.unicodeForHtml(link.getEntity2().getCode().getFullName()) + "</i>";
 		} else {
-			ent1h = "<i>" + StringUtils.unicodeForHtml(link.getEntity1().getCode().getCode()) + "</i>";
+			ent1h = "<i>" + StringUtils.unicodeForHtml(link.getEntity1().getCode().getFullName()) + "</i>";
 			ent2h = htmlLink(link.getEntity2());
 		}
 		String label = link.getLabel() == null ? null : StringUtils.unicodeForHtml(link.getLabel());
@@ -163,7 +163,7 @@ public final class LinkHtmlPrinter {
 		sb.append("<a href=\"");
 		sb.append(urlOf(ent));
 		sb.append("\">");
-		sb.append(StringUtils.unicodeForHtml(ent.getCode().getCode()));
+		sb.append(StringUtils.unicodeForHtml(ent.getCode().getFullName()));
 		sb.append("</a>");
 		return sb.toString();
 	}
@@ -172,8 +172,8 @@ public final class LinkHtmlPrinter {
 		if (ent.getEntityType() == LeafType.NOTE) {
 			throw new IllegalArgumentException();
 		}
-		if (ent.getCode().getCode().matches("[-\\w_ .]+")) {
-			return StringUtils.unicodeForHtml(ent.getCode().getCode()) + ".html";
+		if (ent.getCode().getFullName().matches("[-\\w_ .]+")) {
+			return StringUtils.unicodeForHtml(ent.getCode().getFullName()) + ".html";
 		}
 		return StringUtils.unicodeForHtml(ent.getUid()) + ".html";
 	}

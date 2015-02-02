@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -36,7 +36,6 @@ import java.util.List;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.StringUtils;
-import net.sourceforge.plantuml.UniqueSequence;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.cucadiagram.BlockMember;
 import net.sourceforge.plantuml.cucadiagram.BlockMemberImpl;
@@ -47,11 +46,13 @@ import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.EntityPortion;
 import net.sourceforge.plantuml.cucadiagram.EntityPosition;
 import net.sourceforge.plantuml.cucadiagram.EntityUtils;
+import net.sourceforge.plantuml.cucadiagram.GroupRoot;
 import net.sourceforge.plantuml.cucadiagram.GroupType;
 import net.sourceforge.plantuml.cucadiagram.IGroup;
 import net.sourceforge.plantuml.cucadiagram.ILeaf;
 import net.sourceforge.plantuml.cucadiagram.LeafType;
 import net.sourceforge.plantuml.cucadiagram.Link;
+import net.sourceforge.plantuml.cucadiagram.LongCode;
 import net.sourceforge.plantuml.cucadiagram.Member;
 import net.sourceforge.plantuml.cucadiagram.PortionShower;
 import net.sourceforge.plantuml.cucadiagram.Rankdir;
@@ -65,18 +66,21 @@ import net.sourceforge.plantuml.svek.IEntityImage;
 import net.sourceforge.plantuml.svek.PackageStyle;
 import net.sourceforge.plantuml.svek.SingleStrategy;
 import net.sourceforge.plantuml.ugraphic.UStroke;
+import net.sourceforge.plantuml.utils.UniqueSequence;
 
-class EntityImpl implements ILeaf, IGroup {
+final class EntityImpl implements ILeaf, IGroup {
 
 	private final EntityFactory entityFactory;
 
 	// Entity
 	private final Code code;
+	private final LongCode longCode;
+
 	private Url url;
 
 	private final Bodier bodier;
 	private final String uid = StringUtils.getUid("cl", UniqueSequence.getValue());
-	private Display display = new Display();
+	private Display display = Display.empty();
 
 	private LeafType leafType;
 	private Stereotype stereotype;
@@ -88,7 +92,7 @@ class EntityImpl implements ILeaf, IGroup {
 	private final List<String> mouseOver = new ArrayList<String>();
 
 	// Group
-	private String namespace;
+	private Code namespace2;
 
 	private GroupType groupType;
 
@@ -105,6 +109,8 @@ class EntityImpl implements ILeaf, IGroup {
 	private boolean removed = false;
 	private HtmlColor specificLineColor;
 	private UStroke specificStroke;
+	private USymbol symbol;
+	private final int rawLayout;
 
 	// Back to Entity
 	public final boolean isTop() {
@@ -117,7 +123,8 @@ class EntityImpl implements ILeaf, IGroup {
 		this.top = top;
 	}
 
-	private EntityImpl(EntityFactory entityFactory, Code code, Bodier bodier, IGroup parentContainer) {
+	private EntityImpl(EntityFactory entityFactory, Code code, Bodier bodier, IGroup parentContainer,
+			LongCode longCode, String namespaceSeparator, int rawLayout) {
 		if (code == null) {
 			throw new IllegalArgumentException();
 		}
@@ -125,18 +132,21 @@ class EntityImpl implements ILeaf, IGroup {
 		this.bodier = bodier;
 		this.code = code;
 		this.parentContainer = parentContainer;
+		this.longCode = longCode;
+		this.rawLayout = rawLayout;
 	}
 
-	EntityImpl(EntityFactory entityFactory, Code code, Bodier bodier, IGroup parentContainer, LeafType leafType) {
-		this(entityFactory, code, bodier, parentContainer);
+	EntityImpl(EntityFactory entityFactory, Code code, Bodier bodier, IGroup parentContainer, LeafType leafType,
+			LongCode longCode, String namespaceSeparator, int rawLayout) {
+		this(entityFactory, code, bodier, parentContainer, longCode, namespaceSeparator, rawLayout);
 		this.leafType = leafType;
 	}
 
 	EntityImpl(EntityFactory entityFactory, Code code, Bodier bodier, IGroup parentContainer, GroupType groupType,
-			String namespace) {
-		this(entityFactory, code, bodier, parentContainer);
+			Code namespace2, LongCode longCode, String namespaceSeparator, int rawLayout) {
+		this(entityFactory, code, bodier, parentContainer, longCode, namespaceSeparator, rawLayout);
 		this.groupType = groupType;
-		this.namespace = namespace;
+		this.namespace2 = namespace2;
 	}
 
 	public void setContainer(IGroup container) {
@@ -151,7 +161,7 @@ class EntityImpl implements ILeaf, IGroup {
 		return leafType;
 	}
 
-	public void muteToType(LeafType newType) {
+	public void muteToType(LeafType newType, USymbol newSymbol) {
 		checkNotGroup();
 		if (newType == null) {
 			throw new IllegalArgumentException();
@@ -167,6 +177,7 @@ class EntityImpl implements ILeaf, IGroup {
 			}
 		}
 		this.leafType = newType;
+		this.symbol = newSymbol;
 	}
 
 	public Code getCode() {
@@ -221,6 +232,9 @@ class EntityImpl implements ILeaf, IGroup {
 		if (display != null && display.hasUrl()) {
 			return true;
 		}
+		if (bodier.hasUrl()) {
+			return true;
+		}
 		return url != null;
 	}
 
@@ -234,7 +248,7 @@ class EntityImpl implements ILeaf, IGroup {
 	}
 
 	public final void setNearDecoration(boolean nearDecoration) {
-		checkNotGroup();
+		// checkNotGroup();
 		this.nearDecoration = nearDecoration;
 	}
 
@@ -339,6 +353,9 @@ class EntityImpl implements ILeaf, IGroup {
 	public EntityPosition getEntityPosition() {
 		checkNotGroup();
 		if (leafType != LeafType.STATE) {
+			return EntityPosition.NORMAL;
+		}
+		if (getParentContainer() instanceof GroupRoot) {
 			return EntityPosition.NORMAL;
 		}
 		final Stereotype stereotype = getStereotype();
@@ -446,9 +463,9 @@ class EntityImpl implements ILeaf, IGroup {
 		return groupType;
 	}
 
-	public String getNamespace() {
+	public Code getNamespace2() {
 		checkGroup();
-		return namespace;
+		return namespace2;
 	}
 
 	public boolean isAutonom() {
@@ -517,25 +534,26 @@ class EntityImpl implements ILeaf, IGroup {
 		this.leafType = leafType;
 	}
 
-	void muteToGroup(String namespace, GroupType groupType, IGroup parentContainer) {
+	void muteToGroup(Code namespace2, GroupType groupType, IGroup parentContainer) {
 		checkNotGroup();
 		if (parentContainer.isGroup() == false) {
 			throw new IllegalArgumentException();
 		}
-		this.namespace = namespace;
+		this.namespace2 = namespace2;
 		this.groupType = groupType;
 		this.leafType = null;
 		this.parentContainer = parentContainer;
 	}
 
 	public boolean isHidden() {
+		if (entityFactory.isHidden(leafType)) {
+			return true;
+		}
 		if (stereotype != null) {
 			return stereotype.isHidden();
 		}
 		return false;
 	}
-
-	private USymbol symbol;
 
 	public USymbol getUSymbol() {
 		return symbol;
@@ -587,6 +605,34 @@ class EntityImpl implements ILeaf, IGroup {
 
 	public void setSpecificLineStroke(UStroke specificLineStroke) {
 		this.specificStroke = specificLineStroke;
+	}
+
+	private int layer;
+
+	public int getHectorLayer() {
+		return layer;
+	}
+
+	public void setHectorLayer(int layer) {
+		this.layer = layer;
+		if (layer > 1000) {
+			throw new IllegalArgumentException();
+		}
+	}
+
+	public LongCode getLongCode() {
+		return longCode;
+	}
+
+	public FontParam getTitleFontParam() {
+		if (symbol != null) {
+			return symbol.getFontParam();
+		}
+		return getGroupType() == GroupType.STATE ? FontParam.STATE : FontParam.PACKAGE;
+	}
+
+	public final int getRawLayout() {
+		return rawLayout;
 	}
 
 }

@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -29,6 +29,8 @@
 package net.sourceforge.plantuml.oregon;
 
 import java.util.Random;
+
+import net.sourceforge.plantuml.StringUtils;
 
 public class OregonBasicGame implements BasicGame {
 
@@ -863,7 +865,7 @@ public class OregonBasicGame implements BasicGame {
 
 		public static ShootingWord safeValueOf(String s) {
 			try {
-				return valueOf(s.toUpperCase());
+				return valueOf(StringUtils.goUpperCase(s));
 			} catch (IllegalArgumentException e) {
 				return null;
 			}

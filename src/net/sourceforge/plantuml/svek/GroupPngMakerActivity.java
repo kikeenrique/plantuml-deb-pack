@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -80,8 +80,8 @@ public final class GroupPngMakerActivity {
 		for (Link link : diagram.getLinks()) {
 			final IEntity e1 = (IEntity) link.getEntity1();
 			final IEntity e2 = (IEntity) link.getEntity2();
-			if ((e1.getParentContainer() == group) && e1.isGroup() == false
-					&& (e2.getParentContainer() == group) && e2.isGroup() == false) {
+			if (e1.getParentContainer() == group && e1.isGroup() == false && e2.getParentContainer() == group
+					&& e2.isGroup() == false) {
 				result.add(link);
 			}
 		}
@@ -98,14 +98,15 @@ public final class GroupPngMakerActivity {
 		}
 		final List<Link> links = getPureInnerLinks();
 		final ISkinParam skinParam = diagram.getSkinParam();
-//		if (OptionFlags.PBBACK && group.getSpecificBackColor() != null) {
-//			skinParam = new SkinParamBackcolored(skinParam, null, group.getSpecificBackColor());
-//		}
+		// if (OptionFlags.PBBACK && group.getSpecificBackColor() != null) {
+		// skinParam = new SkinParamBackcolored(skinParam, null, group.getSpecificBackColor());
+		// }
 		final DotData dotData = new DotData(group, links, group.getLeafsDirect(), diagram.getUmlDiagramType(),
 				skinParam, group.getRankdir(), new InnerGroupHierarchy(), diagram.getColorMapper(),
-				diagram.getEntityFactory(), false);
+				diagram.getEntityFactory(), false, DotMode.NORMAL, diagram.getNamespaceSeparator(), diagram.getPragma());
 
-		final CucaDiagramFileMakerSvek2 svek2 = new CucaDiagramFileMakerSvek2(dotData, diagram.getEntityFactory(), false, diagram.getSource(), diagram.getPragma());
+		final CucaDiagramFileMakerSvek2 svek2 = new CucaDiagramFileMakerSvek2(dotData, diagram.getEntityFactory(),
+				false, diagram.getSource(), diagram.getPragma());
 
 		if (group.getGroupType() == GroupType.INNER_ACTIVITY) {
 			final Stereotype stereo = group.getStereotype();
@@ -121,14 +122,13 @@ public final class GroupPngMakerActivity {
 
 	private UFont getFont(FontParam fontParam) {
 		final ISkinParam skinParam = diagram.getSkinParam();
-		return skinParam.getFont(fontParam, null);
+		return skinParam.getFont(fontParam, null, false);
 	}
 
 	private final Rose rose = new Rose();
 
 	protected final HtmlColor getColor(ColorParam colorParam, Stereotype stereo) {
-		final String s = stereo == null ? null : stereo.getLabel();
 		final ISkinParam skinParam = diagram.getSkinParam();
-		return rose.getHtmlColor(skinParam, colorParam, s);
+		return rose.getHtmlColor(skinParam, colorParam, stereo);
 	}
 }

@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -30,9 +30,9 @@ package net.sourceforge.plantuml.command;
 
 import java.util.List;
 
-import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.UmlDiagram;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.StringUtils;
 
 public class CommandMultilinesTitle extends CommandMultilines<UmlDiagram> {
 
@@ -42,13 +42,13 @@ public class CommandMultilinesTitle extends CommandMultilines<UmlDiagram> {
 
 	@Override
 	public String getPatternEnd() {
-		return "(?i)^end ?title$";
+		return "(?i)^end[%s]?title$";
 	}
 
 	public CommandExecutionResult execute(final UmlDiagram diagram, List<String> lines) {
-		final Display strings = new Display(lines.subList(1, lines.size() - 1)).removeEmptyColumns();
+		final Display strings = Display.create(lines.subList(1, lines.size() - 1)).removeEmptyColumns();
 		if (strings.size() > 0) {
-			diagram.setTitle(StringUtils.manageEmbededDiagrams(strings));
+			diagram.setTitle(strings);
 			return CommandExecutionResult.ok();
 		}
 		return CommandExecutionResult.error("No title defined");

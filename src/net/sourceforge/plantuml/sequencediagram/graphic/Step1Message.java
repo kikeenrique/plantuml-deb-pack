@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -29,11 +29,11 @@
 package net.sourceforge.plantuml.sequencediagram.graphic;
 
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.OptionFlags;
 import net.sourceforge.plantuml.SkinParamBackcolored;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.sequencediagram.InGroupable;
-import net.sourceforge.plantuml.sequencediagram.LifeEvent;
 import net.sourceforge.plantuml.sequencediagram.Message;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 import net.sourceforge.plantuml.skin.ArrowConfiguration;
@@ -81,10 +81,7 @@ class Step1Message extends Step1Abstract {
 
 		// final double delta1 = isSelfMessage() ? 4 : 0;
 		final double delta1 = 0;
-
-		for (LifeEvent lifeEvent : getMessage().getLiveEvents()) {
-			beforeMessage(lifeEvent, arrowYStartLevel + delta1);
-		}
+		getMessage().setPosYstartLevel(arrowYStartLevel + delta1);
 
 		final double length;
 		if (isSelfMessage()) {
@@ -111,9 +108,8 @@ class Step1Message extends Step1Abstract {
 			constraintSet.getConstraint(getParticipantBox1(), getParticipantBox2()).ensureValue(length);
 		}
 
-		for (LifeEvent lifeEvent : getMessage().getLiveEvents()) {
-			afterMessage(getStringBounder(), lifeEvent, arrowYEndLevel + marginActivateAndDeactive - delta1);
-		}
+		final double posYendLevel = arrowYEndLevel + marginActivateAndDeactive - delta1;
+		getMessage().setPosYendLevel(posYendLevel);
 
 		assert graphic instanceof InGroupable;
 		if (graphic instanceof InGroupable) {
@@ -177,8 +173,12 @@ class Step1Message extends Step1Abstract {
 	private MessageSelfArrow createMessageSelfArrow() {
 		final double posY = getFreeY().getFreeY(getParticipantRange());
 		double deltaY = 0;
+		double deltaX = 0;
 		if (getMessage().isActivate()) {
 			deltaY -= getHalfLifeWidth();
+			if (OptionFlags.STRICT_SELFMESSAGE_POSITION) {
+				deltaX += 5;
+			}
 		}
 		if (getMessage().isDeactivate()) {
 			deltaY += getHalfLifeWidth();
@@ -186,14 +186,14 @@ class Step1Message extends Step1Abstract {
 
 		return new MessageSelfArrow(posY, getDrawingSet().getSkin(), getDrawingSet().getSkin().createComponent(
 				ComponentType.ARROW, getConfig(), getDrawingSet().getSkinParam(), getLabelOfMessage(getMessage())),
-				getLivingParticipantBox1(), deltaY, getMessage().getUrl());
+				getLivingParticipantBox1(), deltaY, getMessage().getUrl(), deltaX);
 	}
 
 	private double getHalfLifeWidth() {
 		return getDrawingSet()
 				.getSkin()
 				.createComponent(ComponentType.ALIVE_BOX_OPEN_OPEN, null, getDrawingSet().getSkinParam(),
-						Display.asList("")).getPreferredWidth(null) / 2;
+						Display.create("")).getPreferredWidth(null) / 2;
 	}
 
 	private Arrow createArrowCreate() {
@@ -225,6 +225,8 @@ class Step1Message extends Step1Abstract {
 		}
 		result = result.withPart(m.getArrowConfiguration().getPart());
 		result = result.withColor(m.getArrowConfiguration().getColor());
+		result = result.withDecoration1(m.getArrowConfiguration().getDecoration1());
+		result = result.withDecoration2(m.getArrowConfiguration().getDecoration2());
 		return result;
 	}
 

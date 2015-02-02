@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -264,8 +264,8 @@ public class Elastane {
 			final String label = l.getLabel().get(0).toString();
 			if (label != null) {
 				// polyline.getFirst().getCenter();
-				final TextBlock textBlock = TextBlockUtils.create(Display.asList(label),
-						new FontConfiguration(UFont.getCurrentFont(g2d), HtmlColorUtils.BLACK),
+				final TextBlock textBlock = TextBlockUtils.create(Display.create(label),
+						new FontConfiguration(UFont.getCurrentFont(g2d), HtmlColorUtils.BLACK, HtmlColorUtils.BLUE, true),
 						HorizontalAlignment.LEFT, new SpriteContainerEmpty());
 				textBlock.calculateDimension(StringBounderUtils.asStringBounder(g2d));
 				// textBlock.drawTOBEREMOVED(new ColorMapperIdentity(), g2d, center.getXint() - dim.getWidth() / 2,

@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -43,6 +43,8 @@ import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SkinParam;
 import net.sourceforge.plantuml.SpriteContainerEmpty;
 import net.sourceforge.plantuml.api.ImageDataSimple;
+import net.sourceforge.plantuml.core.DiagramDescription;
+import net.sourceforge.plantuml.core.DiagramDescriptionImpl;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
@@ -119,7 +121,7 @@ class PrintSkin extends AbstractPSystem {
 	private void printComponent(ComponentType type) {
 		println(type.name());
 		final Component comp = skin.createComponent(type, ArrowConfiguration.withDirectionNormal(),
-				new SkinParam(null), new Display(toPrint));
+				new SkinParam(null), Display.create(toPrint));
 		if (comp == null) {
 			println("null");
 			return;
@@ -135,7 +137,9 @@ class PrintSkin extends AbstractPSystem {
 		if (width == 0) {
 			width = 42;
 		}
-		ug.apply(new UChangeBackColor(HtmlColorUtils.LIGHT_GRAY)).apply(new UChangeColor(HtmlColorUtils.LIGHT_GRAY)).apply(new UTranslate((double) (xpos - 1), (double) (ypos - 1))).draw(new URectangle(width + 2, height + 2));
+		ug.apply(new UChangeBackColor(HtmlColorUtils.LIGHT_GRAY)).apply(new UChangeColor(HtmlColorUtils.LIGHT_GRAY))
+				.apply(new UTranslate((double) (xpos - 1), (double) (ypos - 1)))
+				.draw(new URectangle(width + 2, height + 2));
 
 		comp.drawU(ug.apply(new UTranslate(xpos, ypos)), new Area(new Dimension2DDouble(width, height)),
 				new SimpleContext2D(false));
@@ -144,14 +148,14 @@ class PrintSkin extends AbstractPSystem {
 	}
 
 	private void println(String s) {
-		final TextBlock textBlock = TextBlockUtils.create(Display.asList(s), new FontConfiguration(FONT1,
-				HtmlColorUtils.BLACK), HorizontalAlignment.LEFT, new SpriteContainerEmpty());
+		final TextBlock textBlock = TextBlockUtils.create(Display.create(s), new FontConfiguration(FONT1,
+				HtmlColorUtils.BLACK, HtmlColorUtils.BLUE, true), HorizontalAlignment.LEFT, new SpriteContainerEmpty());
 		textBlock.drawU(ug.apply(new UTranslate(xpos, ypos)));
 		ypos += textBlock.calculateDimension(ug.getStringBounder()).getHeight();
 	}
 
-	public String getDescription() {
-		return "Printing of " + skin.getClass().getName();
+	public DiagramDescription getDescription() {
+		return new DiagramDescriptionImpl("Printing of " + skin.getClass().getName(), getClass());
 	}
 
 	public PrintSkin(String className, List<String> toPrint) {

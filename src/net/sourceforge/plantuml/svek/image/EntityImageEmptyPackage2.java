@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -62,10 +62,11 @@ public class EntityImageEmptyPackage2 extends AbstractEntityImage {
 		this.skinParam = skinParam;
 		this.specificBackColor = entity.getSpecificBackColor();
 		this.stereotype = entity.getStereotype();
-		this.desc = TextBlockUtils.create(entity.getDisplay(),
-				new FontConfiguration(SkinParamUtils.getFont(getSkinParam(), FontParam.PACKAGE, stereotype),
-						SkinParamUtils.getFontColor(getSkinParam(), FontParam.PACKAGE, stereotype)),
-				HorizontalAlignment.CENTER, skinParam);
+		this.desc = TextBlockUtils.create(
+				entity.getDisplay(),
+				new FontConfiguration(SkinParamUtils.getFont(getSkinParam(),
+						FontParam.PACKAGE, stereotype), SkinParamUtils.getFontColor(getSkinParam(), FontParam.PACKAGE,
+				stereotype), getSkinParam().getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink()), HorizontalAlignment.CENTER, skinParam);
 	}
 
 	public Dimension2D calculateDimension(StringBounder stringBounder) {
@@ -80,8 +81,7 @@ public class EntityImageEmptyPackage2 extends AbstractEntityImage {
 		final double widthTotal = dimTotal.getWidth();
 		final double heightTotal = dimTotal.getHeight();
 
-		final HtmlColor stateBack = Cluster.getStateBackColor(specificBackColor, skinParam, stereotype == null ? null
-				: stereotype.getLabel());
+		final HtmlColor stateBack = Cluster.getStateBackColor(specificBackColor, skinParam, stereotype);
 
 		final ClusterDecoration decoration = new ClusterDecoration(getSkinParam().getPackageStyle(), null, desc,
 				TextBlockUtils.empty(0, 0), stateBack, 0, 0, widthTotal, heightTotal);

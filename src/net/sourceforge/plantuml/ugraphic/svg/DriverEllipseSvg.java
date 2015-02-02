@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -28,15 +28,16 @@
  */
 package net.sourceforge.plantuml.ugraphic.svg;
 
-import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorGradient;
+import net.sourceforge.plantuml.graphic.HtmlColorTransparent;
 import net.sourceforge.plantuml.svg.SvgGraphics;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
 import net.sourceforge.plantuml.ugraphic.UDriver;
 import net.sourceforge.plantuml.ugraphic.UEllipse;
 import net.sourceforge.plantuml.ugraphic.UParam;
 import net.sourceforge.plantuml.ugraphic.UShape;
+import net.sourceforge.plantuml.StringUtils;
 
 public class DriverEllipseSvg implements UDriver<SvgGraphics> {
 
@@ -45,7 +46,6 @@ public class DriverEllipseSvg implements UDriver<SvgGraphics> {
 		final double width = shape.getWidth();
 		final double height = shape.getHeight();
 
-		final String color = StringUtils.getAsSvg(mapper, param.getColor());
 
 		final HtmlColor back = param.getBackcolor();
 		if (back instanceof HtmlColorGradient) {
@@ -53,13 +53,14 @@ public class DriverEllipseSvg implements UDriver<SvgGraphics> {
 			final String id = svg.createSvgGradient(StringUtils.getAsHtml(mapper.getMappedColor(gr.getColor1())),
 					StringUtils.getAsHtml(mapper.getMappedColor(gr.getColor2())), gr.getPolicy());
 			svg.setFillColor("url(#" + id + ")");
-			svg.setStrokeColor(color);
+		} else if (back == null || back instanceof HtmlColorTransparent) {
+			svg.setFillColor("none");
 		} else {
 			final String backcolor = StringUtils.getAsSvg(mapper, back);
 			svg.setFillColor(backcolor);
-			svg.setStrokeColor(color);
 		}
-
+		final String color = StringUtils.getAsSvg(mapper, param.getColor());
+		svg.setStrokeColor(color);
 		svg.setStrokeWidth(param.getStroke().getThickness(), param.getStroke().getDasharraySvg());
 
 		double start = shape.getStart();

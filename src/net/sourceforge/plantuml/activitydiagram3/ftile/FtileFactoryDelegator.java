@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -32,6 +32,7 @@ import java.util.List;
 
 import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.activitydiagram3.Branch;
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
 import net.sourceforge.plantuml.cucadiagram.Display;
@@ -39,6 +40,7 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 import net.sourceforge.plantuml.skin.rose.Rose;
+import net.sourceforge.plantuml.ugraphic.Sprite;
 
 public class FtileFactoryDelegator implements FtileFactory {
 
@@ -59,7 +61,7 @@ public class FtileFactoryDelegator implements FtileFactory {
 
 	protected Display getInLinkRenderingDisplay(Ftile tile) {
 		final LinkRendering linkRendering = tile.getInLinkRendering();
-		if (linkRendering == null || linkRendering.getDisplay() == null) {
+		if (linkRendering == null) {
 			return null;
 		}
 		return linkRendering.getDisplay();
@@ -86,6 +88,10 @@ public class FtileFactoryDelegator implements FtileFactory {
 		return factory.addNote(ftile, note, notePosition);
 	}
 
+	public Ftile addUrl(Ftile ftile, Url url) {
+		return factory.addUrl(ftile, url);
+	}
+
 	public Ftile decorateIn(Ftile ftile, LinkRendering linkRendering) {
 		return factory.decorateIn(ftile, linkRendering);
 	}
@@ -98,29 +104,29 @@ public class FtileFactoryDelegator implements FtileFactory {
 		return factory.assembly(tile1, tile2);
 	}
 
-	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test) {
-		return factory.repeat(swimlane, repeat, test);
+	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test, Display yes, Display out, HtmlColor color) {
+		return factory.repeat(swimlane, repeat, test, yes, out, color);
 	}
 
 	public Ftile createWhile(Swimlane swimlane, Ftile whileBlock, Display test, Display yes, Display out,
-			LinkRendering afterEndwhile) {
-		return factory.createWhile(swimlane, whileBlock, test, yes, out, afterEndwhile);
+			LinkRendering afterEndwhile, HtmlColor color) {
+		return factory.createWhile(swimlane, whileBlock, test, yes, out, afterEndwhile, color);
 	}
 
 	public Ftile createIf(Swimlane swimlane, List<Branch> thens, Branch elseBranch) {
 		return factory.createIf(swimlane, thens, elseBranch);
 	}
 
-	public Ftile createFork(List<Ftile> all) {
-		return factory.createFork(all);
+	public Ftile createFork(Swimlane swimlane, List<Ftile> all) {
+		return factory.createFork(swimlane, all);
 	}
 
 	public Ftile createSplit(List<Ftile> all) {
 		return factory.createSplit(all);
 	}
 
-	public Ftile createGroup(Ftile list, Display name) {
-		return factory.createGroup(list, name);
+	public Ftile createGroup(Ftile list, Display name, HtmlColor backColor, HtmlColor titleColor, Display headerNote) {
+		return factory.createGroup(list, name, backColor, titleColor, headerNote);
 	}
 
 	public StringBounder getStringBounder() {
@@ -141,6 +147,14 @@ public class FtileFactoryDelegator implements FtileFactory {
 
 	protected FtileFactory getFactory() {
 		return factory;
+	}
+
+	public Sprite getSprite(String name) {
+		return skinParam.getSprite(name);
+	}
+
+	public String getValue(String key) {
+		return skinParam.getValue(key);
 	}
 
 }

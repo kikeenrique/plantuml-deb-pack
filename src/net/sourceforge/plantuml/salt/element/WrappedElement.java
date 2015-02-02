@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -45,8 +45,8 @@ public class WrappedElement implements Element {
 		return wrapped.getPreferredDimension(stringBounder, 0, 0);
 	}
 
-	public void drawU(UGraphic ug, double x, double y, int zIndex, Dimension2D dimToUse) {
-		wrapped.drawU(ug, x, y, zIndex, dimToUse);
+	public void drawU(UGraphic ug, int zIndex, Dimension2D dimToUse) {
+		wrapped.drawU(ug, zIndex, dimToUse);
 	}
 
 }

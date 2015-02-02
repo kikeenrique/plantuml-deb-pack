@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -44,7 +44,7 @@ import net.sourceforge.plantuml.skin.Skin;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-class LifeLine {
+public class LifeLine {
 
 	static class Variation {
 		final private LifeSegmentVariation type;
@@ -82,7 +82,7 @@ class LifeLine {
 			final Variation last = events.get(events.size() - 1);
 			if (y < last.y) {
 				return;
-//				throw new IllegalArgumentException();
+				// throw new IllegalArgumentException();
 			}
 			if (y == last.y && type != last.type) {
 				return;
@@ -118,22 +118,6 @@ class LifeLine {
 	}
 
 	int getLevel(double y) {
-//		int level = 0;
-//		for (Variation ev : events) {
-//			if (ev.y > y) {
-//				return level;
-//			}
-//			if (ev.type == LifeSegmentVariation.LARGER) {
-//				level++;
-//			} else {
-//				level--;
-//				if (level < 0) {
-//					level = 0;
-//				}
-//			}
-//		}
-//		assert level >= 0;
-//		return level;
 		return stairs.getValue(y);
 	}
 
@@ -188,7 +172,9 @@ class LifeLine {
 				level--;
 			}
 			if (level == 0) {
-				return new SegmentColored(events.get(i).y, events.get(j).y, events.get(i).backcolor, shadowing);
+				final double y1 = events.get(i).y;
+				final double y2 = events.get(j).y;
+				return new SegmentColored(y1, y2, events.get(i).backcolor, shadowing);
 			}
 		}
 		return new SegmentColored(events.get(i).y, events.get(events.size() - 1).y, events.get(i).backcolor, shadowing);
@@ -206,7 +192,7 @@ class LifeLine {
 		final StringBounder stringBounder = ug.getStringBounder();
 
 		ug = ug.apply(new UTranslate(getStartingX(stringBounder), 0));
-		
+
 		for (int i = 0; i < events.size(); i++) {
 			ComponentType type = ComponentType.ALIVE_BOX_CLOSE_OPEN;
 			for (final Iterator<SegmentColored> it = getSegmentsCutted(stringBounder, i).iterator(); it.hasNext();) {
@@ -218,14 +204,15 @@ class LifeLine {
 				}
 				final Component compAliveBox = skin.createComponent(type, null, skinParam2, null);
 				type = ComponentType.ALIVE_BOX_OPEN_OPEN;
-				final int currentLevel = getLevel(seg.getSegment().getPos1());
+				final int currentLevel = getLevel(seg.getPos1Initial());
 				seg.drawU(ug, compAliveBox, currentLevel);
 			}
 		}
 	}
 
 	private double create = 0;
-	private double destroy = 0;
+
+	// private double destroy = 0;
 
 	public final void setCreate(double create) {
 		this.create = create;
@@ -236,12 +223,12 @@ class LifeLine {
 	}
 
 	public final double getDestroy() {
-		return destroy;
+		return 0;
 	}
 
-	public final void setDestroy(double destroy) {
-		this.destroy = destroy;
-	}
+	// public final void setDestroy(double destroy) {
+	// this.destroy = destroy;
+	// }
 
 	public final boolean shadowing() {
 		return shadowing;

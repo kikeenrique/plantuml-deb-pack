@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -59,6 +59,11 @@ public class SourceFileReader implements ISourceFileReader {
 		this(file, file.getAbsoluteFile().getParentFile());
 	}
 
+	public SourceFileReader(File file, File outputDirectory, String charset) throws IOException {
+		this(new Defines(), file, outputDirectory, Collections.<String> emptyList(), charset, new FileFormatOption(
+				FileFormat.PNG));
+	}
+
 	public SourceFileReader(final File file, File outputDirectory) throws IOException {
 		this(new Defines(), file, outputDirectory, Collections.<String> emptyList(), null, new FileFormatOption(
 				FileFormat.PNG));
@@ -87,10 +92,11 @@ public class SourceFileReader implements ISourceFileReader {
 		}
 		this.outputDirectory = outputDirectory;
 
-		builder = new BlockUmlBuilder(config, charset, defines, getReader(charset), file.getAbsoluteFile().getParentFile());
+		builder = new BlockUmlBuilder(config, charset, defines, getReader(charset), file.getAbsoluteFile()
+				.getParentFile());
 	}
 
-	public boolean hasError() throws IOException, InterruptedException {
+	public boolean hasError() {
 		for (final BlockUml b : builder.getBlockUmls()) {
 			if (b.getDiagram() instanceof PSystemError) {
 				return true;
@@ -131,7 +137,7 @@ public class SourceFileReader implements ISourceFileReader {
 						ps.close();
 					}
 				}
-				final GeneratedImage generatedImage = new GeneratedImage(f, desc, system);
+				final GeneratedImage generatedImage = new GeneratedImage(f, desc, blockUml);
 				result.add(generatedImage);
 			}
 
@@ -142,7 +148,7 @@ public class SourceFileReader implements ISourceFileReader {
 		return Collections.unmodifiableList(result);
 	}
 
-	public List<String> getEncodedUrl() throws IOException, InterruptedException {
+	public List<String> getEncodedUrl() throws IOException {
 		final List<String> result = new ArrayList<String>();
 		final Transcoder transcoder = TranscoderUtil.getDefaultTranscoder();
 		for (BlockUml blockUml : builder.getBlockUmls()) {

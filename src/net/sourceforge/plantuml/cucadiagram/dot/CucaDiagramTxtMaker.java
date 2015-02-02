@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 
 import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.cucadiagram.CucaDiagram;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.IEntity;
@@ -53,6 +52,7 @@ import net.sourceforge.plantuml.posimo.GraphvizSolverB;
 import net.sourceforge.plantuml.posimo.Path;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 import net.sourceforge.plantuml.ugraphic.txt.UGraphicTxt;
+import net.sourceforge.plantuml.StringUtils;
 
 public final class CucaDiagramTxtMaker {
 
@@ -77,7 +77,7 @@ public final class CucaDiagramTxtMaker {
 
 		final Map<IEntity, Block> blocks = new HashMap<IEntity, Block>();
 
-		for (IEntity ent : diagram.getLeafs().values()) {
+		for (IEntity ent : diagram.getLeafsvalues()) {
 			// printClass(ent);
 			// ug.translate(0, getHeight(ent) + 1);
 			final double width = getWidth(ent) * getXPixelPerChar();
@@ -88,26 +88,24 @@ public final class CucaDiagramTxtMaker {
 		}
 
 		final GraphvizSolverB solver = new GraphvizSolverB();
-		try {
-			final Collection<Path> paths = new ArrayList<Path>();
-			for (Link link : diagram.getLinks()) {
-				final Block b1 = blocks.get(link.getEntity1());
-				final Block b2 = blocks.get(link.getEntity2());
-				paths.add(new Path(b1, b2, null, link.getLength()));
-			}
-			solver.solve(root, paths);
-			for (Path p : paths) {
-				p.getDotPath().draw(globalUg.getCharArea(), getXPixelPerChar(), getYPixelPerChar());
-			}
-			for (IEntity ent : diagram.getLeafs().values()) {
-				final Block b = blocks.get(ent);
-				final Point2D p = b.getPosition();
-				printClass(ent, (UGraphicTxt) globalUg.apply(new UTranslate(p.getX() / getXPixelPerChar(), p.getY() / getYPixelPerChar())));
-			}
 
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		final Collection<Path> paths = new ArrayList<Path>();
+		for (Link link : diagram.getLinks()) {
+			final Block b1 = blocks.get(link.getEntity1());
+			final Block b2 = blocks.get(link.getEntity2());
+			paths.add(new Path(b1, b2, null, link.getLength()));
+		}
+		solver.solve(root, paths);
+		for (Path p : paths) {
+			p.getDotPath().draw(globalUg.getCharArea(), getXPixelPerChar(), getYPixelPerChar());
+		}
+		for (IEntity ent : diagram.getLeafsvalues()) {
+			final Block b = blocks.get(ent);
+			final Point2D p = b.getPosition();
+			printClass(
+					ent,
+					(UGraphicTxt) globalUg.apply(new UTranslate(p.getX() / getXPixelPerChar(), p.getY()
+							/ getYPixelPerChar())));
 		}
 
 	}

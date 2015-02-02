@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -34,7 +34,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.sourceforge.plantuml.EmptyImageBuilder;
@@ -43,6 +42,8 @@ import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.UmlDiagram;
 import net.sourceforge.plantuml.UmlDiagramType;
 import net.sourceforge.plantuml.api.ImageDataSimple;
+import net.sourceforge.plantuml.core.DiagramDescription;
+import net.sourceforge.plantuml.core.DiagramDescriptionImpl;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
@@ -65,8 +66,7 @@ public class PostItDiagram extends UmlDiagram {
 	}
 
 	@Override
-	final protected ImageData exportDiagramInternal(OutputStream os, int index, FileFormatOption fileFormatOption,
-			List<BufferedImage> flashcodes) throws IOException {
+	final protected ImageData exportDiagramInternal(OutputStream os, int index, FileFormatOption fileFormatOption) throws IOException {
 		final UGraphic ug = createImage(fileFormatOption);
 		drawU(ug);
 		if (ug instanceof UGraphicG2d) {
@@ -82,8 +82,8 @@ public class PostItDiagram extends UmlDiagram {
 		return new ImageDataSimple();
 	}
 
-	public String getDescription() {
-		return "Board of post-it";
+	public DiagramDescription getDescription() {
+		return new DiagramDescriptionImpl("Board of post-it", getClass());
 	}
 
 	public Area getDefaultArea() {

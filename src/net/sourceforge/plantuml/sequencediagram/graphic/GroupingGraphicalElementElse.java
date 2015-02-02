@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -32,6 +32,7 @@ import java.awt.geom.Dimension2D;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.sequencediagram.InGroupable;
 import net.sourceforge.plantuml.sequencediagram.InGroupableList;
 import net.sourceforge.plantuml.skin.Area;
 import net.sourceforge.plantuml.skin.Component;
@@ -39,7 +40,7 @@ import net.sourceforge.plantuml.skin.Context2D;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-class GroupingGraphicalElementElse extends GroupingGraphicalElement {
+public class GroupingGraphicalElementElse extends GroupingGraphicalElement implements InGroupable {
 
 	private final Component compElse;
 	private final Lazy afterY;
@@ -82,6 +83,18 @@ class GroupingGraphicalElementElse extends GroupingGraphicalElement {
 	@Override
 	public double getPreferredWidth(StringBounder stringBounder) {
 		return compElse.getPreferredWidth(stringBounder);
+	}
+
+	public double getMinX(StringBounder stringBounder) {
+		return getStartingX(stringBounder);
+	}
+
+	public double getMaxX(StringBounder stringBounder) {
+		return getMinX(stringBounder) + getPreferredWidth(stringBounder);
+	}
+
+	public String toString(StringBounder stringBounder) {
+		return toString();
 	}
 
 }

@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -33,13 +33,14 @@ import java.io.StringReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.preproc.ReadLine;
 import net.sourceforge.plantuml.preproc.ReadLineReader;
 import net.sourceforge.plantuml.preproc.UncommentReadLine;
 
 public class ArobaseStringCompressor implements StringCompressor {
 
-	private final static Pattern p = Pattern.compile("(?s)(?i)^\\s*(@startuml[^\\n\\r]*)?\\s*(.*?)\\s*(@enduml)?\\s*$");
+	private final static Pattern p = MyPattern.cmpile("(?s)(?i)^[%s]*(@startuml[^\\n\\r]*)?[%s]*(.*?)[%s]*(@enduml)?[%s]*$");
 
 	public String compress(final String data) throws IOException {
 		final ReadLine r = new UncommentReadLine(new ReadLineReader(new StringReader(data)));

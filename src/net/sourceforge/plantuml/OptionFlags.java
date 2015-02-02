@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -40,14 +40,17 @@ import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
 public class OptionFlags {
 
 	// static public final boolean PBBACK = false;
-	static public boolean GRAPHVIZCACHE = false;
+	// static public boolean GRAPHVIZCACHE = false;
 	static public final boolean TRACE_DOT = false;
 
-	static public final boolean HORIZONTAL_LINE_BETWEEN_DIFFERENT_PACKAGE_ALLOWED = false;
 	static public boolean ALLOW_INCLUDE = true;
 
 	static public final boolean USE_HECTOR = false;
-	static public final boolean USE_CREOLE = true;
+	static public boolean ADD_NICE_FOR_DOT = false;
+	static public final boolean STRICT_SELFMESSAGE_POSITION = true;
+	static public final boolean TEOZ = false;
+	static public final boolean USE_INTERFACE_EYE1 = false;
+	static public final boolean USE_INTERFACE_EYE2 = false;
 
 	void reset() {
 		reset(false);
@@ -65,7 +68,7 @@ public class OptionFlags {
 		checkDotError = false;
 		printFonts = false;
 		useSuggestEngine = true;
-		failOnError = false;
+		// failOnError = false;
 		encodesprite = false;
 		// PIC_LINE = false;
 	}
@@ -87,7 +90,7 @@ public class OptionFlags {
 	private boolean checkDotError;
 	private boolean printFonts;
 	private boolean useSuggestEngine;
-	private boolean failOnError;
+	// private boolean failOnError;
 	private boolean encodesprite;
 	private boolean overwrite;
 	private File logData;
@@ -254,13 +257,13 @@ public class OptionFlags {
 		this.useSuggestEngine = useSuggestEngine;
 	}
 
-	public final boolean isFailOnError() {
-		return failOnError;
-	}
-
-	public final void setFailOnError(boolean failOnError) {
-		this.failOnError = failOnError;
-	}
+	// public final boolean isFailOnError() {
+	// return failOnError;
+	// }
+	//
+	// public final void setFailOnError(boolean failOnError) {
+	// this.failOnError = failOnError;
+	// }
 
 	public final boolean isEncodesprite() {
 		return encodesprite;
@@ -277,5 +280,5 @@ public class OptionFlags {
 	public final void setOverwrite(boolean overwrite) {
 		this.overwrite = overwrite;
 	}
-	
+
 }

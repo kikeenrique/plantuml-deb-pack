@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.List;
 
 import net.sourceforge.plantuml.FileSystem;
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.classdiagram.ClassDiagram;
 import net.sourceforge.plantuml.command.CommandExecutionResult;
 import net.sourceforge.plantuml.command.SingleLineCommand;
@@ -45,7 +46,7 @@ import net.sourceforge.plantuml.cucadiagram.LinkType;
 public class CommandImport extends SingleLineCommand<ClassDiagram> {
 
 	public CommandImport() {
-		super("(?i)^import\\s+\"?([^\"]+)\"?$");
+		super("(?i)^import[%s]+[%g]?([^%g]+)[%g]?$");
 	}
 
 	@Override
@@ -74,10 +75,10 @@ public class CommandImport extends SingleLineCommand<ClassDiagram> {
 	}
 
 	private void includeSimpleFile(ClassDiagram classDiagram, File f) throws IOException {
-		if (f.getName().toLowerCase().endsWith(".java")) {
+		if (StringUtils.goLowerCase(f.getName()).endsWith(".java")) {
 			includeFileJava(classDiagram, f);
 		}
-		// if (f.getName().toLowerCase().endsWith(".sql")) {
+		// if (f.getName().goLowerCase().endsWith(".sql")) {
 		// includeFileSql(f);
 		// }
 	}
@@ -86,10 +87,10 @@ public class CommandImport extends SingleLineCommand<ClassDiagram> {
 		final JavaFile javaFile = new JavaFile(f);
 		for (JavaClass cl : javaFile.getJavaClasses()) {
 			final Code name = Code.of(cl.getName());
-			final IEntity ent1 = classDiagram.getOrCreateLeaf(name, cl.getType());
+			final IEntity ent1 = classDiagram.getOrCreateLeaf(name, cl.getType(), null);
 
 			for (String p : cl.getParents()) {
-				final IEntity ent2 = classDiagram.getOrCreateLeaf(Code.of(p), cl.getParentType());
+				final IEntity ent2 = classDiagram.getOrCreateLeaf(Code.of(p), cl.getParentType(), null);
 				final Link link = new Link(ent2, ent1, new LinkType(LinkDecor.NONE, LinkDecor.EXTENDS), null, 2);
 				classDiagram.addLink(link);
 			}

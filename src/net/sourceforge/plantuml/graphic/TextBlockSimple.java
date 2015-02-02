@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -37,6 +37,7 @@ import java.util.StringTokenizer;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.EmbededDiagram;
 import net.sourceforge.plantuml.SpriteContainer;
+import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
@@ -121,7 +122,7 @@ class TextBlockSimple implements TextBlock {
 	}
 
 	private void addSingleLineNoSpace(String s) {
-		if (s.length() == 0 || s.matches("^\\s*$ ")) {
+		if (s.length() == 0 || MyPattern.mtches(s, "^[%s]*$ ")) {
 			return;
 		}
 		lines2.add(new SingleLine(s, fontConfiguration, horizontalAlignment, spriteContainer));

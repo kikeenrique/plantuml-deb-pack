@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -31,20 +31,20 @@ package net.sourceforge.plantuml.command;
 import java.util.List;
 import java.util.regex.Matcher;
 
-import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.UmlDiagram;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
+import net.sourceforge.plantuml.StringUtils;
 
 public class CommandMultilinesHeader extends CommandMultilines<UmlDiagram> {
 
 	public CommandMultilinesHeader() {
-		super("(?i)^(?:(left|right|center)?\\s*)header$");
+		super("(?i)^(?:(left|right|center)?[%s]*)header$");
 	}
 	
 	@Override
 	public String getPatternEnd() {
-		return "(?i)^end ?header$";
+		return "(?i)^end[%s]?header$";
 	}
 
 
@@ -56,9 +56,9 @@ public class CommandMultilinesHeader extends CommandMultilines<UmlDiagram> {
 		}
 		final String align = m.group(1);
 		if (align != null) {
-			diagram.setHeaderAlignment(HorizontalAlignment.valueOf(align.toUpperCase()));
+			diagram.setHeaderAlignment(HorizontalAlignment.valueOf(StringUtils.goUpperCase(align)));
 		}
-		final Display strings = new Display(lines.subList(1, lines.size() - 1));
+		final Display strings = Display.create(lines.subList(1, lines.size() - 1));
 		if (strings.size() > 0) {
 			diagram.setHeader(strings);
 			return CommandExecutionResult.ok();

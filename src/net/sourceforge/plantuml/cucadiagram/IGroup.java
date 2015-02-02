@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -30,6 +30,7 @@ package net.sourceforge.plantuml.cucadiagram;
 
 import java.util.Collection;
 
+import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.svek.IEntityImage;
 import net.sourceforge.plantuml.svek.PackageStyle;
 import net.sourceforge.plantuml.svek.SingleStrategy;
@@ -48,7 +49,7 @@ public interface IGroup extends IEntity {
 
 	public GroupType getGroupType();
 
-	public String getNamespace();
+	public Code getNamespace2();
 
 	public boolean isAutonom();
 
@@ -63,4 +64,6 @@ public interface IGroup extends IEntity {
 	public void overideImage(IEntityImage img, LeafType state);
 
 	public SingleStrategy getSingleStrategy();
+
+	public FontParam getTitleFontParam();
 }

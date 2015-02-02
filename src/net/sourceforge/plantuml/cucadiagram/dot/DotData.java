@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -32,15 +32,18 @@ import java.util.Collection;
 import java.util.List;
 
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.Pragma;
 import net.sourceforge.plantuml.UmlDiagramType;
 import net.sourceforge.plantuml.cucadiagram.EntityPortion;
 import net.sourceforge.plantuml.cucadiagram.GroupHierarchy;
+import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.IGroup;
 import net.sourceforge.plantuml.cucadiagram.ILeaf;
 import net.sourceforge.plantuml.cucadiagram.Link;
 import net.sourceforge.plantuml.cucadiagram.PortionShower;
 import net.sourceforge.plantuml.cucadiagram.Rankdir;
 import net.sourceforge.plantuml.cucadiagram.entity.EntityFactory;
+import net.sourceforge.plantuml.svek.DotMode;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
 
 final public class DotData implements PortionShower {
@@ -49,29 +52,36 @@ final public class DotData implements PortionShower {
 	final private Collection<ILeaf> leafs;
 	final private UmlDiagramType umlDiagramType;
 	final private ISkinParam skinParam;
-	final private Rankdir rankdir;
+	// final private Rankdir rankdir;
 	final private GroupHierarchy groupHierarchy;
 	final private IGroup topParent;
 	final private PortionShower portionShower;
 	final private boolean isHideEmptyDescriptionForState;
+	final private DotMode dotMode;
+	final private String namespaceSeparator;
+	final private Pragma pragma;
 
 	private final ColorMapper colorMapper;
 	private final EntityFactory entityFactory;
 
 	public DotData(IGroup topParent, List<Link> links, Collection<ILeaf> leafs, UmlDiagramType umlDiagramType,
-			ISkinParam skinParam, Rankdir rankdir, GroupHierarchy groupHierarchy, PortionShower portionShower,
-			ColorMapper colorMapper, EntityFactory entityFactory, boolean isHideEmptyDescriptionForState) {
+			ISkinParam skinParam, GroupHierarchy groupHierarchy, PortionShower portionShower, ColorMapper colorMapper,
+			EntityFactory entityFactory, boolean isHideEmptyDescriptionForState, DotMode dotMode,
+			String namespaceSeparator, Pragma pragma) {
+		this.namespaceSeparator = namespaceSeparator;
+		this.pragma = pragma;
 		this.topParent = topParent;
 		if (topParent == null) {
 			throw new IllegalArgumentException();
 		}
+		this.dotMode = dotMode;
 		this.isHideEmptyDescriptionForState = isHideEmptyDescriptionForState;
 		this.colorMapper = colorMapper;
 		this.links = links;
 		this.leafs = leafs;
 		this.umlDiagramType = umlDiagramType;
 		this.skinParam = skinParam;
-		this.rankdir = rankdir;
+		// this.rankdir = rankdir;
 		this.groupHierarchy = groupHierarchy;
 		this.portionShower = portionShower;
 		this.entityFactory = entityFactory;
@@ -79,12 +89,13 @@ final public class DotData implements PortionShower {
 
 	public DotData(IGroup topParent, List<Link> links, Collection<ILeaf> leafs, UmlDiagramType umlDiagramType,
 			ISkinParam skinParam, Rankdir rankdir, GroupHierarchy groupHierarchy, ColorMapper colorMapper,
-			EntityFactory entityFactory, boolean isHideEmptyDescriptionForState) {
-		this(topParent, links, leafs, umlDiagramType, skinParam, rankdir, groupHierarchy, new PortionShower() {
-			public boolean showPortion(EntityPortion portion, ILeaf entity) {
+			EntityFactory entityFactory, boolean isHideEmptyDescriptionForState, DotMode dotMode,
+			String namespaceSeparator, Pragma pragma) {
+		this(topParent, links, leafs, umlDiagramType, skinParam, groupHierarchy, new PortionShower() {
+			public boolean showPortion(EntityPortion portion, IEntity entity) {
 				return true;
 			}
-		}, colorMapper, entityFactory, isHideEmptyDescriptionForState);
+		}, colorMapper, entityFactory, isHideEmptyDescriptionForState, dotMode, namespaceSeparator, pragma);
 	}
 
 	public UmlDiagramType getUmlDiagramType() {
@@ -95,9 +106,9 @@ final public class DotData implements PortionShower {
 		return skinParam;
 	}
 
-	public Rankdir getRankdir() {
-		return rankdir;
-	}
+	// public Rankdir getRankdir() {
+	// return rankdir;
+	// }
 
 	public GroupHierarchy getGroupHierarchy() {
 		return groupHierarchy;
@@ -119,7 +130,7 @@ final public class DotData implements PortionShower {
 		return groupHierarchy.isEmpty(g);
 	}
 
-	public boolean showPortion(EntityPortion portion, ILeaf entity) {
+	public boolean showPortion(EntityPortion portion, IEntity entity) {
 		return portionShower.showPortion(portion, entity);
 	}
 
@@ -133,6 +144,18 @@ final public class DotData implements PortionShower {
 
 	public final boolean isHideEmptyDescriptionForState() {
 		return isHideEmptyDescriptionForState;
+	}
+
+	public final DotMode getDotMode() {
+		return dotMode;
+	}
+
+	public final String getNamespaceSeparator() {
+		return namespaceSeparator;
+	}
+
+	public Pragma getPragma() {
+		return pragma;
 	}
 
 }

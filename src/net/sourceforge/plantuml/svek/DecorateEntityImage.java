@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -40,7 +40,7 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 public class DecorateEntityImage implements TextBlockBackcolored {
 
-	private final TextBlockBackcolored original;
+	private final TextBlock original;
 	private final HorizontalAlignment horizontal1;
 	private final TextBlock text1;
 	private final HorizontalAlignment horizontal2;
@@ -49,16 +49,16 @@ public class DecorateEntityImage implements TextBlockBackcolored {
 	private double deltaX;
 	private double deltaY;
 
-	public static DecorateEntityImage addTop(TextBlockBackcolored original, TextBlock text, HorizontalAlignment horizontal) {
+	public static DecorateEntityImage addTop(TextBlock original, TextBlock text, HorizontalAlignment horizontal) {
 		return new DecorateEntityImage(original, text, horizontal, null, null);
 	}
 
-	public static DecorateEntityImage addBottom(TextBlockBackcolored original, TextBlock text, HorizontalAlignment horizontal) {
+	public static DecorateEntityImage addBottom(TextBlock original, TextBlock text, HorizontalAlignment horizontal) {
 		return new DecorateEntityImage(original, null, null, text, horizontal);
 	}
 
-	public DecorateEntityImage(TextBlockBackcolored original, TextBlock text1, HorizontalAlignment horizontal1,
-			TextBlock text2, HorizontalAlignment horizontal2) {
+	public DecorateEntityImage(TextBlock original, TextBlock text1, HorizontalAlignment horizontal1, TextBlock text2,
+			HorizontalAlignment horizontal2) {
 		this.original = original;
 		this.horizontal1 = horizontal1;
 		this.text1 = text1;
@@ -111,7 +111,10 @@ public class DecorateEntityImage implements TextBlockBackcolored {
 	}
 
 	public HtmlColor getBackcolor() {
-		return original.getBackcolor();
+		if (original instanceof TextBlockBackcolored) {
+			return ((TextBlockBackcolored) original).getBackcolor();
+		}
+		throw new UnsupportedOperationException();
 	}
 
 	public Dimension2D calculateDimension(StringBounder stringBounder) {

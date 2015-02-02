@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -50,7 +50,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import net.sourceforge.plantuml.Log;
-import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.code.Base64Coder;
 import net.sourceforge.plantuml.eps.EpsGraphics;
 import net.sourceforge.plantuml.graphic.HtmlColorGradient;
@@ -58,6 +57,7 @@ import net.sourceforge.plantuml.ugraphic.ColorMapper;
 import net.sourceforge.plantuml.ugraphic.UPath;
 import net.sourceforge.plantuml.ugraphic.USegment;
 import net.sourceforge.plantuml.ugraphic.USegmentType;
+import net.sourceforge.plantuml.StringUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -256,7 +256,7 @@ public class SvgGraphics {
 	}
 
 	public final void setStrokeColor(String stroke) {
-		this.stroke = stroke;
+		this.stroke = stroke == null ? "none" : stroke;
 	}
 
 	public final void setStrokeWidth(double strokeWidth, String strokeDasharray) {
@@ -340,11 +340,11 @@ public class SvgGraphics {
 	}
 
 	private String getStyle() {
-		return getStyle(strokeWidth);
+		return getStyleInternal(stroke, strokeWidth, strokeDasharray);
 	}
 
-	private String getStyle(String strokeWidth) {
-		final StringBuilder style = new StringBuilder("stroke: " + stroke + "; stroke-width: " + strokeWidth + ";");
+	private static String getStyleInternal(String color, String strokeWidth, String strokeDasharray) {
+		final StringBuilder style = new StringBuilder("stroke: " + color + "; stroke-width: " + strokeWidth + ";");
 		if (strokeDasharray != null) {
 			style.append(" stroke-dasharray: " + strokeDasharray + ";");
 		}
@@ -405,6 +405,18 @@ public class SvgGraphics {
 			}
 			elt.setTextContent(text);
 			getG().appendChild(elt);
+
+			if (textDecoration != null && textDecoration.contains("underline")) {
+				final double delta = 2;
+				final Element elt2 = (Element) document.createElement("line");
+				elt2.setAttribute("x1", format(x));
+				elt2.setAttribute("y1", format(y + delta));
+				elt2.setAttribute("x2", format(x + textLength));
+				elt2.setAttribute("y2", format(y + delta));
+				elt2.setAttribute("style", getStyleInternal(fill, "1.0", null));
+				getG().appendChild(elt2);
+			}
+
 		}
 		ensureVisible(x, y);
 		ensureVisible(x + textLength, y);
@@ -517,6 +529,10 @@ public class SvgGraphics {
 				ensureVisible(coord[0] + x + 2 * deltaShadow, coord[1] + y + 2 * deltaShadow);
 				ensureVisible(coord[2] + x + 2 * deltaShadow, coord[3] + y + 2 * deltaShadow);
 				ensureVisible(coord[4] + x + 2 * deltaShadow, coord[5] + y + 2 * deltaShadow);
+			} else if (type == USegmentType.SEG_ARCTO) {
+				sb.append("A" + format(coord[0]) + "," + format(coord[1]) + " " + format(coord[2]) + ","
+						+ format(coord[3]) + " " + format(coord[4]) + "," + format(coord[5] + x) + ","
+						+ format(coord[6] + y) + " ");
 			} else if (type == USegmentType.SEG_CLOSE) {
 				// Nothing
 			} else {

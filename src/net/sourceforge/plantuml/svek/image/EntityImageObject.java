@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -34,11 +34,14 @@ import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.LineConfigurable;
+import net.sourceforge.plantuml.LineParam;
 import net.sourceforge.plantuml.SkinParamUtils;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.creole.Stencil;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.EntityPortion;
+import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.ILeaf;
 import net.sourceforge.plantuml.cucadiagram.PortionShower;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
@@ -71,22 +74,26 @@ public class EntityImageObject extends AbstractEntityImage implements Stencil {
 	final private Url url;
 	final private double roundCorner;
 
+	final private LineConfigurable lineConfig;
+
 	public EntityImageObject(ILeaf entity, ISkinParam skinParam) {
 		super(entity, skinParam);
+		this.lineConfig = entity;
 		final Stereotype stereotype = entity.getStereotype();
 		this.roundCorner = skinParam.getRoundCorner();
-		this.name = TextBlockUtils.withMargin(TextBlockUtils.create(entity.getDisplay(),
-				new FontConfiguration(SkinParamUtils.getFont(getSkinParam(), FontParam.OBJECT, stereotype),
-						SkinParamUtils.getFontColor(getSkinParam(), FontParam.OBJECT, stereotype)),
-				HorizontalAlignment.CENTER, skinParam), 2, 2);
+		this.name = TextBlockUtils.withMargin(TextBlockUtils.create(
+				entity.getDisplay(),
+				new FontConfiguration(SkinParamUtils.getFont(getSkinParam(),
+						FontParam.OBJECT, stereotype), SkinParamUtils.getFontColor(getSkinParam(), FontParam.OBJECT,
+				stereotype), getSkinParam().getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink()), HorizontalAlignment.CENTER, skinParam), 2, 2);
 		if (stereotype == null || stereotype.getLabel() == null) {
 			this.stereo = null;
 		} else {
 			this.stereo = TextBlockUtils.create(
 					Display.getWithNewlines(stereotype.getLabel()),
-					new FontConfiguration(SkinParamUtils.getFont(getSkinParam(), FontParam.OBJECT_STEREOTYPE,
-							stereotype), SkinParamUtils.getFontColor(getSkinParam(), FontParam.OBJECT_STEREOTYPE,
-							stereotype)), HorizontalAlignment.CENTER, skinParam);
+					new FontConfiguration(SkinParamUtils.getFont(getSkinParam(),
+							FontParam.OBJECT_STEREOTYPE, stereotype), SkinParamUtils.getFontColor(getSkinParam(),
+					FontParam.OBJECT_STEREOTYPE, stereotype), getSkinParam().getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink()), HorizontalAlignment.CENTER, skinParam);
 		}
 
 		if (entity.getFieldsToDisplay().size() == 0) {
@@ -96,7 +103,7 @@ public class EntityImageObject extends AbstractEntityImage implements Stencil {
 			// entity.getFieldsToDisplay().asTextBlock(FontParam.OBJECT_ATTRIBUTE,
 			// skinParam);
 			this.fields = entity.getBody(new PortionShower() {
-				public boolean showPortion(EntityPortion portion, ILeaf entity) {
+				public boolean showPortion(EntityPortion portion, IEntity entity) {
 					return true;
 				}
 			}).asTextBlock(FontParam.OBJECT_ATTRIBUTE, skinParam);
@@ -139,7 +146,7 @@ public class EntityImageObject extends AbstractEntityImage implements Stencil {
 			ug.startUrl(url);
 		}
 
-		final UStroke stroke = new UStroke(1.5);
+		final UStroke stroke = getStroke();
 		ug.apply(stroke).draw(rect);
 
 		final ULayoutGroup header = new ULayoutGroup(new PlacementStrategyY1Y2(ug.getStringBounder()));
@@ -155,6 +162,17 @@ public class EntityImageObject extends AbstractEntityImage implements Stencil {
 		if (url != null) {
 			ug.closeAction();
 		}
+	}
+
+	private UStroke getStroke() {
+		UStroke stroke = lineConfig.getSpecificLineStroke();
+		if (stroke == null) {
+			stroke = getSkinParam().getThickness(LineParam.objectBorder, getStereo());
+		}
+		if (stroke == null) {
+			stroke = new UStroke(1.5);
+		}
+		return stroke;
 	}
 
 	private double getMethodOrFieldHeight(final Dimension2D dim) {

@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -34,6 +34,7 @@ import java.util.List;
 import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.activitydiagram3.Branch;
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
 import net.sourceforge.plantuml.activitydiagram3.ftile.BoxStyle;
@@ -51,6 +52,7 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 import net.sourceforge.plantuml.skin.rose.Rose;
+import net.sourceforge.plantuml.ugraphic.Sprite;
 import net.sourceforge.plantuml.ugraphic.UFont;
 
 public class VCompactFactory implements FtileFactory {
@@ -81,7 +83,7 @@ public class VCompactFactory implements FtileFactory {
 	public Ftile activity(Display label, final HtmlColor color, Swimlane swimlane, BoxStyle style) {
 		final HtmlColor borderColor = rose.getHtmlColor(skinParam, ColorParam.activityBorder);
 		final HtmlColor backColor = color == null ? rose.getHtmlColor(skinParam, ColorParam.activityBackground) : color;
-		final UFont font = skinParam.getFont(FontParam.ACTIVITY2, null);
+		final UFont font = skinParam.getFont(FontParam.ACTIVITY, null, false);
 		final HtmlColor arrowColor = rose.getHtmlColor(skinParam, ColorParam.activityArrow);
 		return new FtileBox(shadowing(), label, borderColor, backColor, font, arrowColor, swimlane, style, skinParam);
 	}
@@ -90,16 +92,20 @@ public class VCompactFactory implements FtileFactory {
 		return ftile;
 	}
 
+	public Ftile addUrl(Ftile ftile, Url url) {
+		return ftile;
+	}
+
 	public Ftile assembly(Ftile tile1, Ftile tile2) {
 		return new FtileAssemblySimple(tile1, tile2);
 	}
 
-	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test) {
+	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test, Display yes, Display out, HtmlColor color) {
 		return repeat;
 	}
 
 	public Ftile createWhile(Swimlane swimlane, Ftile whileBlock, Display test, Display yes, Display out,
-			LinkRendering afterEndwhile) {
+			LinkRendering afterEndwhile, HtmlColor color) {
 		return whileBlock;
 	}
 
@@ -112,7 +118,7 @@ public class VCompactFactory implements FtileFactory {
 		return new FtileForkInner(ftiles);
 	}
 
-	public Ftile createFork(List<Ftile> all) {
+	public Ftile createFork(Swimlane swimlane, List<Ftile> all) {
 		return new FtileForkInner(all);
 	}
 
@@ -120,7 +126,7 @@ public class VCompactFactory implements FtileFactory {
 		return new FtileForkInner(all);
 	}
 
-	public Ftile createGroup(Ftile list, Display name) {
+	public Ftile createGroup(Ftile list, Display name, HtmlColor backColor, HtmlColor titleColor, Display headerNote) {
 		return list;
 	}
 
@@ -140,6 +146,14 @@ public class VCompactFactory implements FtileFactory {
 
 	public boolean shadowing() {
 		return skinParam.shadowing();
+	}
+
+	public Sprite getSprite(String name) {
+		return skinParam.getSprite(name);
+	}
+
+	public String getValue(String key) {
+		return skinParam.getValue(key);
 	}
 
 }

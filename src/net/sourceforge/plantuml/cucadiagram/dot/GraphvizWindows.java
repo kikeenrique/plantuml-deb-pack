@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import net.sourceforge.plantuml.StringUtils;
+
 class GraphvizWindows extends AbstractGraphviz {
 
 	@Override
@@ -46,6 +48,10 @@ class GraphvizWindows extends AbstractGraphviz {
 		if (result86 != null) {
 			return result86;
 		}
+		final File resultEclipse = searchInDir(new File("c:/eclipse/graphviz"));
+		if (resultEclipse != null) {
+			return resultEclipse;
+		}
 		return null;
 	}
 
@@ -56,7 +62,7 @@ class GraphvizWindows extends AbstractGraphviz {
 		final List<File> dots = new ArrayList<File>();
 		for (File f : programFile.listFiles(new FileFilter() {
 			public boolean accept(File pathname) {
-				return pathname.isDirectory() && pathname.getName().startsWith("Graphviz");
+				return pathname.isDirectory() && StringUtils.goLowerCase(pathname.getName()).startsWith("graphviz");
 			}
 		})) {
 			final File result = new File(new File(f, "bin"), "dot.exe");

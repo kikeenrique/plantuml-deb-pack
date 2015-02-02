@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -30,9 +30,13 @@ package net.sourceforge.plantuml;
 
 import net.sourceforge.plantuml.ugraphic.Sprite;
 
-public class SpriteContainerEmpty implements SpriteContainer {
+public class SpriteContainerEmpty implements SpriteContainer, ISkinSimple {
 
 	public Sprite getSprite(String name) {
+		return null;
+	}
+
+	public String getValue(String key) {
 		return null;
 	}
 

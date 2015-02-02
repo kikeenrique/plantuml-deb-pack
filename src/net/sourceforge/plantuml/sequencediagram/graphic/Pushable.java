@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -32,7 +32,7 @@ import java.util.Collection;
 
 import net.sourceforge.plantuml.graphic.StringBounder;
 
-interface Pushable {
+public interface Pushable {
 
 	double getPreferredWidth(StringBounder stringBounder);
 

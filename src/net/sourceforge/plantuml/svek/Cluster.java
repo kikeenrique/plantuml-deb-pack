@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -44,9 +44,7 @@ import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
-import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.UmlDiagramType;
-import net.sourceforge.plantuml.UniqueSequence;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.cucadiagram.EntityPosition;
 import net.sourceforge.plantuml.cucadiagram.EntityUtils;
@@ -56,12 +54,14 @@ import net.sourceforge.plantuml.cucadiagram.Member;
 import net.sourceforge.plantuml.cucadiagram.MethodsOrFieldsArea;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
 import net.sourceforge.plantuml.cucadiagram.dot.DotData;
+import net.sourceforge.plantuml.cucadiagram.dot.GraphvizVersion;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorTransparent;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockEmpty;
 import net.sourceforge.plantuml.graphic.TextBlockWidth;
+import net.sourceforge.plantuml.graphic.USymbol;
 import net.sourceforge.plantuml.posimo.Moveable;
 import net.sourceforge.plantuml.skin.rose.Rose;
 import net.sourceforge.plantuml.svek.image.EntityImageState;
@@ -72,6 +72,8 @@ import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.URectangle;
 import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
+import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.utils.UniqueSequence;
 
 public class Cluster implements Moveable {
 
@@ -119,12 +121,17 @@ public class Cluster implements Moveable {
 		this(null, root, colorSequence, skinParam);
 	}
 
+	private ColorParam border;
+
 	private Cluster(Cluster parent, IGroup group, ColorSequence colorSequence, ISkinParam skinParam) {
 		if (group == null) {
 			throw new IllegalStateException();
 		}
 		this.parent = parent;
 		this.group = group;
+		if (group.getUSymbol() != null) {
+			border = group.getUSymbol().getColorParamBorder();
+		}
 		this.color = colorSequence.getValue();
 		this.colorTitle = colorSequence.getValue();
 		this.skinParam = skinParam;
@@ -277,7 +284,18 @@ public class Cluster implements Moveable {
 		this.yTitle = y;
 	}
 
-	public void drawU(UGraphic ug, HtmlColor borderColor, DotData dotData) {
+	private static HtmlColor getColor(ColorParam colorParam, ISkinParam skinParam) {
+		return new Rose().getHtmlColor(skinParam, colorParam);
+	}
+
+	public void drawU(UGraphic ug, DotData dotData, UStroke stroke) {
+		HtmlColor borderColor;
+		if (dotData.getUmlDiagramType() == UmlDiagramType.STATE) {
+			borderColor = getColor(ColorParam.stateBorder, dotData.getSkinParam());
+		} else {
+			borderColor = getColor(ColorParam.packageBorder, dotData.getSkinParam());
+		}
+
 		final Url url = group.getUrl99();
 		if (url != null) {
 			ug.startUrl(url);
@@ -292,16 +310,29 @@ public class Cluster implements Moveable {
 			}
 			final boolean isState = dotData.getUmlDiagramType() == UmlDiagramType.STATE;
 			if (isState) {
-				drawUState(ug, borderColor, dotData);
+				if (group.getSpecificLineStroke() != null) {
+					stroke = group.getSpecificLineStroke();
+				}
+				if (group.getSpecificLineColor() != null) {
+					borderColor = group.getSpecificLineColor();
+				}
+				drawUState(ug, borderColor, dotData, stroke);
 				return;
 			}
 			PackageStyle style = group.getPackageStyle();
 			if (style == null) {
 				style = dotData.getSkinParam().getPackageStyle();
 			}
+			if (border != null) {
+				final HtmlColor tmp = dotData.getSkinParam().getHtmlColor(border, null, false);
+				if (tmp != null) {
+					borderColor = tmp;
+				}
+			}
+
 			if (ztitle != null || zstereo != null) {
 				final HtmlColor stateBack = getStateBackColor(getBackColor(), dotData.getSkinParam(),
-						group.getStereotype() == null ? null : group.getStereotype().getLabel());
+						group.getStereotype());
 				final ClusterDecoration decoration = new ClusterDecoration(style, group.getUSymbol(), ztitle, zstereo,
 						stateBack, minX, minY, maxX, maxY);
 				decoration.drawU(ug, borderColor, dotData.getSkinParam().shadowing());
@@ -311,8 +342,7 @@ public class Cluster implements Moveable {
 			if (dotData.getSkinParam().shadowing()) {
 				rect.setDeltaShadow(3.0);
 			}
-			final HtmlColor stateBack = getStateBackColor(getBackColor(), dotData.getSkinParam(),
-					group.getStereotype() == null ? null : group.getStereotype().getLabel());
+			final HtmlColor stateBack = getStateBackColor(getBackColor(), dotData.getSkinParam(), group.getStereotype());
 			ug = ug.apply(new UChangeBackColor(stateBack)).apply(new UChangeColor(borderColor));
 			ug.apply(new UStroke(2)).apply(new UTranslate(minX, minY)).draw(rect);
 
@@ -363,11 +393,11 @@ public class Cluster implements Moveable {
 
 	}
 
-	private HtmlColor getColor(DotData dotData, ColorParam colorParam, String stereo) {
+	private HtmlColor getColor(DotData dotData, ColorParam colorParam, Stereotype stereo) {
 		return new Rose().getHtmlColor(dotData.getSkinParam(), colorParam, stereo);
 	}
 
-	private void drawUState(UGraphic ug, HtmlColor borderColor, DotData dotData) {
+	private void drawUState(UGraphic ug, HtmlColor borderColor, DotData dotData, UStroke stroke) {
 		final Dimension2D total = new Dimension2DDouble(maxX - minX, maxY - minY);
 		final double suppY;
 		if (ztitle == null) {
@@ -379,14 +409,13 @@ public class Cluster implements Moveable {
 
 		HtmlColor stateBack = getBackColor();
 		if (stateBack == null) {
-			stateBack = getColor(dotData, ColorParam.stateBackground, group.getStereotype() == null ? null : group
-					.getStereotype().getLabel());
+			stateBack = getColor(dotData, ColorParam.stateBackground, group.getStereotype());
 		}
 		final HtmlColor background = getColor(dotData, ColorParam.background, null);
 		final TextBlockWidth attribute = getTextBlockAttribute(dotData);
 		final double attributeHeight = attribute.calculateDimension(ug.getStringBounder()).getHeight();
 		final RoundedContainer r = new RoundedContainer(total, suppY, attributeHeight
-				+ (attributeHeight > 0 ? IEntityImage.MARGIN : 0), borderColor, stateBack, background);
+				+ (attributeHeight > 0 ? IEntityImage.MARGIN : 0), borderColor, stateBack, background, stroke);
 		r.drawU(ug.apply(new UTranslate(minX, minY)), dotData.getSkinParam().shadowing());
 
 		if (ztitle != null) {
@@ -427,7 +456,7 @@ public class Cluster implements Moveable {
 
 	private boolean isThereALinkFromOrToGroup(Collection<Line> lines) {
 		for (Line line : lines) {
-			if (line.isLinkFromOrToGroup(group)) {
+			if (line.isLinkFromOrTo(group)) {
 				return true;
 			}
 		}
@@ -499,7 +528,8 @@ public class Cluster implements Moveable {
 		}
 	}
 
-	public boolean printCluster2(StringBuilder sb, Collection<Line> lines, StringBounder stringBounder) {
+	public boolean printCluster2(StringBuilder sb, Collection<Line> lines, StringBounder stringBounder,
+			DotMode dotMode, GraphvizVersion graphvizVersion) {
 		// Log.println("Cluster::printCluster " + this);
 
 		boolean added = false;
@@ -508,10 +538,12 @@ public class Cluster implements Moveable {
 			added = true;
 		}
 
-		appendRankSame(sb, lines);
+		if (dotMode != DotMode.NO_LEFT_RIGHT) {
+			appendRankSame(sb, lines);
+		}
 
 		for (Cluster child : getChildren()) {
-			child.printInternal(sb, lines, stringBounder);
+			child.printInternal(sb, lines, stringBounder, dotMode, graphvizVersion);
 		}
 
 		return added;
@@ -615,22 +647,30 @@ public class Cluster implements Moveable {
 		return null;
 	}
 
-	private void printInternal(StringBuilder sb, Collection<Line> lines, StringBounder stringBounder) {
-		final boolean thereALinkFromOrToGroup = isThereALinkFromOrToGroup(lines);
-		if (thereALinkFromOrToGroup) {
+	private void printInternal(StringBuilder sb, Collection<Line> lines, StringBounder stringBounder, DotMode dotMode,
+			GraphvizVersion graphvizVersion) {
+		final boolean thereALinkFromOrToGroup2 = isThereALinkFromOrToGroup(lines);
+		boolean thereALinkFromOrToGroup1 = thereALinkFromOrToGroup2;
+		final boolean useProtectionWhenThereALinkFromOrToGroup = graphvizVersion
+				.useProtectionWhenThereALinkFromOrToGroup();
+		if (useProtectionWhenThereALinkFromOrToGroup == false) {
+			thereALinkFromOrToGroup1 = false;
+		}
+		// final boolean thereALinkFromOrToGroup1 = false;
+		if (thereALinkFromOrToGroup1) {
 			subgraphCluster(sb, "a");
 		}
 		final boolean hasEntryOrExitPoint = hasEntryOrExitPoint();
 		if (hasEntryOrExitPoint) {
 			for (Line line : lines) {
-				if (line.isLinkFromOrToGroup(group)) {
+				if (line.isLinkFromOrTo(group)) {
 					line.setProjectionCluster(this);
 				}
 			}
 		}
 		boolean protection0 = protection0();
 		boolean protection1 = protection1();
-		if (hasEntryOrExitPoint) {
+		if (hasEntryOrExitPoint || useProtectionWhenThereALinkFromOrToGroup == false) {
 			protection0 = false;
 			protection1 = false;
 		}
@@ -665,8 +705,10 @@ public class Cluster implements Moveable {
 		// subgraphCluster(sb, "ee");
 		// }
 
-		if (thereALinkFromOrToGroup) {
+		if (thereALinkFromOrToGroup2) {
 			sb.append(getSpecialPointId(group) + " [shape=point,width=.01,label=\"\"];");
+		}
+		if (thereALinkFromOrToGroup1) {
 			subgraphCluster(sb, "i");
 		}
 		if (protection1) {
@@ -688,7 +730,7 @@ public class Cluster implements Moveable {
 		}
 		SvekUtils.println(sb);
 		printCluster1(sb, lines);
-		final boolean added = printCluster2(sb, lines, stringBounder);
+		final boolean added = printCluster2(sb, lines, stringBounder, dotMode, graphvizVersion);
 		if (hasEntryOrExitPoint && added == false) {
 			final String empty = "empty" + color;
 			sb.append(empty + " [shape=point,width=.01,label=\"\"];");
@@ -697,7 +739,7 @@ public class Cluster implements Moveable {
 		if (protection1) {
 			sb.append("}");
 		}
-		if (thereALinkFromOrToGroup) {
+		if (thereALinkFromOrToGroup1) {
 			sb.append("}");
 			sb.append("}");
 		}
@@ -736,6 +778,13 @@ public class Cluster implements Moveable {
 		if (result != null) {
 			return result;
 		}
+		final Stereotype stereo = group.getStereotype();
+		final USymbol sym = group.getUSymbol() == null ? USymbol.PACKAGE : group.getUSymbol();
+		final ColorParam backparam = sym.getColorParamBack();
+		final HtmlColor c1 = skinParam.getHtmlColor(backparam, stereo, false);
+		if (c1 != null) {
+			return c1;
+		}
 		if (parent == null) {
 			return null;
 		}
@@ -749,7 +798,7 @@ public class Cluster implements Moveable {
 		return group == ent;
 	}
 
-	public static HtmlColor getStateBackColor(HtmlColor stateBack, ISkinParam skinParam, String stereotype) {
+	public static HtmlColor getStateBackColor(HtmlColor stateBack, ISkinParam skinParam, Stereotype stereotype) {
 		if (stateBack == null) {
 			stateBack = skinParam.getHtmlColor(ColorParam.packageBackground, stereotype, false);
 		}

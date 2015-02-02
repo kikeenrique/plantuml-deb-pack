@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -35,7 +35,7 @@ import net.sourceforge.plantuml.classdiagram.AbstractEntityDiagram;
 public class CommandPage extends SingleLineCommand<AbstractEntityDiagram> {
 
 	public CommandPage() {
-		super("(?i)^page\\s+(\\d+)\\s*x\\s*(\\d+)$");
+		super("(?i)^page[%s]+(\\d+)[%s]*x[%s]*(\\d+)$");
 	}
 
 	@Override

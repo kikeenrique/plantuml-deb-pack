@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -37,10 +37,14 @@ public class UPath extends AbstractShadowable implements Iterable<USegment> {
 	private final List<USegment> segments = new ArrayList<USegment>();
 	private MinMax minmax = MinMax.getEmpty(false);
 
+	private boolean isOpenIconic;
+
 	public void add(double[] coord, USegmentType pathType) {
 		segments.add(new USegment(coord, pathType));
-		for (int i = 0; i < coord.length; i += 2) {
-			minmax = minmax.addPoint(coord[i], coord[i + 1]);
+		if (pathType != USegmentType.SEG_ARCTO) {
+			for (int i = 0; i < coord.length; i += 2) {
+				minmax = minmax.addPoint(coord[i], coord[i + 1]);
+			}
 		}
 	}
 
@@ -54,6 +58,16 @@ public class UPath extends AbstractShadowable implements Iterable<USegment> {
 
 	public void cubicTo(double ctrlx1, double ctrly1, double ctrlx2, double ctrly2, double x2, double y2) {
 		add(new double[] { ctrlx1, ctrly1, ctrlx2, ctrly2, x2, y2 }, USegmentType.SEG_CUBICTO);
+	}
+
+	public void arcTo(double rx, double ry, double x_axis_rotation, double large_arc_flag, double sweep_flag, double x,
+			double y) {
+		add(new double[] { rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y }, USegmentType.SEG_ARCTO);
+		// lineTo(x, y);
+	}
+
+	public void closePath() {
+		// System.err.println("CLOSE_PATH");
 	}
 
 	public double getMaxX() {
@@ -79,6 +93,14 @@ public class UPath extends AbstractShadowable implements Iterable<USegment> {
 
 	public Iterator<USegment> iterator() {
 		return segments.iterator();
+	}
+
+	public boolean isOpenIconic() {
+		return isOpenIconic;
+	}
+
+	public void setOpenIconic(boolean isOpenIconic) {
+		this.isOpenIconic = isOpenIconic;
 	}
 
 }

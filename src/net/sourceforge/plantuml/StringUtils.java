@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -36,9 +36,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.cucadiagram.Code;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
@@ -47,6 +49,7 @@ import net.sourceforge.plantuml.preproc.ReadLineReader;
 import net.sourceforge.plantuml.preproc.UncommentReadLine;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
 
+// Do not move
 public class StringUtils {
 
 	public static String getPlateformDependentAbsolutePath(File file) {
@@ -54,7 +57,7 @@ public class StringUtils {
 	}
 
 	public static List<String> getWithNewlines2(Code s) {
-		return getWithNewlines2(s.getCode());
+		return getWithNewlines2(s.getFullName());
 	}
 
 	public static List<String> getWithNewlines2(String s) {
@@ -171,6 +174,22 @@ public class StringUtils {
 	public static String capitalize(String s) {
 		return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
 	}
+	
+	public static String goUpperCase(String s) {
+		return s.toUpperCase(Locale.ENGLISH);
+	}
+
+	public static char goUpperCase(char c) {
+		return goUpperCase("" + c).charAt(0);
+	}
+
+	public static String goLowerCase(String s) {
+		return s.toLowerCase(Locale.ENGLISH);
+	}
+
+	public static char goLowerCase(char c) {
+		return goLowerCase("" + c).charAt(0);
+	}
 
 	public static String manageArrowForCuca(String s) {
 		final Direction dir = getArrowDirection(s);
@@ -250,20 +269,29 @@ public class StringUtils {
 	// return Code.of(eventuallyRemoveStartingAndEndingDoubleQuote(s.getCode()));
 	// }
 
-	public static String eventuallyRemoveStartingAndEndingDoubleQuote(String s) {
-		if (s.startsWith("\"") && s.endsWith("\"")) {
+	public static String eventuallyRemoveStartingAndEndingDoubleQuote(String s, String format) {
+		if (format.contains("\"") && s.length() > 1 && isDoubleQuote(s.charAt(0))
+				&& isDoubleQuote(s.charAt(s.length() - 1))) {
 			return s.substring(1, s.length() - 1);
 		}
-		if (s.startsWith("(") && s.endsWith(")")) {
+		if (format.contains("(") && s.startsWith("(") && s.endsWith(")")) {
 			return s.substring(1, s.length() - 1);
 		}
-		if (s.startsWith("[") && s.endsWith("]")) {
+		if (format.contains("[") && s.startsWith("[") && s.endsWith("]")) {
 			return s.substring(1, s.length() - 1);
 		}
-		if (s.startsWith(":") && s.endsWith(":")) {
+		if (format.contains(":") && s.startsWith(":") && s.endsWith(":")) {
 			return s.substring(1, s.length() - 1);
 		}
 		return s;
+	}
+
+	public static String eventuallyRemoveStartingAndEndingDoubleQuote(String s) {
+		return eventuallyRemoveStartingAndEndingDoubleQuote(s, "\"([:");
+	}
+
+	private static boolean isDoubleQuote(char c) {
+		return c == '\"' || c == '\u201c' || c == '\u201d' || c == '\u00ab' || c == '\u00bb';
 	}
 
 	public static boolean isCJK(char c) {
@@ -407,11 +435,11 @@ public class StringUtils {
 
 	public static List<String> splitComma(String s) {
 		s = s.trim();
-		if (s.matches("([\\p{L}0-9_.]+|\"[^\"]+\")(\\s*,\\s*([\\p{L}0-9_.]+|\"[^\"]+\"))*") == false) {
-			throw new IllegalArgumentException();
-		}
+		// if (s.matches("([\\p{L}0-9_.]+|[%g][^%g]+[%g])(\\s*,\\s*([\\p{L}0-9_.]+|[%g][^%g]+[%g]))*") == false) {
+		// throw new IllegalArgumentException();
+		// }
 		final List<String> result = new ArrayList<String>();
-		final Pattern p = Pattern.compile("([\\p{L}0-9_.]+|\"[^\"]+\")");
+		final Pattern p = MyPattern.cmpile("([\\p{L}0-9_.]+|[%g][^%g]+[%g])");
 		final Matcher m = p.matcher(s);
 		while (m.find()) {
 			result.add(eventuallyRemoveStartingAndEndingDoubleQuote(m.group(0)));
@@ -421,7 +449,7 @@ public class StringUtils {
 
 	public static String getAsHtml(Color color) {
 		if (color == null) {
-			throw new IllegalArgumentException();
+			return null;
 		}
 		return getAsHtml(color.getRGB());
 	}
@@ -447,52 +475,6 @@ public class StringUtils {
 		return uid1 + String.format("%04d", uid2);
 	}
 
-	public static Display manageEmbededDiagrams(final Display strings) {
-		Display result = new Display();
-		final Iterator<CharSequence> it = strings.iterator();
-		while (it.hasNext()) {
-			CharSequence s = it.next();
-			if (s.equals("{{")) {
-				Display other = new Display();
-				other = other.add("@startuml");
-				while (it.hasNext()) {
-					final CharSequence s2 = it.next();
-					if (s2.equals("}}")) {
-						break;
-					}
-					other = other.add(s2);
-				}
-				other = other.add("@enduml");
-				s = new EmbededDiagram(other);
-			}
-			result = result.add(s);
-		}
-		return result;
-	}
-
-	public static List<CharSequence> manageEmbededDiagrams2(final List<String> strings) {
-		final List<CharSequence> result = new ArrayList<CharSequence>();
-		final Iterator<String> it = strings.iterator();
-		while (it.hasNext()) {
-			CharSequence s = it.next();
-			if (s.equals("{{")) {
-				final List<String> other = new ArrayList<String>();
-				other.add("@startuml");
-				while (it.hasNext()) {
-					final String s2 = it.next();
-					if (s2.equals("}}")) {
-						break;
-					}
-					other.add(s2);
-				}
-				other.add("@enduml");
-				s = new EmbededDiagram(new Display(other));
-			}
-			result.add(s);
-		}
-		return result;
-	}
-
 	public static boolean isMethod(String s) {
 		return s.contains("(") || s.contains(")");
 	}
@@ -503,4 +485,9 @@ public class StringUtils {
 		return Collections.unmodifiableList(result);
 	}
 
+	public static boolean endsWithBackslash(final String s) {
+		return s.endsWith("\\") && s.endsWith("\\\\") == false;
+	}
+
+	// http://docs.oracle.com/javase/tutorial/i18n/format/dateFormat.html
 }

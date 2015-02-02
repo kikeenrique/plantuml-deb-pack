@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,6 +41,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.preproc.Defines;
 
 public class Option {
@@ -53,6 +55,8 @@ public class Option {
 	private boolean pipe = false;
 	private boolean syntax = false;
 	private boolean checkOnly = false;
+	private boolean failfast = false;
+	private boolean failfast2 = false;
 	private boolean pattern = false;
 	private boolean duration = false;
 	private int nbThreads = 0;
@@ -104,6 +108,10 @@ public class Option {
 				setFileFormat(FileFormat.PNG);
 			} else if (s.equalsIgnoreCase("-vdx") || s.equalsIgnoreCase("-tvdx")) {
 				setFileFormat(FileFormat.VDX);
+			} else if (s.equalsIgnoreCase("-latex") || s.equalsIgnoreCase("-tlatex")) {
+				setFileFormat(FileFormat.LATEX);
+			} else if (s.equalsIgnoreCase("-base64") || s.equalsIgnoreCase("-tbase64")) {
+				setFileFormat(FileFormat.BASE64);
 			} else if (s.equalsIgnoreCase("-pdf") || s.equalsIgnoreCase("-tpdf")) {
 				setFileFormat(FileFormat.PDF);
 			} else if (s.equalsIgnoreCase("-overwrite")) {
@@ -155,9 +163,12 @@ public class Option {
 				} else if (nb.matches("\\d+")) {
 					this.nbThreads = Integer.parseInt(nb);
 				}
+			} else if (s.equalsIgnoreCase("-failfast")) {
+				this.failfast = true;
+			} else if (s.equalsIgnoreCase("-failfast2")) {
+				this.failfast2 = true;
 			} else if (s.equalsIgnoreCase("-checkonly")) {
 				this.checkOnly = true;
-				OptionFlags.getInstance().setFailOnError(true);
 			} else if (s.equalsIgnoreCase("-config")) {
 				i++;
 				if (i == arg.length) {
@@ -222,11 +233,9 @@ public class Option {
 				OptionFlags.getInstance().setEncodesprite(true);
 			} else if (s.equalsIgnoreCase("-nosuggestengine")) {
 				OptionFlags.getInstance().setUseSuggestEngine(false);
-			} else if (s.equalsIgnoreCase("-failonerror")) {
-				OptionFlags.getInstance().setFailOnError(true);
 			} else if (s.equalsIgnoreCase("-printfonts")) {
 				OptionFlags.getInstance().setPrintFonts(true);
-			} else if (s.toLowerCase().startsWith("-ftp")) {
+			} else if (StringUtils.goLowerCase(s).startsWith("-ftp")) {
 				final int x = s.indexOf(':');
 				if (x == -1) {
 					this.ftpPort = 4242;
@@ -262,7 +271,7 @@ public class Option {
 	}
 
 	private void manageDefine(String s) {
-		final Pattern p = Pattern.compile("^(\\w+)(?:=(.*))?$");
+		final Pattern p = MyPattern.cmpile("^(\\w+)(?:=(.*))?$");
 		final Matcher m = p.matcher(s);
 		if (m.find()) {
 			define(m.group(1), m.group(2));
@@ -270,7 +279,7 @@ public class Option {
 	}
 
 	private void manageSkinParam(String s) {
-		final Pattern p = Pattern.compile("^(\\w+)(?:=(.*))?$");
+		final Pattern p = MyPattern.cmpile("^(\\w+)(?:=(.*))?$");
 		final Matcher m = p.matcher(s);
 		if (m.find()) {
 			skinParam(m.group(1), m.group(2));
@@ -303,7 +312,7 @@ public class Option {
 	public Defines getDefaultDefines() {
 		final Defines result = new Defines();
 		for (Map.Entry<String, String> ent : defines.entrySet()) {
-			result.define(ent.getKey(), ent.getValue());
+			result.define(ent.getKey(), Arrays.asList(ent.getValue()));
 
 		}
 		return result;
@@ -376,6 +385,22 @@ public class Option {
 
 	public final void setCheckOnly(boolean checkOnly) {
 		this.checkOnly = checkOnly;
+	}
+
+	public final boolean isFailfastOrFailfast2() {
+		return failfast || failfast2;
+	}
+
+	public final boolean isFailfast2() {
+		return failfast2;
+	}
+
+	public final void setFailfast(boolean failfast) {
+		this.failfast = failfast;
+	}
+
+	public final void setFailfast2(boolean failfast2) {
+		this.failfast2 = failfast2;
 	}
 
 	public final File getOutputFile() {

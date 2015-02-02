@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -67,8 +67,8 @@ public class EntityImageClassHeader2 extends AbstractEntityImage {
 		final HtmlColor color = SkinParamUtils.getFontColor(getSkinParam(), FontParam.CLASS, getStereo());
 		final Stereotype stereotype = entity.getStereotype();
 		final String generic = entity.getGeneric();
-		FontConfiguration fontConfigurationName = new FontConfiguration(SkinParamUtils.getFont(getSkinParam(),
-				FontParam.CLASS, stereotype), color);
+		FontConfiguration fontConfigurationName = new FontConfiguration(SkinParamUtils.getFont(getSkinParam(), FontParam.CLASS, stereotype),
+				color, getSkinParam().getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink());
 		if (italic) {
 			fontConfigurationName = fontConfigurationName.italic();
 		}
@@ -81,11 +81,10 @@ public class EntityImageClassHeader2 extends AbstractEntityImage {
 			stereo = null;
 		} else {
 			stereo = TextBlockUtils.withMargin(TextBlockUtils.create(
-					new Display(stereotype.getLabels()),
-					new FontConfiguration(SkinParamUtils
-							.getFont(getSkinParam(), FontParam.CLASS_STEREOTYPE, stereotype), SkinParamUtils
-							.getFontColor(getSkinParam(), FontParam.CLASS_STEREOTYPE, stereotype)),
-					HorizontalAlignment.CENTER, skinParam), 1, 0);
+					Display.create(stereotype.getLabels()),
+					new FontConfiguration(SkinParamUtils.getFont(getSkinParam(),
+							FontParam.CLASS_STEREOTYPE, stereotype), SkinParamUtils.getFontColor(getSkinParam(),
+					FontParam.CLASS_STEREOTYPE, stereotype), getSkinParam().getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink()), HorizontalAlignment.CENTER, skinParam), 1, 0);
 		}
 
 		TextBlock genericBlock;
@@ -93,11 +92,10 @@ public class EntityImageClassHeader2 extends AbstractEntityImage {
 			genericBlock = null;
 		} else {
 			genericBlock = TextBlockUtils.create(
-					Display.asList(generic),
-					new FontConfiguration(SkinParamUtils
-							.getFont(getSkinParam(), FontParam.CLASS_STEREOTYPE, stereotype), SkinParamUtils
-							.getFontColor(getSkinParam(), FontParam.CLASS_STEREOTYPE, stereotype)),
-					HorizontalAlignment.CENTER, skinParam);
+					Display.getWithNewlines(generic),
+					new FontConfiguration(SkinParamUtils.getFont(getSkinParam(),
+							FontParam.CLASS_STEREOTYPE, stereotype), SkinParamUtils.getFontColor(getSkinParam(),
+					FontParam.CLASS_STEREOTYPE, stereotype), skinParam.getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink()), HorizontalAlignment.CENTER, skinParam);
 			genericBlock = TextBlockUtils.withMargin(genericBlock, 1, 1);
 			final HtmlColor classBackground = SkinParamUtils
 					.getColor(getSkinParam(), ColorParam.background, stereotype);

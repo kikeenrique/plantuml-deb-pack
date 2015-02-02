@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -28,11 +28,19 @@
  */
 package net.sourceforge.plantuml.ugraphic;
 
-
-public class ULine extends AbstractShadowable {
+public class ULine extends AbstractShadowable implements Scalable {
 
 	private final double dx;
 	private final double dy;
+
+	public UShape getScaled(double scale) {
+		if (scale == 1) {
+			return this;
+		}
+		final AbstractShadowable result = new ULine(dx * scale, dy * scale);
+		result.setDeltaShadow(this.getDeltaShadow());
+		return result;
+	}
 
 	public ULine(double dx, double dy) {
 		this.dx = dx;
@@ -43,7 +51,7 @@ public class ULine extends AbstractShadowable {
 	public String toString() {
 		return "ULine dx=" + dx + " dy=" + dy;
 	}
-	
+
 	public double getDX() {
 		return dx;
 	}

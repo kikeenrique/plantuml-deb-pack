@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -31,6 +31,7 @@ package net.sourceforge.plantuml.creole;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 
 public class CommandCreoleMonospaced implements Command {
@@ -38,12 +39,11 @@ public class CommandCreoleMonospaced implements Command {
 	private final Pattern pattern;
 
 	public static Command create() {
-		return new CommandCreoleMonospaced("^(?i)(\"\"(.*?)\"\")");
+		return new CommandCreoleMonospaced("^(?i)([%g][%g](.*?)[%g][%g])");
 	}
 
 	private CommandCreoleMonospaced(String p) {
-		this.pattern = Pattern.compile(p);
-
+		this.pattern = MyPattern.cmpile(p);
 	}
 
 	public int matchingSize(String line) {

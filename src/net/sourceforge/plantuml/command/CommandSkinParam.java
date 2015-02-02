@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -35,7 +35,7 @@ import net.sourceforge.plantuml.UmlDiagram;
 public class CommandSkinParam extends SingleLineCommand<UmlDiagram> {
 
 	public CommandSkinParam() {
-		super("(?i)^(skinparam|skinparamlocked)\\s+([\\w.]*(?:\\<\\<.*\\>\\>)?[\\w.]*)\\s+([^{}]*)$");
+		super("(?i)^(skinparam|skinparamlocked)[%s]+([\\w.]*(?:\\<\\<.*\\>\\>)?[\\w.]*)[%s]+([^{}]*)$");
 	}
 
 	@Override

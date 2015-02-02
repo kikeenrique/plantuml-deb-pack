@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -28,7 +28,7 @@
  */
 package net.sourceforge.plantuml.skin.bluemodern;
 
-import net.sourceforge.plantuml.SpriteContainer;
+import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
@@ -50,9 +50,9 @@ final public class ComponentBlueModernNote extends AbstractTextualComponent {
 	private final HtmlColor back;
 	private final HtmlColor foregroundColor;
 
-	public ComponentBlueModernNote(HtmlColor back, HtmlColor foregroundColor, HtmlColor fontColor, UFont font,
-			Display strings, SpriteContainer spriteContainer) {
-		super(strings, fontColor, font, HorizontalAlignment.LEFT, 6, 15, 5, spriteContainer, 0, false);
+	public ComponentBlueModernNote(HtmlColor back, HtmlColor foregroundColor, HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font,
+			Display strings, ISkinSimple spriteContainer) {
+		super(strings, fontColor, hyperlinkColor, useUnderlineForHyperlink, font, HorizontalAlignment.LEFT, 6, 15, 5, spriteContainer, 0, false);
 		this.back = back;
 		this.foregroundColor = foregroundColor;
 	}

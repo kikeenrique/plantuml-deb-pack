@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -35,8 +35,7 @@ import java.util.List;
 
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
-import net.sourceforge.plantuml.SpriteContainer;
-import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
@@ -47,6 +46,7 @@ import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.TextBlockVertical2;
 import net.sourceforge.plantuml.skin.rose.Rose;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
+import net.sourceforge.plantuml.StringUtils;
 
 public class BodyEnhanced implements TextBlock {
 
@@ -66,8 +66,8 @@ public class BodyEnhanced implements TextBlock {
 		this.fontParam = fontParam;
 		this.skinParam = skinParam;
 
-		this.titleConfig = new FontConfiguration(skinParam.getFont(fontParam, null), new Rose().getFontColor(skinParam,
-				fontParam));
+		this.titleConfig = new FontConfiguration(skinParam.getFont(fontParam, null, false), new Rose().getFontColor(skinParam,
+				fontParam), skinParam.getHyperlinkColor(), skinParam.useUnderlineForHyperlink());
 		this.lineFirst = true;
 		this.align = HorizontalAlignment.LEFT;
 		this.manageHorizontalLine = true;
@@ -126,7 +126,7 @@ public class BodyEnhanced implements TextBlock {
 				title = getTitle(s, skinParam);
 				members = new ArrayList<Member>();
 			} else {
-				final Member m = new MemberImpl(s, StringUtils.isMethod(s), manageModifier);
+				final Member m = new Member(s, StringUtils.isMethod(s), manageModifier);
 				members.add(m);
 				if (m.getUrl() != null) {
 					urls.add(m.getUrl());
@@ -152,7 +152,7 @@ public class BodyEnhanced implements TextBlock {
 		if (s.startsWith("==") && s.endsWith("==")) {
 			return true;
 		}
-		if (s.startsWith("..") && s.endsWith("..")) {
+		if (s.startsWith("..") && s.endsWith("..") && s.equals("...") == false) {
 			return true;
 		}
 		if (s.startsWith("__") && s.endsWith("__")) {
@@ -161,13 +161,13 @@ public class BodyEnhanced implements TextBlock {
 		return false;
 	}
 
-	private TextBlock getTitle(String s, SpriteContainer spriteContainer) {
+	private TextBlock getTitle(String s, ISkinSimple spriteContainer) {
 		if (s.length() <= 4) {
 			return null;
 		}
 		s = s.substring(2, s.length() - 2).trim();
-		return TextBlockUtils.create(Display.getWithNewlines(s), titleConfig, HorizontalAlignment.LEFT,
-				spriteContainer);
+		return TextBlockUtils
+				.create(Display.getWithNewlines(s), titleConfig, HorizontalAlignment.LEFT, spriteContainer);
 	}
 
 	public void drawU(UGraphic ug) {

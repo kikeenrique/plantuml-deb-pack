@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -195,7 +195,7 @@ public class ClosedArea extends AbstractFigure {
 	}
 
 	@Override
-	protected void addSegment(LineSegmentInt seg) {
+	public void addSegment(LineSegmentInt seg) {
 		super.addSegment(seg);
 		minY = Math.min(minY, seg.getMinY());
 		maxY = Math.max(maxY, seg.getMaxY());

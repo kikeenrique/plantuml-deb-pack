@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -61,6 +61,7 @@ import net.sourceforge.plantuml.graphic.TextBlockWidth;
 import net.sourceforge.plantuml.skin.rose.Rose;
 import net.sourceforge.plantuml.svek.image.EntityImageState;
 import net.sourceforge.plantuml.ugraphic.UFont;
+import net.sourceforge.plantuml.ugraphic.UStroke;
 
 public final class GroupPngMakerState {
 
@@ -102,20 +103,14 @@ public final class GroupPngMakerState {
 
 	public IEntityImage getImage() throws IOException, InterruptedException {
 		final Display display = group.getDisplay();
+		final ISkinParam skinParam = diagram.getSkinParam();
 		final TextBlock title = TextBlockUtils.create(display, new FontConfiguration(getFont(FontParam.STATE),
-				HtmlColorUtils.BLACK), HorizontalAlignment.CENTER, diagram.getSkinParam());
+				HtmlColorUtils.BLACK, skinParam.getHyperlinkColor(), skinParam.useUnderlineForHyperlink()), HorizontalAlignment.CENTER, diagram.getSkinParam());
 
 		if (group.size() == 0) {
 			return new EntityImageState(group, diagram.getSkinParam());
 		}
 		final List<Link> links = getPureInnerLinks();
-		final ISkinParam skinParam = diagram.getSkinParam();
-		// if (OptionFlags.PBBACK && group.getSpecificBackColor() != null) {
-		// skinParam = new SkinParamBackcolored(skinParam, null, group.getSpecificBackColor());
-		// }
-		final DotData dotData = new DotData(group, links, group.getLeafsDirect(), diagram.getUmlDiagramType(),
-				skinParam, group.getRankdir(), new InnerGroupHierarchy(), diagram.getColorMapper(),
-				diagram.getEntityFactory(), diagram.isHideEmptyDescriptionForState());
 
 		boolean hasVerticalLine = false;
 		for (ILeaf leaf : group.getLeafsDirect()) {
@@ -123,14 +118,27 @@ public final class GroupPngMakerState {
 				hasVerticalLine = true;
 			}
 		}
+
+		final DotData dotData = new DotData(group, links, group.getLeafsDirect(), diagram.getUmlDiagramType(),
+				skinParam, group.getRankdir(), new InnerGroupHierarchy(), diagram.getColorMapper(),
+				diagram.getEntityFactory(), diagram.isHideEmptyDescriptionForState(), DotMode.NORMAL,
+				diagram.getNamespaceSeparator(), diagram.getPragma());
+
 		final CucaDiagramFileMakerSvek2 svek2 = new CucaDiagramFileMakerSvek2(dotData, diagram.getEntityFactory(),
 				hasVerticalLine, diagram.getSource(), diagram.getPragma());
+		UStroke stroke = group.getSpecificLineStroke();
+		if (stroke == null) {
+			stroke = new UStroke(1.5);
+		}
 
 		if (group.getGroupType() == GroupType.CONCURRENT_STATE) {
 			// return new InnerStateConcurrent(svek2.createFile());
 			return svek2.createFile();
 		} else if (group.getGroupType() == GroupType.STATE) {
-			final HtmlColor borderColor = getColor(ColorParam.stateBorder, null);
+			HtmlColor borderColor = group.getSpecificLineColor();
+			if (borderColor == null) {
+				borderColor = getColor(ColorParam.stateBorder, null);
+			}
 			final Stereotype stereo = group.getStereotype();
 			final HtmlColor backColor = group.getSpecificBackColor() == null ? getColor(ColorParam.stateBackground,
 					stereo) : group.getSpecificBackColor();
@@ -146,7 +154,7 @@ public final class GroupPngMakerState {
 			final boolean withSymbol = stereotype != null && stereotype.isWithOOSymbol();
 
 			return new InnerStateAutonom(svek2.createFile(), title, attribute, borderColor, backColor,
-					skinParam.shadowing(), group.getUrl99(), withSymbol);
+					skinParam.shadowing(), group.getUrl99(), withSymbol, stroke);
 		}
 
 		throw new UnsupportedOperationException(group.getGroupType().toString());
@@ -155,14 +163,13 @@ public final class GroupPngMakerState {
 
 	private UFont getFont(FontParam fontParam) {
 		final ISkinParam skinParam = diagram.getSkinParam();
-		return skinParam.getFont(fontParam, null);
+		return skinParam.getFont(fontParam, null, false);
 	}
 
 	private final Rose rose = new Rose();
 
 	protected final HtmlColor getColor(ColorParam colorParam, Stereotype stereo) {
-		final String s = stereo == null ? null : stereo.getLabel();
 		final ISkinParam skinParam = diagram.getSkinParam();
-		return rose.getHtmlColor(skinParam, colorParam, s);
+		return rose.getHtmlColor(skinParam, colorParam, stereo);
 	}
 }

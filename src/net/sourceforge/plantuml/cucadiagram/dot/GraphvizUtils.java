@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -55,9 +55,9 @@ public class GraphvizUtils {
 		} else {
 			result = new GraphvizLinux(dotString, type);
 		}
-//		if (OptionFlags.GRAPHVIZCACHE) {
-//			return new GraphvizCached(result);
-//		}
+		// if (OptionFlags.GRAPHVIZCACHE) {
+		// return new GraphvizCached(result);
+		// }
 		return result;
 	}
 
@@ -109,7 +109,7 @@ public class GraphvizUtils {
 		return dotVersion;
 	}
 
-	static int retrieveVersion(String s) {
+	public static int retrieveVersion(String s) {
 		if (s == null) {
 			return -1;
 		}
@@ -186,10 +186,14 @@ public class GraphvizUtils {
 		return Collections.unmodifiableList(result);
 	}
 
-	static String getTestCreateSimpleFile() throws IOException, InterruptedException {
+	static String getTestCreateSimpleFile() throws IOException {
 		final Graphviz graphviz2 = GraphvizUtils.create("digraph foo { test; }", "svg");
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		graphviz2.createFile(baos);
+		final ProcessState state = graphviz2.createFile3(baos);
+		if (state.differs(ProcessState.TERMINATED_OK())) {
+			return "Error: timeout " + state;
+		}
+
 		final byte data[] = baos.toByteArray();
 
 		if (data.length == 0) {
@@ -202,11 +206,11 @@ public class GraphvizUtils {
 		return null;
 	}
 
-	public static OS getOS() {
-		if (isWindows()) {
-			return new OSWindows();
-		}
-		return new OSLinux();
-	}
+	// public static OS getOS() {
+	// if (isWindows()) {
+	// return new OSWindows();
+	// }
+	// return new OSLinux();
+	// }
 
 }

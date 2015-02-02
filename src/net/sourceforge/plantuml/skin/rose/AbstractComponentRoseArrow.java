@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -28,7 +28,7 @@
  */
 package net.sourceforge.plantuml.skin.rose;
 
-import net.sourceforge.plantuml.SpriteContainer;
+import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
@@ -44,10 +44,10 @@ public abstract class AbstractComponentRoseArrow extends AbstractTextualComponen
 	private final HtmlColor foregroundColor;
 	private final ArrowConfiguration arrowConfiguration;
 
-	public AbstractComponentRoseArrow(HtmlColor foregroundColor, HtmlColor fontColor, UFont font,
-			Display stringsToDisplay, ArrowConfiguration arrowConfiguration, SpriteContainer spriteContainer,
+	public AbstractComponentRoseArrow(HtmlColor foregroundColor, HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font,
+			Display stringsToDisplay, ArrowConfiguration arrowConfiguration, ISkinSimple spriteContainer,
 			HorizontalAlignment textHorizontalAlignment, double maxMessageSize) {
-		super(stringsToDisplay, fontColor, font, textHorizontalAlignment, 7, 7, 1, spriteContainer, maxMessageSize, false);
+		super(stringsToDisplay, fontColor, hyperlinkColor, useUnderlineForHyperlink, font, textHorizontalAlignment, 7, 7, 1, spriteContainer, maxMessageSize, false);
 		this.arrowConfiguration = arrowConfiguration;
 		this.foregroundColor = foregroundColor;
 	}

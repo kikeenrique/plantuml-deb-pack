@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -28,7 +28,6 @@
  */
 package net.sourceforge.plantuml.sequencediagram;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
@@ -42,14 +41,18 @@ import java.util.Stack;
 
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
+import net.sourceforge.plantuml.OptionFlags;
 import net.sourceforge.plantuml.UmlDiagram;
 import net.sourceforge.plantuml.UmlDiagramType;
+import net.sourceforge.plantuml.core.DiagramDescription;
+import net.sourceforge.plantuml.core.DiagramDescriptionImpl;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.sequencediagram.graphic.FileMaker;
-import net.sourceforge.plantuml.sequencediagram.graphic.SequenceDiagramFileMakerPuma;
+import net.sourceforge.plantuml.sequencediagram.graphic.SequenceDiagramFileMakerPuma2;
 import net.sourceforge.plantuml.sequencediagram.graphic.SequenceDiagramTxtMaker;
+import net.sourceforge.plantuml.sequencediagram.teoz.SequenceDiagramFileMakerTeoz;
 import net.sourceforge.plantuml.skin.ProtectedSkin;
 import net.sourceforge.plantuml.skin.Skin;
 import net.sourceforge.plantuml.skin.SkinUtils;
@@ -80,10 +83,10 @@ public class SequenceDiagram extends UmlDiagram {
 		return result;
 	}
 
-	private AbstractMessage lastMessage;
+	private EventWithDeactivate lastEventWithDeactivate;
 
-	public AbstractMessage getLastMessage() {
-		return lastMessage;
+	public EventWithDeactivate getLastEventWithDeactivate() {
+		return lastEventWithDeactivate;
 	}
 
 	public Participant createNewParticipant(ParticipantType type, String code, Display display) {
@@ -105,7 +108,7 @@ public class SequenceDiagram extends UmlDiagram {
 	}
 
 	public String addMessage(AbstractMessage m) {
-		lastMessage = m;
+		lastEventWithDeactivate = m;
 		lastDelay = null;
 		events.add(m);
 		if (pendingCreate != null) {
@@ -181,7 +184,7 @@ public class SequenceDiagram extends UmlDiagram {
 		return Collections.unmodifiableList(events);
 	}
 
-	private FileMaker getSequenceDiagramPngMaker(FileFormatOption fileFormatOption, List<BufferedImage> flashcodes) {
+	private FileMaker getSequenceDiagramPngMaker(FileFormatOption fileFormatOption) {
 
 		final FileFormat fileFormat = fileFormatOption.getFileFormat();
 
@@ -189,13 +192,17 @@ public class SequenceDiagram extends UmlDiagram {
 			return new SequenceDiagramTxtMaker(this, fileFormat);
 		}
 
-		return new SequenceDiagramFileMakerPuma(this, skin, fileFormatOption, flashcodes);
+		if (OptionFlags.TEOZ) {
+			return new SequenceDiagramFileMakerTeoz(this, skin, fileFormatOption);
+		}
+
+		return new SequenceDiagramFileMakerPuma2(this, skin, fileFormatOption);
 	}
 
 	@Override
-	protected ImageData exportDiagramInternal(OutputStream os, int index, FileFormatOption fileFormat,
-			List<BufferedImage> flashcodes) throws IOException {
-		final FileMaker sequenceDiagramPngMaker = getSequenceDiagramPngMaker(fileFormat, flashcodes);
+	protected ImageData exportDiagramInternal(OutputStream os, int index, FileFormatOption fileFormat)
+			throws IOException {
+		final FileMaker sequenceDiagramPngMaker = getSequenceDiagramPngMaker(fileFormat);
 		return sequenceDiagramPngMaker.createOne(os, index, fileFormat.isWithMetadata());
 	}
 
@@ -215,23 +222,28 @@ public class SequenceDiagram extends UmlDiagram {
 		if (lastDelay != null) {
 			return "You cannot Activate/Deactivate just after a ...";
 		}
+		final LifeEvent lifeEvent = new LifeEvent(p, lifeEventType, backcolor);
+		events.add(lifeEvent);
 		if (lifeEventType == LifeEventType.CREATE) {
-			pendingCreate = new LifeEvent(p, lifeEventType, backcolor);
+			pendingCreate = lifeEvent;
 			return null;
 		}
-		if (lastMessage == null) {
+		if (lastEventWithDeactivate == null) {
 			if (lifeEventType == LifeEventType.ACTIVATE) {
 				p.incInitialLife(backcolor);
 				return null;
 			}
 			return "Only activate command can occur before message are send";
 		}
-		if (lifeEventType == LifeEventType.ACTIVATE && lastMessage instanceof Message) {
-			activationState.push((Message) lastMessage);
+		if (lifeEventType == LifeEventType.ACTIVATE && lastEventWithDeactivate instanceof Message) {
+			activationState.push((Message) lastEventWithDeactivate);
 		} else if (lifeEventType == LifeEventType.DEACTIVATE && activationState.empty() == false) {
 			activationState.pop();
 		}
-		final boolean ok = lastMessage.addLifeEvent(new LifeEvent(p, lifeEventType, backcolor));
+		final boolean ok = lastEventWithDeactivate.addLifeEvent(lifeEvent);
+		if (lastEventWithDeactivate instanceof AbstractMessage) {
+			lifeEvent.setMessage((AbstractMessage) lastEventWithDeactivate);
+		}
 		if (ok) {
 			return null;
 		}
@@ -257,13 +269,14 @@ public class SequenceDiagram extends UmlDiagram {
 			openGroupings.add(0, (GroupingStart) g);
 		} else if (type == GroupingType.END) {
 			openGroupings.remove(0);
+			lastEventWithDeactivate = (GroupingLeaf) g;
 		}
 
 		return true;
 	}
 
-	public String getDescription() {
-		return "(" + participants.size() + " participants)";
+	public DiagramDescription getDescription() {
+		return new DiagramDescriptionImpl("(" + participants.size() + " participants)", getClass());
 	}
 
 	public boolean changeSkin(String className) {
@@ -346,10 +359,9 @@ public class SequenceDiagram extends UmlDiagram {
 		return participantEnglober != null;
 	}
 
-
 	@Override
 	public int getNbImages() {
-		return getSequenceDiagramPngMaker(new FileFormatOption(FileFormat.PNG), null).getNbPages();
+		return getSequenceDiagramPngMaker(new FileFormatOption(FileFormat.PNG)).getNbPages();
 	}
 
 	public void removeHiddenParticipants() {
@@ -408,7 +420,7 @@ public class SequenceDiagram extends UmlDiagram {
 			}
 		}
 		for (Event ev : events) {
-			if (ev.getUrl() != null) {
+			if (ev.hasUrl()) {
 				return true;
 			}
 		}

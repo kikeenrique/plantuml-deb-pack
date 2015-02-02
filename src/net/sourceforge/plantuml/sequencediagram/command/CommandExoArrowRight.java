@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -42,8 +42,9 @@ public class CommandExoArrowRight extends CommandExoArrowAny {
 
 	static RegexConcat getRegexConcat() {
 		return new RegexConcat(new RegexLeaf("^"), //
-				new RegexLeaf("PARTICIPANT", "([\\p{L}0-9_.@]+|\"[^\"]+\")"), //
-				new RegexLeaf("\\s*"), //
+				new RegexLeaf("PARTICIPANT", "([\\p{L}0-9_.@]+|[%g][^%g]+[%g])"), //
+				new RegexLeaf("[%s]*"), //
+				new RegexLeaf("ARROW_SUPPCIRCLE", "([%s]+[ox])?"), //
 				new RegexOr( //
 						new RegexConcat( //
 								new RegexLeaf("ARROW_BOTHDRESSING", "(<<?|//?|\\\\\\\\?)?"), //
@@ -56,9 +57,9 @@ public class CommandExoArrowRight extends CommandExoArrowAny {
 								new RegexLeaf("ARROW_BODYB1", "(-*)"), //
 								new RegexLeaf("ARROW_STYLE2", CommandArrow.getColorOrStylePattern()), //
 								new RegexLeaf("ARROW_BODYA2", "(-+)"))), //
-				new RegexLeaf("SHORT", "([?\\]])?"), //
-				new RegexLeaf("\\s*"), //
-				new RegexLeaf("LABEL", "(?::\\s*(.*))?"), //
+				new RegexLeaf("SHORT", "([ox]?[?\\]])?"), //
+				new RegexLeaf("[%s]*"), //
+				new RegexLeaf("LABEL", "(?::[%s]*(.*))?"), //
 				new RegexLeaf("$"));
 	}
 
@@ -74,6 +75,5 @@ public class CommandExoArrowRight extends CommandExoArrowAny {
 		}
 		throw new IllegalArgumentException();
 	}
-
 
 }

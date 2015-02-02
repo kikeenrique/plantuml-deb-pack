@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -28,6 +28,7 @@
  */
 package net.sourceforge.plantuml.cucadiagram;
 
+import net.sourceforge.plantuml.graphic.USymbol;
 import net.sourceforge.plantuml.svek.IEntityImage;
 
 public interface ILeaf extends IEntity {
@@ -52,7 +53,7 @@ public interface ILeaf extends IEntity {
 
 	public String getGeneric();
 
-	public void muteToType(LeafType newType);
+	public void muteToType(LeafType newType, USymbol newSymbol);
 
 	public void setGeneric(String generic);
 

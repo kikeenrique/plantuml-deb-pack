@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -35,6 +35,7 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.SymbolContext;
 import net.sourceforge.plantuml.graphic.TextBlock;
+import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.USymbol;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
@@ -69,9 +70,9 @@ public class ClusterDecoration {
 		this.minY = minY;
 		this.maxX = maxX;
 		this.maxY = maxY;
-//		if (stateBack instanceof HtmlColorTransparent) {
-//			throw new UnsupportedOperationException();
-//		}
+		// if (stateBack instanceof HtmlColorTransparent) {
+		// throw new UnsupportedOperationException();
+		// }
 	}
 
 	public void drawU(UGraphic ug, HtmlColor borderColor, boolean shadowing) {
@@ -85,6 +86,8 @@ public class ClusterDecoration {
 		}
 		if (style == PackageStyle.NODE) {
 			drawWithTitleNode(ug, borderColor, shadowing);
+		} else if (style == PackageStyle.CARD) {
+			drawWithTitleCard(ug, borderColor, shadowing);
 		} else if (style == PackageStyle.DATABASE) {
 			drawWithTitleDatabase(ug, borderColor, shadowing);
 		} else if (style == PackageStyle.CLOUD) {
@@ -140,15 +143,24 @@ public class ClusterDecoration {
 
 	}
 
+	// Card
+	private void drawWithTitleCard(UGraphic ug, HtmlColor borderColor, boolean shadowing) {
+		final double width = maxX - minX;
+		final double height = maxY - minY;
+		final SymbolContext ctx = new SymbolContext(stateBack, borderColor).withStroke(new UStroke(2)).withShadow(
+				shadowing);
+		USymbol.CARD.asBig(title, TextBlockUtils.empty(0, 0), width + 10, height, ctx).drawU(
+				ug.apply(new UTranslate(minX, minY)));
+	}
+
 	// Node
 	private void drawWithTitleNode(UGraphic ug, HtmlColor borderColor, boolean shadowing) {
 		final double width = maxX - minX;
 		final double height = maxY - minY;
 		final SymbolContext ctx = new SymbolContext(stateBack, borderColor).withStroke(new UStroke(2)).withShadow(
 				shadowing);
-		USymbol.NODE.asBig(title, stereo, width + 10, height, ctx).drawU(
+		USymbol.NODE.asBig(title, TextBlockUtils.empty(0, 0), width + 10, height, ctx).drawU(
 				ug.apply(new UTranslate(minX, minY)));
-		// ug.getParam().resetStroke();
 	}
 
 	// Folder

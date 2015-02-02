@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -30,10 +30,10 @@ package net.sourceforge.plantuml.graphic;
 
 import java.awt.geom.Dimension2D;
 
-public interface TextBlock extends UDrawable {
+import net.sourceforge.plantuml.ugraphic.UShape;
 
-	public abstract Dimension2D calculateDimension(StringBounder stringBounder);
+public interface TextBlock extends UDrawable, UShape {
 
-	// public abstract List<Url> getUrlsTOBEREMOVED(StringBounder stringBounder);
+	public Dimension2D calculateDimension(StringBounder stringBounder);
 
 }

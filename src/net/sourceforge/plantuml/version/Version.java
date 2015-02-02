@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -28,25 +28,35 @@
  */
 package net.sourceforge.plantuml.version;
 
+import java.util.Date;
+
 public class Version {
 
 	public static int version() {
-		return 7986;
+		return 8018;
 	}
 
 	public static String versionString() {
-		if (beta()) {
-			return "" + (version() + 1) + "beta";
+		if (beta() != 0) {
+			return "" + (version() + 1) + "beta" + beta();
 		}
 		return "" + version();
 	}
 
-	public static boolean beta() {
-		return false;
+	private static int beta() {
+		final int beta = 0;
+		return beta;
 	}
 
-	public static long compileTime() {
-		return 1384723083362L;
+	private static long compileTime() {
+		return 1421257338161L;
+	}
+
+	public static String compileTimeString() {
+		if (beta() != 0) {
+			return versionString();
+		}
+		return new Date(Version.compileTime()).toString();
 	}
 
 }

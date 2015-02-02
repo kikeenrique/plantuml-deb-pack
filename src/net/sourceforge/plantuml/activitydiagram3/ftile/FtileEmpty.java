@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -28,14 +28,10 @@
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile;
 
-import java.awt.geom.Dimension2D;
-import java.awt.geom.Point2D;
 import java.util.Collections;
 import java.util.Set;
 
-import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.graphic.StringBounder;
-import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 
 public class FtileEmpty extends AbstractFtile {
@@ -57,7 +53,7 @@ public class FtileEmpty extends AbstractFtile {
 		this.swimlaneOut = swimlaneOut;
 
 	}
-	
+
 	public FtileEmpty(boolean shadowing) {
 		this(shadowing, 0, 0, null, null);
 	}
@@ -66,34 +62,16 @@ public class FtileEmpty extends AbstractFtile {
 		this(shadowing, 0, 0, swimlane, swimlane);
 	}
 
-
 	@Override
 	public String toString() {
 		return "FtileEmpty";
 	}
 
-	public TextBlock asTextBlock() {
-		return new TextBlock() {
-
-			public void drawU(UGraphic ug) {
-			}
-
-			public Dimension2D calculateDimension(StringBounder stringBounder) {
-				return new Dimension2DDouble(width, height);
-			}
-		};
+	public void drawU(UGraphic ug) {
 	}
 
-	public Point2D getPointIn(StringBounder stringBounder) {
-		return new Point2D.Double(width / 2, 0);
-	}
-
-	public Point2D getPointOut(StringBounder stringBounder) {
-		return new Point2D.Double(width / 2, height);
-	}
-
-	public boolean isKilled() {
-		return false;
+	public FtileGeometry calculateDimension(StringBounder stringBounder) {
+		return new FtileGeometry(width, height, width / 2, 0, height);
 	}
 
 	public Swimlane getSwimlaneIn() {

@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.command.regex.MyPattern;
+
 public class FileGroup {
 
 	private final List<File> result = new ArrayList<File>();
@@ -42,7 +44,7 @@ public class FileGroup {
 	private final List<String> excluded;
 	private final Option option;
 
-	private final static Pattern predirPath = Pattern.compile("^([^*?]*[/\\\\])?(.*)$");
+	private final static Pattern predirPath = MyPattern.cmpile("^([^*?]*[/\\\\])?(.*)$");
 
 	public FileGroup(String pattern, List<String> excluded, Option option) {
 		this.pattern = pattern;
@@ -116,7 +118,7 @@ public class FileGroup {
 		return f.getPath().replace('\\', '/');
 	}
 
-	private final static Pattern noStarInDirectory = Pattern.compile("^(?:([^*?]*)[/\\\\])?([^/\\\\]*)$");
+	private final static Pattern noStarInDirectory = MyPattern.cmpile("^(?:([^*?]*)[/\\\\])?([^/\\\\]*)$");
 
 	private void initWithSimpleStar() {
 		assert pattern.indexOf("**") == -1;
@@ -155,7 +157,7 @@ public class FileGroup {
 		return Collections.unmodifiableList(result);
 	}
 
-	static String toRegexp(String pattern) {
+	public static String toRegexp(String pattern) {
 		pattern = pattern.replace("\\", "/");
 		pattern = pattern.replace(".", "\\.");
 		pattern = pattern.replace("?", "[^/]");

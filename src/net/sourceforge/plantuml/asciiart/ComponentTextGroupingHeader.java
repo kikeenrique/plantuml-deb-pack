@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -31,7 +31,6 @@ package net.sourceforge.plantuml.asciiart;
 import java.awt.geom.Dimension2D;
 
 import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.skin.Area;
@@ -40,8 +39,9 @@ import net.sourceforge.plantuml.skin.ComponentType;
 import net.sourceforge.plantuml.skin.Context2D;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.txt.UGraphicTxt;
+import net.sourceforge.plantuml.StringUtils;
 
-public class ComponentTextGroupingHeader implements Component {
+public class ComponentTextGroupingHeader extends AbstractComponentText {
 
 	private final ComponentType type;
 	private final Display stringsToDisplay;
@@ -65,7 +65,7 @@ public class ComponentTextGroupingHeader implements Component {
 
 		if (fileFormat == FileFormat.UTXT) {
 			charArea.drawHLine('\u2550', 0, 1, width - 1, '\u2502', '\u256a');
-			charArea.drawStringLR(text.toUpperCase() + "  /", 2, 1);
+			charArea.drawStringLR(StringUtils.goUpperCase(text) + "  /", 2, 1);
 			charArea.drawHLine('\u2500', 2, 1, text.length() + 4);
 			charArea.drawVLine('\u2551', 0, 1, height - 1);
 			charArea.drawVLine('\u2551', width - 1, 1, height - 1);
@@ -78,7 +78,7 @@ public class ComponentTextGroupingHeader implements Component {
 			charArea.drawChar('\u255d', width - 1, height - 1);
 		} else {
 			charArea.drawHLine('_', 0, 0, width - 1);
-			charArea.drawStringLR(text.toUpperCase() + "  /", 2, 1);
+			charArea.drawStringLR(StringUtils.goUpperCase(text) + "  /", 2, 1);
 			charArea.drawHLine('_', 2, 1, text.length() + 3);
 			charArea.drawChar('/', text.length() + 3, 2);
 			charArea.drawVLine('!', 0, 1, height);

@@ -2,7 +2,7 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2013, Arnaud Roques
+ * (C) Copyright 2009-2014, Arnaud Roques
  *
  * Project Info:  http://plantuml.sourceforge.net
  * 
@@ -38,7 +38,7 @@ import net.sourceforge.plantuml.statediagram.StateDiagram;
 public class CommandEndState extends SingleLineCommand<StateDiagram> {
 
 	public CommandEndState() {
-		super("(?i)^(end ?state|\\})$");
+		super("(?i)^(end[%s]?state|\\})$");
 	}
 
 	@Override
