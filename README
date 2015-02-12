@@ -1,3 +1,4 @@
 Goto http://plantuml.sourceforge.net/ for product info
 
+check current build status:
 [![Build Status](https://drone.io/bitbucket.org/kikeenrique/plantuml/status.png)](https://drone.io/bitbucket.org/kikeenrique/plantuml/latest)
