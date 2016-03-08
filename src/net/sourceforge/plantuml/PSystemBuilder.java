@@ -9,28 +9,34 @@
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by
+ * under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * PlantUML distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
  * License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
+ * You should have received a copy of the GNU General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
+ * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
+ * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
+ * 
+ * Revision $Revision: 5207 $
+ * 
  */
 package net.sourceforge.plantuml;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sourceforge.plantuml.acearth.PSystemXearthFactory;
 import net.sourceforge.plantuml.activitydiagram.ActivityDiagramFactory;
 import net.sourceforge.plantuml.activitydiagram3.ActivityDiagramFactory3;
 import net.sourceforge.plantuml.api.PSystemFactory;
@@ -43,6 +49,7 @@ import net.sourceforge.plantuml.creole.PSystemCreoleFactory;
 import net.sourceforge.plantuml.cute.PSystemCuteFactory;
 import net.sourceforge.plantuml.descdiagram.DescriptionDiagramFactory;
 import net.sourceforge.plantuml.directdot.PSystemDotFactory;
+import net.sourceforge.plantuml.ditaa.PSystemDitaaFactory;
 import net.sourceforge.plantuml.donors.PSystemDonorsFactory;
 import net.sourceforge.plantuml.eggs.PSystemAppleTwoFactory;
 import net.sourceforge.plantuml.eggs.PSystemCharlieFactory;
@@ -53,7 +60,9 @@ import net.sourceforge.plantuml.eggs.PSystemPathFactory;
 import net.sourceforge.plantuml.eggs.PSystemRIPFactory;
 import net.sourceforge.plantuml.flowdiagram.FlowDiagramFactory;
 import net.sourceforge.plantuml.font.PSystemListFontsFactory;
+import net.sourceforge.plantuml.jcckit.PSystemJcckitFactory;
 import net.sourceforge.plantuml.jungle.PSystemTreeFactory;
+import net.sourceforge.plantuml.logo.PSystemLogoFactory;
 import net.sourceforge.plantuml.openiconic.PSystemListOpenIconicFactory;
 import net.sourceforge.plantuml.openiconic.PSystemOpenIconicFactory;
 import net.sourceforge.plantuml.oregon.PSystemOregonFactory;
@@ -63,6 +72,8 @@ import net.sourceforge.plantuml.project2.PSystemProjectFactory2;
 import net.sourceforge.plantuml.salt.PSystemSaltFactory;
 import net.sourceforge.plantuml.sequencediagram.SequenceDiagramFactory;
 import net.sourceforge.plantuml.statediagram.StateDiagramFactory;
+import net.sourceforge.plantuml.sudoku.PSystemSudokuFactory;
+import net.sourceforge.plantuml.turing.PSystemTuringFactory;
 import net.sourceforge.plantuml.ugraphic.sprite.PSystemListInternalSpritesFactory;
 import net.sourceforge.plantuml.version.License;
 import net.sourceforge.plantuml.version.PSystemLicenseFactory;
@@ -124,6 +135,15 @@ public class PSystemBuilder {
 		factories.add(new PSystemSaltFactory(DiagramType.UML));
 		factories.add(new PSystemDotFactory(DiagramType.DOT));
 		factories.add(new PSystemDotFactory(DiagramType.UML));
+		if (License.getCurrent() == License.GPL) {
+			factories.add(new PSystemDitaaFactory(DiagramType.DITAA));
+			factories.add(new PSystemDitaaFactory(DiagramType.UML));
+			factories.add(new PSystemJcckitFactory(DiagramType.JCCKIT));
+			factories.add(new PSystemJcckitFactory(DiagramType.UML));
+			factories.add(new PSystemLogoFactory());
+			factories.add(new PSystemSudokuFactory());
+			factories.add(new PSystemTuringFactory());
+		}
 		factories.add(new PSystemCreoleFactory());
 		factories.add(new PSystemEggFactory());
 		factories.add(new PSystemAppleTwoFactory());
@@ -132,6 +152,9 @@ public class PSystemBuilder {
 		factories.add(new PSystemPathFactory());
 		factories.add(new PSystemOregonFactory());
 		factories.add(new PSystemCharlieFactory());
+		if (License.getCurrent() == License.GPL) {
+			factories.add(new PSystemXearthFactory());
+		}
 		factories.add(new PSystemProjectFactory2());
 		factories.add(new FlowDiagramFactory());
 		factories.add(new PSystemTreeFactory(DiagramType.JUNGLE));
