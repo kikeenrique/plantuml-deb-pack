@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -76,8 +76,8 @@ public class MethodsOrFieldsArea {
 	}
 
 	private TextBlock createTextBlock(String s) {
-		return TextBlockUtils.create(Display.create(s), new FontConfiguration(font, HtmlColorUtils.BLACK, HtmlColorUtils.BLUE, true),
-				HorizontalAlignment.LEFT, new SpriteContainerEmpty());
+		return Display.create(s).create(FontConfiguration.blackBlueTrue(font), HorizontalAlignment.LEFT,
+				new SpriteContainerEmpty());
 	}
 
 	public void draw(UGraphic ug, double x, double y) {

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -80,6 +80,18 @@ public class GraphvizUtils {
 			return StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote(getenv);
 		}
 		return null;
+	}
+
+	public static int getenvImageLimit() {
+		final String env = System.getProperty("PLANTUML_LIMIT_SIZE");
+		if (StringUtils.isNotEmpty(env) && env.matches("\\d+")) {
+			return Integer.parseInt(env);
+		}
+		final String getenv = System.getenv("PLANTUML_LIMIT_SIZE");
+		if (StringUtils.isNotEmpty(getenv) && getenv.matches("\\d+")) {
+			return Integer.parseInt(getenv);
+		}
+		return 4096;
 	}
 
 	public static String getenvLogData() {

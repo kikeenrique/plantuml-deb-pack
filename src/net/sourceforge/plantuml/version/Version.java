@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,12 +28,13 @@
  */
 package net.sourceforge.plantuml.version;
 
+import java.net.URL;
 import java.util.Date;
 
 public class Version {
 
 	public static int version() {
-		return 8018;
+		return 8037;
 	}
 
 	public static String versionString() {
@@ -43,13 +44,21 @@ public class Version {
 		return "" + version();
 	}
 
+	public static String versionString(int size) {
+		final StringBuilder sb = new StringBuilder(versionString());
+		while (sb.length() < size) {
+			sb.append(' ');
+		}
+		return sb.toString();
+	}
+
 	private static int beta() {
 		final int beta = 0;
 		return beta;
 	}
 
 	private static long compileTime() {
-		return 1421257338161L;
+		return 1457273929160L;
 	}
 
 	public static String compileTimeString() {
@@ -57,6 +66,25 @@ public class Version {
 			return versionString();
 		}
 		return new Date(Version.compileTime()).toString();
+	}
+
+	public static String getJarPath() {
+		try {
+			final ClassLoader loader = Version.class.getClassLoader();
+			if (loader == null) {
+				return "No ClassLoader?";
+			}
+			final URL url = loader.getResource("net/sourceforge/plantuml/version/Version.class");
+			if (url == null) {
+				return "No URL?";
+			}
+			String fullpath = url.toString();
+			fullpath = fullpath.replaceAll("net/sourceforge/plantuml/version/Version\\.class", "");
+			return fullpath;
+		} catch (Throwable t) {
+			t.printStackTrace();
+			return t.toString();
+		}
 	}
 
 }

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -32,11 +32,16 @@ import java.awt.geom.Dimension2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.ISkinSimple;
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.Url;
+import net.sourceforge.plantuml.creole.CreoleMode;
+import net.sourceforge.plantuml.creole.CreoleParser;
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -46,9 +51,8 @@ import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.TextBlockVertical2;
 import net.sourceforge.plantuml.skin.rose.Rose;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
-import net.sourceforge.plantuml.StringUtils;
 
-public class BodyEnhanced implements TextBlock {
+public class BodyEnhanced extends AbstractTextBlock implements TextBlock {
 
 	private TextBlock area2;
 	private final FontConfiguration titleConfig;
@@ -60,14 +64,17 @@ public class BodyEnhanced implements TextBlock {
 	private final boolean manageHorizontalLine;
 	private final boolean manageModifier;
 	private final List<Url> urls = new ArrayList<Url>();
+	private final boolean manageUrl;
+	private final Stereotype stereotype;
 
-	public BodyEnhanced(List<String> rawBody, FontParam fontParam, ISkinParam skinParam, boolean manageModifier) {
+	public BodyEnhanced(List<String> rawBody, FontParam fontParam, ISkinParam skinParam, boolean manageModifier, Stereotype stereotype) {
 		this.rawBody = new ArrayList<String>(rawBody);
+		this.stereotype = stereotype;
 		this.fontParam = fontParam;
 		this.skinParam = skinParam;
+		this.manageUrl = true;
 
-		this.titleConfig = new FontConfiguration(skinParam.getFont(fontParam, null, false), new Rose().getFontColor(skinParam,
-				fontParam), skinParam.getHyperlinkColor(), skinParam.useUnderlineForHyperlink());
+		this.titleConfig = new FontConfiguration(skinParam, fontParam, stereotype);
 		this.lineFirst = true;
 		this.align = HorizontalAlignment.LEFT;
 		this.manageHorizontalLine = true;
@@ -75,7 +82,9 @@ public class BodyEnhanced implements TextBlock {
 	}
 
 	public BodyEnhanced(Display display, FontParam fontParam, ISkinParam skinParam, HorizontalAlignment align,
-			Stereotype stereotype, boolean manageHorizontalLine, boolean manageModifier) {
+			Stereotype stereotype, boolean manageHorizontalLine, boolean manageModifier, boolean manageUrl) {
+		this.manageUrl = manageUrl;
+		this.stereotype = stereotype;
 		this.rawBody = new ArrayList<String>();
 		for (CharSequence s : display) {
 			this.rawBody.add(s.toString());
@@ -118,22 +127,33 @@ public class BodyEnhanced implements TextBlock {
 		char separator = lineFirst ? '_' : 0;
 		TextBlock title = null;
 		List<Member> members = new ArrayList<Member>();
-		for (String s : rawBody) {
+		for (ListIterator<String> it = rawBody.listIterator(); it.hasNext();) {
+			final String s = it.next();
 			if (manageHorizontalLine && isBlockSeparator(s)) {
-				blocks.add(decorate(stringBounder, new MethodsOrFieldsArea(members, fontParam, skinParam, align),
+				blocks.add(decorate(stringBounder, new MethodsOrFieldsArea(members, fontParam, skinParam, align, stereotype),
 						separator, title));
 				separator = s.charAt(0);
 				title = getTitle(s, skinParam);
 				members = new ArrayList<Member>();
+			} else if (CreoleParser.isTreeStart(s)) {
+				if (members.size() > 0) {
+					blocks.add(decorate(stringBounder, new MethodsOrFieldsArea(members, fontParam, skinParam, align, stereotype),
+							separator, title));
+				}
+				members = new ArrayList<Member>();
+				final List<String> allTree = buildAllTree(s, it);
+				final TextBlock bloc = Display.create(allTree).create(fontParam.getFontConfiguration(skinParam), align,
+						skinParam, CreoleMode.FULL);
+				blocks.add(bloc);
 			} else {
-				final Member m = new Member(s, StringUtils.isMethod(s), manageModifier);
+				final Member m = new MemberImpl(s, MemberImpl.isMethod(s), manageModifier, manageUrl);
 				members.add(m);
 				if (m.getUrl() != null) {
 					urls.add(m.getUrl());
 				}
 			}
 		}
-		blocks.add(decorate(stringBounder, new MethodsOrFieldsArea(members, fontParam, skinParam, align), separator,
+		blocks.add(decorate(stringBounder, new MethodsOrFieldsArea(members, fontParam, skinParam, align, stereotype), separator,
 				title));
 
 		if (blocks.size() == 1) {
@@ -143,6 +163,22 @@ public class BodyEnhanced implements TextBlock {
 		}
 
 		return area2;
+	}
+
+	private static List<String> buildAllTree(String init, ListIterator<String> it) {
+		final List<String> result = new ArrayList<String>();
+		result.add(init);
+		while (it.hasNext()) {
+			final String s = it.next();
+			if (CreoleParser.isTreeStart(StringUtils.trinNoTrace(s))) {
+				result.add(s);
+			} else {
+				it.previous();
+				return result;
+			}
+
+		}
+		return result;
 	}
 
 	public static boolean isBlockSeparator(String s) {
@@ -165,9 +201,8 @@ public class BodyEnhanced implements TextBlock {
 		if (s.length() <= 4) {
 			return null;
 		}
-		s = s.substring(2, s.length() - 2).trim();
-		return TextBlockUtils
-				.create(Display.getWithNewlines(s), titleConfig, HorizontalAlignment.LEFT, spriteContainer);
+		s = StringUtils.trin(s.substring(2, s.length() - 2));
+		return Display.getWithNewlines(s).create(titleConfig, HorizontalAlignment.LEFT, spriteContainer);
 	}
 
 	public void drawU(UGraphic ug) {
@@ -177,5 +212,4 @@ public class BodyEnhanced implements TextBlock {
 	public List<Url> getUrls() {
 		return Collections.unmodifiableList(urls);
 	}
-
 }

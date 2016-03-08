@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -35,12 +35,20 @@ public class MathUtils {
 	}
 
 	public static double max(double a, double b, double c) {
-		return Math.max(Math.max(a, b), c);
+		return max(max(a, b), c);
+	}
+
+	public static double max(double a, double b, double c, double d) {
+		return max(max(a, b), max(c, d));
+	}
+
+	public static double max(double a, double b, double c, double d, double e) {
+		return max(max(a, b, c), max(d, e));
 	}
 
 	public static double limitation(double v, double min, double max) {
 		if (min >= max) {
-			assert false : "min="+min+" max="+max+" v="+v;
+			// assert false : "min="+min+" max="+max+" v="+v;
 			return v;
 			// throw new IllegalArgumentException("min="+min+" max="+max+" v="+v);
 		}

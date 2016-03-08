@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -63,7 +63,7 @@ public class DescriptionDiagram extends AbstractEntityDiagram {
 						LeafType.DESCRIPTION, USymbol.ACTOR);
 			}
 			if (code2.startsWith("()")) {
-				code2 = code2.substring(2).trim();
+				code2 = StringUtils.trin(code2.substring(2));
 				code2 = StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote(code2);
 				return getOrCreateLeafDefault(Code.of(code2), LeafType.DESCRIPTION, USymbol.INTERFACE);
 			}

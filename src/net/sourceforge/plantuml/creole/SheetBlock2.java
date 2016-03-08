@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -29,14 +29,16 @@
 package net.sourceforge.plantuml.creole;
 
 import java.awt.geom.Dimension2D;
+import java.awt.geom.Rectangle2D;
 
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UGraphicStencil;
 import net.sourceforge.plantuml.ugraphic.UStroke;
 
-public class SheetBlock2 implements TextBlock, Atom {
+public class SheetBlock2 extends AbstractTextBlock implements TextBlock, Atom {
 
 	private final SheetBlock1 block;
 	private final UStroke defaultStroke;
@@ -65,4 +67,10 @@ public class SheetBlock2 implements TextBlock, Atom {
 	public double getStartingAltitude(StringBounder stringBounder) {
 		return 0;
 	}
+	
+	@Override
+	public Rectangle2D getInnerPosition(String member, StringBounder stringBounder) {
+		return block.getInnerPosition(member, stringBounder);
+	}
+	
 }

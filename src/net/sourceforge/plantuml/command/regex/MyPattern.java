@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -86,8 +86,16 @@ public abstract class MyPattern {
 		return p;
 	}
 
-	public static boolean mtches(String input, String regex) {
+	// public static boolean mtches(String input, String regex) {
+	// return cmpile(regex).matcher(input).matches();
+	// }
+	//
+	public static boolean mtches(CharSequence input, String regex) {
 		return cmpile(regex).matcher(input).matches();
+	}
+
+	public static CharSequence removeAll(CharSequence src, String regex) {
+		return src.toString().replaceAll(transform(regex), "");
 	}
 
 }

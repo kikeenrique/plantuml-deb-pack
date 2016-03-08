@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,6 +28,7 @@
  */
 package net.sourceforge.plantuml.command;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.UrlBuilder;
 import net.sourceforge.plantuml.UrlBuilder.ModeUrl;
@@ -41,8 +42,10 @@ import net.sourceforge.plantuml.cucadiagram.GroupType;
 import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.IGroup;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
-import net.sourceforge.plantuml.graphic.HtmlColorUtils;
-import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.graphic.USymbol;
+import net.sourceforge.plantuml.graphic.color.ColorParser;
+import net.sourceforge.plantuml.graphic.color.ColorType;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.utils.UniqueSequence;
 
 public class CommandPackage extends SingleLineCommand2<AbstractEntityDiagram> {
@@ -60,8 +63,12 @@ public class CommandPackage extends SingleLineCommand2<AbstractEntityDiagram> {
 				new RegexLeaf("[%s]*"), //
 				new RegexLeaf("URL", "(" + UrlBuilder.getRegexp() + ")?"), //
 				new RegexLeaf("[%s]*"), //
-				new RegexLeaf("COLOR", "(" + HtmlColorUtils.COLOR_REGEXP + ")?"), //
+				color().getRegex(), //
 				new RegexLeaf("[%s]*\\{$"));
+	}
+	
+	private static ColorParser color() {
+		return ColorParser.simpleColor(ColorType.BACK);
 	}
 
 	@Override
@@ -86,7 +93,12 @@ public class CommandPackage extends SingleLineCommand2<AbstractEntityDiagram> {
 				currentPackage);
 		final String stereotype = arg.get("STEREOTYPE", 0);
 		if (stereotype != null) {
-			p.setStereotype(new Stereotype(stereotype));
+			final USymbol usymbol = USymbol.getFromString(stereotype);
+			if (usymbol == null) {
+				p.setStereotype(new Stereotype(stereotype));
+			} else {
+				p.setUSymbol(usymbol);
+			}
 		}
 
 		final String urlString = arg.get("URL", 0);
@@ -96,10 +108,13 @@ public class CommandPackage extends SingleLineCommand2<AbstractEntityDiagram> {
 			p.addUrl(url);
 		}
 
-		final String color = arg.get("COLOR", 0);
-		if (color != null) {
-			p.setSpecificBackcolor(diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(color));
-		}
+		final Colors colors = color().getColor(arg, diagram.getSkinParam().getIHtmlColorSet());
+		p.setColors(colors);
+
+//		final String color = arg.get("COLOR", 0);
+//		if (color != null) {
+//			p.setSpecificColorTOBEREMOVED(ColorType.BACK, diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(color));
+//		}
 		return CommandExecutionResult.ok();
 	}
 

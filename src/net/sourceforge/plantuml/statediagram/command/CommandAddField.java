@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -61,7 +61,7 @@ public class CommandAddField extends SingleLineCommand2<StateDiagram> {
 
 		final IEntity entity = diagram.getOrCreateLeaf(Code.of(code), null, null);
 
-		entity.addFieldOrMethod(field);
+		entity.getBodier().addFieldOrMethod(field);
 		return CommandExecutionResult.ok();
 	}
 

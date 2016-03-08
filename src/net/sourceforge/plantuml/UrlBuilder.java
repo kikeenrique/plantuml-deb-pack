@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -39,7 +39,21 @@ public class UrlBuilder {
 		STRICT, AT_START, ANYWHERE, AT_END
 	}
 
-	private static final String URL_PATTERN = "\\[\\[([%g][^%g]+[%g]|[^{}%s\\]\\[]*)(?:[%s]*\\{([^{}]+)\\})?(?:[%s]*([^\\]\\[]+))?\\]\\]";
+	private static String level0() {
+		return "(?:[^{}]|\\{[^{}]*\\})+";
+	}
+
+	private static String levelN(int n) {
+		if (n == 0) {
+			return level0();
+		}
+		return "(?:[^{}]|\\{" + levelN(n - 1) + "\\})+";
+	}
+
+	private static final String URL_PATTERN_OLD = "\\[\\[([%g][^%g]+[%g]|[^{}%s\\]\\[]*)(?:[%s]*\\{((?:[^{}]|\\{[^{}]*\\})+)\\})?(?:[%s]*([^\\]\\[]+))?\\]\\]";
+
+	private static final String URL_PATTERN = "\\[\\[([%g][^%g]+[%g]|[^{}%s\\]\\[]*)(?:[%s]*\\{" + "(" + levelN(3)
+			+ ")" + "\\})?(?:[%s]*([^\\]\\[]+))?\\]\\]";
 
 	private final String topurl;
 	private ModeUrl mode;
@@ -47,6 +61,21 @@ public class UrlBuilder {
 	public UrlBuilder(String topurl, ModeUrl mode) {
 		this.topurl = topurl;
 		this.mode = mode;
+	}
+
+	public static String multilineTooltip(String label) {
+		final Pattern p = MyPattern.cmpile("(?i)^(" + URL_PATTERN + ")?(.*)$");
+		final Matcher m = p.matcher(label);
+		if (m.matches() == false) {
+			return label;
+		}
+		String gr1 = m.group(1);
+		if (gr1 == null) {
+			return label;
+		}
+		final String gr2 = m.group(m.groupCount());
+		gr1 = gr1.replaceAll("\\\\n", "\n");
+		return gr1 + gr2;
 	}
 
 	public Url getUrl(String s) {
@@ -62,7 +91,7 @@ public class UrlBuilder {
 		} else {
 			throw new IllegalStateException();
 		}
-		final Matcher m = p.matcher(s.trim());
+		final Matcher m = p.matcher(StringUtils.trinNoTrace(s));
 		if (m.matches() == false) {
 			return null;
 		}

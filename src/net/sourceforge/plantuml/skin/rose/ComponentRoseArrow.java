@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -33,6 +33,7 @@ import java.awt.geom.Point2D;
 
 import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -46,7 +47,6 @@ import net.sourceforge.plantuml.skin.ArrowPart;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
 import net.sourceforge.plantuml.ugraphic.UEllipse;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UPolygon;
@@ -58,18 +58,16 @@ public class ComponentRoseArrow extends AbstractComponentRoseArrow {
 	private final HorizontalAlignment messagePosition;
 	private final boolean niceArrow;
 
-	public ComponentRoseArrow(HtmlColor foregroundColor, HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font, Display stringsToDisplay,
-			ArrowConfiguration arrowConfiguration, HorizontalAlignment messagePosition, ISkinSimple spriteContainer,
+	public ComponentRoseArrow(HtmlColor foregroundColor, FontConfiguration font, Display stringsToDisplay, ArrowConfiguration arrowConfiguration, HorizontalAlignment messagePosition, ISkinSimple spriteContainer,
 			HorizontalAlignment textHorizontalAlignment, double maxMessageSize, boolean niceArrow) {
-		super(foregroundColor, fontColor, hyperlinkColor, useUnderlineForHyperlink, font, stringsToDisplay, arrowConfiguration, spriteContainer,
-				textHorizontalAlignment, maxMessageSize);
+		super(foregroundColor, font, stringsToDisplay, arrowConfiguration, spriteContainer, textHorizontalAlignment, maxMessageSize);
 		this.messagePosition = messagePosition;
 		this.niceArrow = niceArrow;
 	}
 
-	private final double spaceCrossX = 6;
+	public static final double spaceCrossX = 6;
 	public static final double diamCircle = 8;
-	private final double thinCircle = 1.5;
+	public static final double thinCircle = 1.5;
 
 	@Override
 	public void drawInternalU(UGraphic ug, Area area) {

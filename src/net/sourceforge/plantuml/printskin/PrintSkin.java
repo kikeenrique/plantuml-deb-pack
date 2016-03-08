@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -121,7 +121,7 @@ class PrintSkin extends AbstractPSystem {
 	private void printComponent(ComponentType type) {
 		println(type.name());
 		final Component comp = skin.createComponent(type, ArrowConfiguration.withDirectionNormal(),
-				new SkinParam(null), Display.create(toPrint));
+				SkinParam.noShadowing(), Display.create(toPrint));
 		if (comp == null) {
 			println("null");
 			return;
@@ -148,8 +148,8 @@ class PrintSkin extends AbstractPSystem {
 	}
 
 	private void println(String s) {
-		final TextBlock textBlock = TextBlockUtils.create(Display.create(s), new FontConfiguration(FONT1,
-				HtmlColorUtils.BLACK, HtmlColorUtils.BLUE, true), HorizontalAlignment.LEFT, new SpriteContainerEmpty());
+		final TextBlock textBlock = Display.create(s).create(FontConfiguration.blackBlueTrue(FONT1),
+				HorizontalAlignment.LEFT, new SpriteContainerEmpty());
 		textBlock.drawU(ug.apply(new UTranslate(xpos, ypos)));
 		ypos += textBlock.calculateDimension(ug.getStringBounder()).getHeight();
 	}

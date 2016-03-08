@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,6 +30,7 @@ package net.sourceforge.plantuml.skin.bluemodern;
 
 import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -38,7 +39,6 @@ import net.sourceforge.plantuml.skin.AbstractTextualComponent;
 import net.sourceforge.plantuml.skin.Area;
 import net.sourceforge.plantuml.skin.StickMan;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
@@ -47,9 +47,10 @@ public class ComponentBlueModernActor extends AbstractTextualComponent {
 	private final StickMan stickman;
 	private final boolean head;
 
-	public ComponentBlueModernActor(HtmlColor backgroundColor, HtmlColor foregroundColor, HtmlColor fontColor, HtmlColor hyperlinkColor,
-			boolean useUnderlineForHyperlink, UFont font, Display stringsToDisplay, boolean head, ISkinSimple spriteContainer) {
-		super(stringsToDisplay, fontColor, hyperlinkColor, useUnderlineForHyperlink, font, HorizontalAlignment.CENTER, 3, 3, 0, spriteContainer, 0, false);
+	public ComponentBlueModernActor(HtmlColor backgroundColor, HtmlColor foregroundColor, FontConfiguration font,
+			Display stringsToDisplay, boolean head, ISkinSimple spriteContainer) {
+		super(stringsToDisplay, font, HorizontalAlignment.CENTER, 3, 3, 0,
+				spriteContainer, 0, false, null, null);
 		this.head = head;
 		stickman = new StickMan(backgroundColor, foregroundColor);
 	}
@@ -62,7 +63,8 @@ public class ComponentBlueModernActor extends AbstractTextualComponent {
 		final double delta = (getPreferredWidth(stringBounder) - stickman.getPreferredWidth()) / 2;
 
 		if (head) {
-			textBlock.drawU(ug.apply(new UTranslate(getTextMiddlePostion(stringBounder), stickman.getPreferredHeight())));
+			textBlock
+					.drawU(ug.apply(new UTranslate(getTextMiddlePostion(stringBounder), stickman.getPreferredHeight())));
 			ug = ug.apply(new UTranslate(delta, 0));
 		} else {
 			textBlock.drawU(ug.apply(new UTranslate(getTextMiddlePostion(stringBounder), 0)));

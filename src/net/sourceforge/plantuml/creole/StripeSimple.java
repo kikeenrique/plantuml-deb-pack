@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -39,13 +39,13 @@ import net.sourceforge.plantuml.graphic.FontPosition;
 import net.sourceforge.plantuml.graphic.FontStyle;
 import net.sourceforge.plantuml.graphic.ImgValign;
 import net.sourceforge.plantuml.openiconic.OpenIcon;
-import net.sourceforge.plantuml.ugraphic.Sprite;
+import net.sourceforge.plantuml.ugraphic.sprite.Sprite;
 import net.sourceforge.plantuml.utils.CharHidder;
 
 public class StripeSimple implements Stripe {
 
 	final private List<Atom> atoms = new ArrayList<Atom>();
-	private final List<Command> commands = new ArrayList<Command>();
+	final private List<Command> commands = new ArrayList<Command>();
 
 	private FontConfiguration fontConfiguration;
 
@@ -53,7 +53,7 @@ public class StripeSimple implements Stripe {
 	final private ISkinSimple skinParam;
 
 	public StripeSimple(FontConfiguration fontConfiguration, StripeStyle style, CreoleContext context,
-			ISkinSimple skinParam, boolean modeSimpleLine) {
+			ISkinSimple skinParam, CreoleMode modeSimpleLine) {
 		this.fontConfiguration = fontConfiguration;
 		this.style = style;
 		this.skinParam = skinParam;
@@ -65,7 +65,7 @@ public class StripeSimple implements Stripe {
 		this.commands.add(CommandCreoleStyle.createCreole(FontStyle.ITALIC));
 		this.commands.add(CommandCreoleStyle.createLegacy(FontStyle.ITALIC));
 		this.commands.add(CommandCreoleStyle.createLegacyEol(FontStyle.ITALIC));
-		if (modeSimpleLine == false) {
+		if (modeSimpleLine == CreoleMode.FULL) {
 			this.commands.add(CommandCreoleStyle.createCreole(FontStyle.UNDERLINE));
 		}
 		this.commands.add(CommandCreoleStyle.createLegacy(FontStyle.UNDERLINE));
@@ -92,7 +92,7 @@ public class StripeSimple implements Stripe {
 		this.commands.add(CommandCreoleSpace.create());
 		this.commands.add(CommandCreoleFontFamilyChange.create());
 		this.commands.add(CommandCreoleFontFamilyChange.createEol());
-		this.commands.add(CommandCreoleMonospaced.create());
+		this.commands.add(CommandCreoleMonospaced.create(skinParam.getMonospacedFamily()));
 		this.commands.add(CommandCreoleUrl.create(skinParam));
 		this.commands.add(CommandCreoleSvgAttributeChange.create());
 

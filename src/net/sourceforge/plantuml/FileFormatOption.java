@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -33,6 +33,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
 
 import net.sourceforge.plantuml.eps.EpsStrategy;
 import net.sourceforge.plantuml.graphic.HtmlColor;
@@ -59,15 +60,20 @@ import net.sourceforge.plantuml.StringUtils;
  * @author Arnaud Roques
  * 
  */
-public class FileFormatOption {
+public class FileFormatOption implements Serializable {
 
 	private final FileFormat fileFormat;
 	private final AffineTransform affineTransform;
 	private final boolean withMetadata;
 	private final boolean useRedForError;
+	private final String svgLinkTarget;
 
 	public FileFormatOption(FileFormat fileFormat) {
-		this(fileFormat, null, true, false);
+		this(fileFormat, null, true, false, "_top");
+	}
+
+	public String getSvgLinkTarget() {
+		return svgLinkTarget;
 	}
 
 	public final boolean isWithMetadata() {
@@ -75,18 +81,24 @@ public class FileFormatOption {
 	}
 
 	public FileFormatOption(FileFormat fileFormat, boolean withMetadata) {
-		this(fileFormat, null, false, false);
+		this(fileFormat, null, false, false, "_top");
 	}
 
-	private FileFormatOption(FileFormat fileFormat, AffineTransform at, boolean withMetadata, boolean useRedForError) {
+	private FileFormatOption(FileFormat fileFormat, AffineTransform at, boolean withMetadata, boolean useRedForError,
+			String svgLinkTarget) {
 		this.fileFormat = fileFormat;
 		this.affineTransform = at;
 		this.withMetadata = withMetadata;
 		this.useRedForError = useRedForError;
+		this.svgLinkTarget = svgLinkTarget;
 	}
 
 	public FileFormatOption withUseRedForError() {
-		return new FileFormatOption(fileFormat, affineTransform, withMetadata, true);
+		return new FileFormatOption(fileFormat, affineTransform, withMetadata, true, svgLinkTarget);
+	}
+
+	public FileFormatOption withSvgLinkTarget(String target) {
+		return new FileFormatOption(fileFormat, affineTransform, withMetadata, useRedForError, target);
 	}
 
 	@Override
@@ -129,7 +141,9 @@ public class FileFormatOption {
 		case VDX:
 			return new UGraphicVdx(colorMapper);
 		case LATEX:
-			return new UGraphicTikz(colorMapper);
+			return new UGraphicTikz(colorMapper, true);
+		case LATEX_NO_PREAMBLE:
+			return new UGraphicTikz(colorMapper, false);
 		default:
 			throw new UnsupportedOperationException(fileFormat.toString());
 		}
@@ -147,11 +161,11 @@ public class FileFormatOption {
 		}
 		final UGraphicSvg ug;
 		if (mybackcolor instanceof HtmlColorGradient) {
-			ug = new UGraphicSvg(colorMapper, (HtmlColorGradient) mybackcolor, false, scale);
+			ug = new UGraphicSvg(colorMapper, (HtmlColorGradient) mybackcolor, false, scale, getSvgLinkTarget());
 		} else if (backColor == null || backColor.equals(Color.WHITE)) {
-			ug = new UGraphicSvg(colorMapper, false, scale);
+			ug = new UGraphicSvg(colorMapper, false, scale, getSvgLinkTarget());
 		} else {
-			ug = new UGraphicSvg(colorMapper, StringUtils.getAsHtml(backColor), false, scale);
+			ug = new UGraphicSvg(colorMapper, StringUtils.getAsHtml(backColor), false, scale, getSvgLinkTarget());
 		}
 		return ug;
 

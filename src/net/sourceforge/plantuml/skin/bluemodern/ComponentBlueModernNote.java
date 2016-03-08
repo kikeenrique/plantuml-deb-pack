@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,6 +30,7 @@ package net.sourceforge.plantuml.skin.bluemodern;
 
 import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -37,7 +38,6 @@ import net.sourceforge.plantuml.skin.AbstractTextualComponent;
 import net.sourceforge.plantuml.skin.Area;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UPolygon;
@@ -50,9 +50,10 @@ final public class ComponentBlueModernNote extends AbstractTextualComponent {
 	private final HtmlColor back;
 	private final HtmlColor foregroundColor;
 
-	public ComponentBlueModernNote(HtmlColor back, HtmlColor foregroundColor, HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font,
+	public ComponentBlueModernNote(HtmlColor back, HtmlColor foregroundColor, FontConfiguration font,
 			Display strings, ISkinSimple spriteContainer) {
-		super(strings, fontColor, hyperlinkColor, useUnderlineForHyperlink, font, HorizontalAlignment.LEFT, 6, 15, 5, spriteContainer, 0, false);
+		super(strings, font, HorizontalAlignment.LEFT, 6, 15, 5, spriteContainer, 0, false,
+				null, null);
 		this.back = back;
 		this.foregroundColor = foregroundColor;
 	}

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -39,7 +39,7 @@ public class Segment {
 	final private double pos1;
 	final private double pos2;
 
-	Segment(double pos1, double pos2) {
+	public Segment(double pos1, double pos2) {
 		this.pos1 = pos1;
 		this.pos2 = pos2;
 		if (pos2 < pos1) {
@@ -100,11 +100,13 @@ public class Segment {
 				result2.add(new Segment(pendingStart, this.pos2));
 				return Collections.unmodifiableCollection(result2);
 			}
-			if (this.contains(d) == false) {
-				throw new IllegalStateException();
+			// if (this.contains(d) == false) {
+			// throw new IllegalStateException();
+			// }
+			if (this.contains(d)) {
+				result2.add(new Segment(pendingStart, d.pos1));
+				pendingStart = d.pos2;
 			}
-			result2.add(new Segment(pendingStart, d.pos1));
-			pendingStart = d.pos2;
 		}
 		result2.add(new Segment(pendingStart, this.pos2));
 		return Collections.unmodifiableCollection(result2);

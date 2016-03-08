@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -39,12 +39,13 @@ import net.sourceforge.plantuml.sequencediagram.Message;
 import net.sourceforge.plantuml.skin.Area;
 import net.sourceforge.plantuml.skin.Component;
 import net.sourceforge.plantuml.skin.ComponentType;
+import net.sourceforge.plantuml.skin.Context2D;
 import net.sourceforge.plantuml.skin.SimpleContext2D;
 import net.sourceforge.plantuml.skin.Skin;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class CommunicationTileSelfNoteRight implements Tile {
+public class CommunicationTileSelfNoteRight implements TileWithUpdateStairs {
 
 	private final CommunicationTileSelf tile;
 	private final Message message;
@@ -68,9 +69,14 @@ public class CommunicationTileSelfNoteRight implements Tile {
 		this.notes = message.getNote();
 		// this.notePosition = message.getNotePosition();
 	}
+	
+	public void updateStairs(StringBounder stringBounder, double y) {
+		tile.updateStairs(stringBounder, y);
+	}
+
 
 	private Component getComponent(StringBounder stringBounder) {
-		final Component comp = skin.createComponent(ComponentType.NOTE, null, skinParam, notes);
+		final Component comp = skin.createComponent(ComponentType.NOTE, null, message.getSkinParamNoteBackcolored(skinParam), notes);
 		return comp;
 	}
 
@@ -86,7 +92,7 @@ public class CommunicationTileSelfNoteRight implements Tile {
 		tile.drawU(ug);
 		final Real p = getNotePosition(stringBounder);
 
-		comp.drawU(ug.apply(new UTranslate(p.getCurrentValue(), 0)), area, new SimpleContext2D(false));
+		comp.drawU(ug.apply(new UTranslate(p.getCurrentValue(), 0)), area, (Context2D) ug);
 	}
 
 	public double getPreferredHeight(StringBounder stringBounder) {

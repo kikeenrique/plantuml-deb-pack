@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -69,7 +69,7 @@ public class CommandReferenceOverSeveral extends SingleLineCommand2<SequenceDiag
 		final List<String> participants = StringUtils.splitComma(arg.get("PARTS", 0));
 		final String url = arg.get("URL", 0);
 		final String title = arg.get("URL", 1);
-		final String text = arg.get("TEXT", 0).trim();
+		final String text = StringUtils.trin(arg.get("TEXT", 0));
 
 		final List<Participant> p = new ArrayList<Participant>();
 		for (String s : participants) {

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -57,9 +57,9 @@ public class PSystemLost extends AbstractPSystem {
 	public ImageData exportDiagram(OutputStream os, int num, FileFormatOption fileFormat) throws IOException {
 		final GraphicStrings result = getGraphicStrings();
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, result.getBackcolor(),
-				getMetadata(), null, 0, 0, null);
-		imageBuilder.addUDrawable(result);
-		return imageBuilder.writeImageTOBEMOVED(fileFormat.getFileFormat(), os);
+				getMetadata(), null, 0, 0, null, false);
+		imageBuilder.setUDrawable(result);
+		return imageBuilder.writeImageTOBEMOVED(fileFormat, os);
 	}
 
 	private GraphicStrings getGraphicStrings() throws IOException {

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -41,6 +41,8 @@ import net.sourceforge.plantuml.graphic.USymbol;
 import net.sourceforge.plantuml.utils.UniqueSequence;
 
 public class StateDiagram extends AbstractEntityDiagram {
+
+	private static final String CONCURRENT_PREFIX = "CONC";
 
 	public boolean checkConcurrentStateOk(Code code) {
 		if (leafExist(code) == false) {
@@ -102,23 +104,25 @@ public class StateDiagram extends AbstractEntityDiagram {
 	public IEntity getHistorical(Code codeGroup) {
 		final IEntity g = getOrCreateGroup(codeGroup, Display.getWithNewlines(codeGroup), GroupType.STATE,
 				getRootGroup());
-		final IEntity result = getOrCreateLeaf(Code.of("*historical*" + g.getCode().getFullName()), LeafType.PSEUDO_STATE, null);
+		final IEntity result = getOrCreateLeaf(Code.of("*historical*" + g.getCode().getFullName()),
+				LeafType.PSEUDO_STATE, null);
 		endGroup();
 		return result;
 	}
 
-	public boolean concurrentState() {
+	public boolean concurrentState(char direction) {
 		final IGroup cur = getCurrentGroup();
 		// printlink("BEFORE");
 		if (EntityUtils.groupRoot(cur) == false && cur.getGroupType() == GroupType.CONCURRENT_STATE) {
 			super.endGroup();
 		}
-		final IGroup conc1 = getOrCreateGroup(UniqueSequence.getCode("CONC"), Display.create(""),
+		getCurrentGroup().setConcurrentSeparator(direction);
+		final IGroup conc1 = getOrCreateGroup(UniqueSequence.getCode(CONCURRENT_PREFIX), Display.create(""),
 				GroupType.CONCURRENT_STATE, getCurrentGroup());
 		if (EntityUtils.groupRoot(cur) == false && cur.getGroupType() == GroupType.STATE) {
 			cur.moveEntitiesTo(conc1);
 			super.endGroup();
-			getOrCreateGroup(UniqueSequence.getCode("CONC"), Display.create(""), GroupType.CONCURRENT_STATE,
+			getOrCreateGroup(UniqueSequence.getCode(CONCURRENT_PREFIX), Display.create(""), GroupType.CONCURRENT_STATE,
 					getCurrentGroup());
 		}
 		// printlink("AFTER");
@@ -155,7 +159,6 @@ public class StateDiagram extends AbstractEntityDiagram {
 	public final boolean isHideEmptyDescriptionForState() {
 		return hideEmptyDescription;
 	}
-	
 
 	// public Link isEntryPoint(IEntity ent) {
 	// final Stereotype stereotype = ent.getStereotype();

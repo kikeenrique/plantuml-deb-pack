@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -52,7 +52,7 @@ public class EntityGenderUtils {
 				if (test.getStereotype() == null) {
 					return false;
 				}
-				return stereotype.equals(test.getStereotype().getLabel());
+				return stereotype.equals(test.getStereotype().getLabel(false));
 			}
 		};
 	}
@@ -82,7 +82,6 @@ public class EntityGenderUtils {
 		};
 	}
 
-
 	static public EntityGender all() {
 		return new EntityGender() {
 			public boolean contains(IEntity test) {
@@ -94,7 +93,7 @@ public class EntityGenderUtils {
 	static public EntityGender emptyMethods() {
 		return new EntityGender() {
 			public boolean contains(IEntity test) {
-				return test.getMethodsToDisplay().size()==0;
+				return test.getBodier().getMethodsToDisplay().size() == 0;
 			}
 		};
 	}
@@ -102,7 +101,7 @@ public class EntityGenderUtils {
 	static public EntityGender emptyFields() {
 		return new EntityGender() {
 			public boolean contains(IEntity test) {
-				return test.getFieldsToDisplay().size()==0;
+				return test.getBodier().getFieldsToDisplay().size() == 0;
 			}
 		};
 	}
@@ -110,7 +109,8 @@ public class EntityGenderUtils {
 	static public EntityGender emptyMembers() {
 		return new EntityGender() {
 			public boolean contains(IEntity test) {
-				return test.getMethodsToDisplay().size()==0 && test.getFieldsToDisplay().size()==0;
+				return test.getBodier().getMethodsToDisplay().size() == 0
+						&& test.getBodier().getFieldsToDisplay().size() == 0;
 			}
 		};
 	}

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,26 +28,34 @@
  */
 package net.sourceforge.plantuml.real;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collection;
 
 public class RealUtils {
 
-	public static Real createOrigin() {
+	public static RealOrigin createOrigin() {
 		final RealLine line = new RealLine();
 		final RealImpl result = new RealImpl("O", line, 0);
 		return result;
 	}
 
 	public static Real middle(Real r1, Real r2) {
-		return new RealMiddle((RealMoveable) r1, (RealMoveable) r2);
+		return new RealMiddle2((RealMoveable) r1, (RealMoveable) r2);
 	}
 
-	// public static Real max(List<Real> all) {
-	// return new RealMax(all);
-	// }
-	//
-	// public static Real min(List<Real> all) {
-	// return new RealMin(all);
-	// }
+	public static Real max(Real... reals) {
+		return new RealMax(Arrays.asList(reals));
+	}
 
+	public static Real max(Collection<Real> reals) {
+		return new RealMax(reals);
+	}
+
+	public static Real min(Real... reals) {
+		return new RealMin(Arrays.asList(reals));
+	}
+
+	public static Real min(Collection<Real> reals) {
+		return new RealMin(reals);
+	}
 }

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -35,12 +35,14 @@ import net.sourceforge.plantuml.cucadiagram.dot.GraphvizLayoutStrategy;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.IHtmlColorSet;
+import net.sourceforge.plantuml.graphic.SkinParameter;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.svek.ConditionStyle;
 import net.sourceforge.plantuml.svek.PackageStyle;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
-import net.sourceforge.plantuml.ugraphic.Sprite;
 import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UStroke;
+import net.sourceforge.plantuml.ugraphic.sprite.Sprite;
 
 public class SkinParamDelegator implements ISkinParam {
 
@@ -62,12 +64,12 @@ public class SkinParamDelegator implements ISkinParam {
 		return skinParam.getCircledCharacterRadius();
 	}
 
-	public UFont getFont(FontParam fontParam, Stereotype stereotype, boolean inPackageTitle) {
-		return skinParam.getFont(fontParam, stereotype, false);
+	public UFont getFont(Stereotype stereotype, boolean inPackageTitle, FontParam... fontParam) {
+		return skinParam.getFont(stereotype, false, fontParam);
 	}
 
-	public HtmlColor getFontHtmlColor(FontParam param, Stereotype stereotype) {
-		return skinParam.getFontHtmlColor(param, stereotype);
+	public HtmlColor getFontHtmlColor(Stereotype stereotype, FontParam... param) {
+		return skinParam.getFontHtmlColor(stereotype, param);
 	}
 
 	public HtmlColor getHtmlColor(ColorParam param, Stereotype stereotype, boolean clickable) {
@@ -106,6 +108,10 @@ public class SkinParamDelegator implements ISkinParam {
 		return skinParam.shadowing();
 	}
 
+	public boolean shadowing2(SkinParameter skinParameter) {
+		return skinParam.shadowing2(skinParameter);
+	}
+
 	public PackageStyle getPackageStyle() {
 		return skinParam.getPackageStyle();
 	}
@@ -122,8 +128,8 @@ public class SkinParamDelegator implements ISkinParam {
 		return skinParam.stereotypePositionTop();
 	}
 
-	public boolean useSwimlanes() {
-		return skinParam.useSwimlanes();
+	public boolean useSwimlanes(UmlDiagramType type) {
+		return skinParam.useSwimlanes(type);
 	}
 
 	public double getNodesep() {
@@ -169,7 +175,7 @@ public class SkinParamDelegator implements ISkinParam {
 	public Rankdir getRankdir() {
 		return skinParam.getRankdir();
 	}
-	
+
 	public boolean useOctagonForActivity(Stereotype stereotype) {
 		return skinParam.useOctagonForActivity(stereotype);
 	}
@@ -182,5 +188,48 @@ public class SkinParamDelegator implements ISkinParam {
 		return skinParam.useUnderlineForHyperlink();
 	}
 
+	public HorizontalAlignment getDefaultTextAlignment() {
+		return skinParam.getDefaultTextAlignment();
+	}
+
+	public double getPadding() {
+		return skinParam.getPadding();
+	}
+
+	public int groupInheritance() {
+		return skinParam.groupInheritance();
+	}
+
+	public boolean useGuillemet() {
+		return skinParam.useGuillemet();
+	}
+
+	public boolean handwritten() {
+		return skinParam.handwritten();
+	}
+
+	public String getSvgLinkTarget() {
+		return skinParam.getSvgLinkTarget();
+	}
+
+	public String getMonospacedFamily() {
+		return skinParam.getMonospacedFamily();
+	}
+
+	public Colors getColors(ColorParam param, Stereotype stereotype) {
+		return skinParam.getColors(param, stereotype);
+	}
+
+	public int getTabSize() {
+		return skinParam.getTabSize();
+	}
+
+	public boolean shadowingForNote(Stereotype stereotype) {
+		return shadowingForNote(stereotype);
+	}
+
+	public int maxAsciiMessageLength() {
+		return skinParam.maxAsciiMessageLength();
+	}
 
 }

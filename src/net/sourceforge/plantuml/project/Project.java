@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -79,7 +79,7 @@ public class Project {
 	}
 
 	public Expression getExpression(String desc) {
-		desc = desc.trim();
+		desc = StringUtils.trin(desc);
 		final int plus = desc.indexOf('+');
 
 		if (plus != -1) {

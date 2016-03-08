@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -96,7 +96,8 @@ public class SequenceDiagramTxtMaker implements FileMaker {
 		final double tailHeight = drawableSet.getTailHeight(dummyStringBounder, diagram.isShowFootbox());
 		final double newpage2 = fullDimension.getHeight() - (diagram.isShowFootbox() ? tailHeight : 0) - headerHeight;
 		final Page page = new Page(headerHeight, 0, newpage2, tailHeight, 0, null);
-		drawableSet.drawU(ug, 0, fullDimension.getWidth(), page, diagram.isShowFootbox());
+		//drawableSet.drawU_REMOVEDME_4243(ug, 0, fullDimension.getWidth(), page, diagram.isShowFootbox());
+		drawableSet.drawU22(ug, 0, fullDimension.getWidth(), page, diagram.isShowFootbox());
 	}
 
 

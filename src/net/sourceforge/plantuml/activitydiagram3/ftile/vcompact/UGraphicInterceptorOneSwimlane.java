@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -69,6 +69,7 @@ public class UGraphicInterceptorOneSwimlane extends UGraphicDelegator {
 					|| tile1.getSwimlaneOut() == swimlane;
 			final boolean contained2 = tile2 == null || tile2.getSwimlaneIn() == null
 					|| tile2.getSwimlaneIn() == swimlane;
+
 			if (contained1 && contained2) {
 				connection.drawU(this);
 			}
@@ -87,6 +88,10 @@ public class UGraphicInterceptorOneSwimlane extends UGraphicDelegator {
 
 	public UGraphic apply(UChange change) {
 		return new UGraphicInterceptorOneSwimlane(getUg().apply(change), swimlane);
+	}
+
+	public final Swimlane getSwimlane() {
+		return swimlane;
 	}
 
 }

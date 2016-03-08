@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.cucadiagram.LeafType;
 
 class JavaClass {
@@ -49,9 +50,9 @@ class JavaClass {
 		if (p == null) {
 			p = "";
 		}
-		final StringTokenizer st = new StringTokenizer(p.trim(), ",");
+		final StringTokenizer st = new StringTokenizer(StringUtils.trin(p), ",");
 		while (st.hasMoreTokens()) {
-			this.parents.add(st.nextToken().trim().replaceAll("\\<.*", ""));
+			this.parents.add(StringUtils.trin(st.nextToken()).replaceAll("\\<.*", ""));
 		}
 		this.type = type;
 		this.parentType = parentType;

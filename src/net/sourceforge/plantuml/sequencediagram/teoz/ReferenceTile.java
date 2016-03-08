@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -39,7 +39,7 @@ import net.sourceforge.plantuml.sequencediagram.Reference;
 import net.sourceforge.plantuml.skin.Area;
 import net.sourceforge.plantuml.skin.Component;
 import net.sourceforge.plantuml.skin.ComponentType;
-import net.sourceforge.plantuml.skin.SimpleContext2D;
+import net.sourceforge.plantuml.skin.Context2D;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
@@ -54,7 +54,6 @@ public class ReferenceTile implements Tile {
 		return reference;
 	}
 
-
 	public ReferenceTile(Reference reference, TileArguments tileArguments) {
 		this.reference = reference;
 		this.tileArguments = tileArguments;
@@ -68,15 +67,17 @@ public class ReferenceTile implements Tile {
 			final LivingSpace livingSpace = tileArguments.getLivingSpace(p);
 			final Real pos = livingSpace.getPosC(stringBounder);
 			if (first == null || pos.getCurrentValue() < first.getCurrentValue()) {
-				this.first = pos;
+				this.first = livingSpace.getPosB();
 			}
 			if (last == null || pos.getCurrentValue() > last.getCurrentValue()) {
-				this.last = pos;
+				this.last = livingSpace.getPosD(stringBounder);
 			}
 		}
 		final Component comp = getComponent(stringBounder);
 		final Dimension2D dim = comp.getPreferredDimension(stringBounder);
-		this.last = this.last.addAtLeast(0);
+		if (reference.getParticipant().size() == 1) {
+			this.last = this.last.addAtLeast(0);
+		}
 		this.last.ensureBiggerThan(this.first.addFixed(dim.getWidth()));
 
 	}
@@ -99,7 +100,7 @@ public class ReferenceTile implements Tile {
 		final Area area = new Area(last.getCurrentValue() - first.getCurrentValue(), dim.getHeight());
 
 		ug = ug.apply(new UTranslate(first.getCurrentValue(), 0));
-		comp.drawU(ug, area, new SimpleContext2D(false));
+		comp.drawU(ug, area, (Context2D) ug);
 	}
 
 	public double getPreferredHeight(StringBounder stringBounder) {

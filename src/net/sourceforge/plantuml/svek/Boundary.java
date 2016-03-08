@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,35 +31,25 @@ package net.sourceforge.plantuml.svek;
 import java.awt.geom.Dimension2D;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
-import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.StringBounder;
-import net.sourceforge.plantuml.graphic.TextBlock;
-import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
-import net.sourceforge.plantuml.ugraphic.UChangeColor;
+import net.sourceforge.plantuml.graphic.SymbolContext;
 import net.sourceforge.plantuml.ugraphic.UEllipse;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
-import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UPath;
-import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class Boundary implements TextBlock {
+public class Boundary extends AbstractTextBlock {
 
 	private final double margin = 4;
 
 	private final double radius = 12;
 	private final double left = 17;
-	private final HtmlColor backgroundColor;
-	private final HtmlColor foregroundColor;
-	private final double thickness;
+	
+	private final SymbolContext symbolContext;
 
-	private final double deltaShadow;
-
-	public Boundary(HtmlColor backgroundColor, HtmlColor foregroundColor, double deltaShadow, double thickness) {
-		this.backgroundColor = backgroundColor;
-		this.foregroundColor = foregroundColor;
-		this.deltaShadow = deltaShadow;
-		this.thickness = thickness;
+	public Boundary(SymbolContext symbolContext) {
+		this.symbolContext = symbolContext;
 	}
 
 	public void drawU(UGraphic ug) {
@@ -67,22 +57,21 @@ public class Boundary implements TextBlock {
 		double y = 0;
 		x += margin;
 		y += margin;
-		ug = ug.apply(new UStroke(thickness)).apply(new UChangeBackColor(backgroundColor))
-				.apply(new UChangeColor(foregroundColor));
+		ug = symbolContext.apply(ug);
 		final UEllipse circle = new UEllipse(radius * 2, radius * 2);
-		circle.setDeltaShadow(deltaShadow);
+		circle.setDeltaShadow(symbolContext.getDeltaShadow());
 
 		final UPath path1 = new UPath();
 		path1.moveTo(0, 0);
 		path1.lineTo(0, radius * 2);
-		path1.setDeltaShadow(deltaShadow);
+		path1.setDeltaShadow(symbolContext.getDeltaShadow());
 
 		final UPath path = new UPath();
 		path.moveTo(0, 0);
 		path.lineTo(0, radius * 2);
 		path.moveTo(0, radius);
 		path.lineTo(left, radius);
-		path.setDeltaShadow(deltaShadow);
+		path.setDeltaShadow(symbolContext.getDeltaShadow());
 		ug.apply(new UTranslate(x, y)).draw(path);
 
 		// final ULine line1 = new ULine(0, radius * 2);

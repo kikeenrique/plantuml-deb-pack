@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -29,18 +29,22 @@
 package net.sourceforge.plantuml.creole;
 
 import java.awt.geom.Dimension2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sourceforge.plantuml.Dimension2DDouble;
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.ugraphic.MinMax;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
+import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class SheetBlock1 implements TextBlock, Atom, Stencil {
+public class SheetBlock1 extends AbstractTextBlock implements TextBlock, Atom, Stencil {
 
 	private final Sheet sheet;
 	private List<Stripe> stripes;
@@ -49,10 +53,12 @@ public class SheetBlock1 implements TextBlock, Atom, Stencil {
 	private Map<Atom, Position> positions;
 	private MinMax minMax;
 	private final double maxWidth;
+	private final double padding;
 
-	public SheetBlock1(Sheet sheet, double maxWidth) {
+	public SheetBlock1(Sheet sheet, double maxWidth, double padding) {
 		this.sheet = sheet;
 		this.maxWidth = maxWidth;
+		this.padding = padding;
 	}
 
 	private void initMap(StringBounder stringBounder) {
@@ -117,11 +123,20 @@ public class SheetBlock1 implements TextBlock, Atom, Stencil {
 
 	public Dimension2D calculateDimension(StringBounder stringBounder) {
 		initMap(stringBounder);
-		return minMax.getDimension();
+		return Dimension2DDouble.delta(minMax.getDimension(), 2 * padding);
 	}
+	
+	@Override
+	public Rectangle2D getInnerPosition(String member, StringBounder stringBounder) {
+		return null;
+	}
+
 
 	public void drawU(UGraphic ug) {
 		initMap(ug.getStringBounder());
+		if (padding > 0) {
+			ug = ug.apply(new UTranslate(padding, padding));
+		}
 		for (Stripe stripe : stripes) {
 			for (Atom atom : stripe.getAtoms()) {
 				final Position position = positions.get(atom);
@@ -142,4 +157,5 @@ public class SheetBlock1 implements TextBlock, Atom, Stencil {
 	public double getEndingX(StringBounder stringBounder, double y) {
 		return calculateDimension(stringBounder).getWidth();
 	}
+	
 }

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,24 +28,41 @@
  */
 package net.sourceforge.plantuml.ugraphic.svg;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorGradient;
 import net.sourceforge.plantuml.graphic.HtmlColorTransparent;
 import net.sourceforge.plantuml.svg.SvgGraphics;
+import net.sourceforge.plantuml.ugraphic.ClipContainer;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
+import net.sourceforge.plantuml.ugraphic.UClip;
 import net.sourceforge.plantuml.ugraphic.UDriver;
 import net.sourceforge.plantuml.ugraphic.UEllipse;
 import net.sourceforge.plantuml.ugraphic.UParam;
 import net.sourceforge.plantuml.ugraphic.UShape;
-import net.sourceforge.plantuml.StringUtils;
 
 public class DriverEllipseSvg implements UDriver<SvgGraphics> {
+
+	private final ClipContainer clipContainer;
+
+	public DriverEllipseSvg(ClipContainer clipContainer) {
+		this.clipContainer = clipContainer;
+	}
 
 	public void draw(UShape ushape, double x, double y, ColorMapper mapper, UParam param, SvgGraphics svg) {
 		final UEllipse shape = (UEllipse) ushape;
 		final double width = shape.getWidth();
 		final double height = shape.getHeight();
 
+		final UClip clip = clipContainer.getClip();
+		if (clip != null) {
+			if (clip.isInside(x, y) == false) {
+				return;
+			}
+			if (clip.isInside(x + width, y + height) == false) {
+				return;
+			}
+		}
 
 		final HtmlColor back = param.getBackcolor();
 		if (back instanceof HtmlColorGradient) {

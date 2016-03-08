@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -37,19 +37,23 @@ import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 
-public class InstructionGroup implements Instruction {
+public class InstructionGroup implements Instruction, InstructionCollection {
 
-	private final InstructionList list = new InstructionList();
+	private final InstructionList list;
 	private final Instruction parent;
 	private final HtmlColor backColor;
+	private final HtmlColor borderColor;
 	private final HtmlColor titleColor;
 
 	private final Display test;
-	private Display headerNote;
+	private Display headerNote = Display.NULL;
 
-	public InstructionGroup(Instruction parent, Display test, HtmlColor backColor, HtmlColor titleColor) {
+	public InstructionGroup(Instruction parent, Display test, HtmlColor backColor, HtmlColor titleColor,
+			Swimlane swimlane, HtmlColor borderColor) {
+		this.list = new InstructionList(swimlane);
 		this.parent = parent;
 		this.test = test;
+		this.borderColor = borderColor;
 		this.backColor = backColor;
 		this.titleColor = titleColor;
 	}
@@ -59,7 +63,7 @@ public class InstructionGroup implements Instruction {
 	}
 
 	public Ftile createFtile(FtileFactory factory) {
-		return factory.createGroup(list.createFtile(factory), test, backColor, titleColor, headerNote);
+		return factory.createGroup(list.createFtile(factory), test, backColor, titleColor, headerNote, borderColor);
 	}
 
 	public Instruction getParent() {
@@ -74,12 +78,12 @@ public class InstructionGroup implements Instruction {
 		return null;
 	}
 
-	public void addNote(Display note, NotePosition position) {
+	public boolean addNote(Display note, NotePosition position) {
 		if (list.isEmpty()) {
 			this.headerNote = note;
-			return;
+			return true;
 		}
-		list.addNote(note, position);
+		return list.addNote(note, position);
 	}
 
 	public Set<Swimlane> getSwimlanes() {
@@ -92,6 +96,10 @@ public class InstructionGroup implements Instruction {
 
 	public Swimlane getSwimlaneOut() {
 		return list.getSwimlaneOut();
+	}
+
+	public Instruction getLast() {
+		return list.getLast();
 	}
 
 }

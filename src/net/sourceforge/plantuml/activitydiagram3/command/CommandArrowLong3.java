@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,7 +30,9 @@ package net.sourceforge.plantuml.activitydiagram3.command;
 
 import java.util.List;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.activitydiagram3.ActivityDiagram3;
+import net.sourceforge.plantuml.command.BlocLines;
 import net.sourceforge.plantuml.command.CommandExecutionResult;
 import net.sourceforge.plantuml.command.CommandMultilines2;
 import net.sourceforge.plantuml.command.MultilinesStrategy;
@@ -40,7 +42,6 @@ import net.sourceforge.plantuml.command.regex.RegexOr;
 import net.sourceforge.plantuml.command.regex.RegexResult;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
-import net.sourceforge.plantuml.StringUtils;
 
 public class CommandArrowLong3 extends CommandMultilines2<ActivityDiagram3> {
 
@@ -63,31 +64,30 @@ public class CommandArrowLong3 extends CommandMultilines2<ActivityDiagram3> {
 				new RegexLeaf("$"));
 	}
 
-	public CommandExecutionResult executeNow(ActivityDiagram3 diagram, List<String> lines) {
-		lines = StringUtils.removeEmptyColumns(lines);
-		final RegexResult line0 = getStartingPattern().matcher(lines.get(0).trim());
+	public CommandExecutionResult executeNow(ActivityDiagram3 diagram, BlocLines lines) {
+		lines = lines.removeEmptyColumns();
+		final RegexResult line0 = getStartingPattern().matcher(StringUtils.trin(lines.getFirst499()));
 		final HtmlColor color = diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(line0.get("COLOR", 0));
 		diagram.setColorNextArrow(color);
-		removeStarting(lines, line0.get("LABEL", 0));
-		removeEnding(lines);
-		diagram.setLabelNextArrow(Display.create(lines));
+		lines = lines.removeStartingAndEnding2(line0.get("LABEL", 0));
+		diagram.setLabelNextArrow(lines.toDisplay());
 		return CommandExecutionResult.ok();
 	}
 
-	private void removeStarting(List<String> lines, String data) {
+	private <CS extends CharSequence> void removeStarting(List<CS> lines, String data) {
 		if (lines.size() == 0) {
 			return;
 		}
-		lines.set(0, data);
+		lines.set(0, (CS)data);
 	}
 
-	private void removeEnding(List<String> lines) {
+	private <CS extends CharSequence> void removeEnding(List<CS> lines) {
 		if (lines.size() == 0) {
 			return;
 		}
 		final int n = lines.size() - 1;
-		final String s = lines.get(n);
-		lines.set(n, s.substring(0, s.length() - 1));
+		final CharSequence s = lines.get(n);
+		lines.set(n, (CS)s.subSequence(0, s.length() - 1));
 	}
 
 }

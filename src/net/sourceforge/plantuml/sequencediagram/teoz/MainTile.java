@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -29,86 +29,93 @@
 package net.sourceforge.plantuml.sequencediagram.teoz;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.graphic.StringBounder;
-import net.sourceforge.plantuml.graphic.TextBlockUtils;
-import net.sourceforge.plantuml.graphic.UGraphicInterceptorUDrawable;
 import net.sourceforge.plantuml.real.Real;
-import net.sourceforge.plantuml.real.RealMax;
-import net.sourceforge.plantuml.real.RealMin;
+import net.sourceforge.plantuml.real.RealUtils;
 import net.sourceforge.plantuml.sequencediagram.Event;
 import net.sourceforge.plantuml.sequencediagram.SequenceDiagram;
-import net.sourceforge.plantuml.skin.Skin;
+import net.sourceforge.plantuml.ugraphic.LimitFinder;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
-import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class MainTile implements Tile {
+public class MainTile implements Tile, Bordered {
 
-	private final RealMin min = new RealMin();
-	private final RealMax max = new RealMax();
-	private double height;
+	private final double startingY = 8;
+	private final Real min;
+	private final Real max;
+	private final boolean isShowFootbox;
 
 	private final List<Tile> tiles = new ArrayList<Tile>();
+	private final LivingSpaces livingSpaces;
 
-	public MainTile(SequenceDiagram diagram, Skin skin, Real omega, LivingSpaces livingSpaces, Real origin) {
+	public MainTile(SequenceDiagram diagram, Englobers englobers, TileArguments tileArguments) {
 
-		min.put(origin);
-		max.put(omega);
+		this.livingSpaces = tileArguments.getLivingSpaces();
 
-		final ISkinParam skinParam = diagram.getSkinParam();
-		final StringBounder stringBounder = TextBlockUtils.getDummyStringBounder();
+		final List<Real> min2 = new ArrayList<Real>();
+		final List<Real> max2 = new ArrayList<Real>();
 
-		final TileArguments tileArguments = new TileArguments(stringBounder, omega, livingSpaces, skin, skinParam,
-				origin);
+		min2.add(tileArguments.getOrigin());
+		max2.add(tileArguments.getOrigin());
+
+		if (englobers.size() > 0) {
+			min2.add(englobers.getMinX(tileArguments.getStringBounder()));
+			max2.add(englobers.getMaxX(tileArguments.getStringBounder()));
+		}
+
+		// tiles.add(new EmptyTile(8, tileArguments));
 
 		tiles.addAll(TileBuilder.buildSeveral(diagram.events().iterator(), tileArguments, null));
 
 		for (Tile tile : tiles) {
-			height += tile.getPreferredHeight(stringBounder);
-			min.put(tile.getMinX(stringBounder));
-			max.put(tile.getMaxX(stringBounder));
-			// if (tile instanceof DelayTile) {
-			// for (LivingSpace livingSpace : livingSpaces.values()) {
-			// livingSpace.addDelayTile((DelayTile) tile);
-			// }
-			// }
+			min2.add(tile.getMinX(tileArguments.getStringBounder()));
+			max2.add(tile.getMaxX(tileArguments.getStringBounder()));
 		}
-	}
 
-	private void beforeDrawing(StringBounder stringBounder, Collection<LivingSpace> livingSpaces) {
-		double h = 0;
-		for (Tile tile : tiles) {
-			System.err.println("tile=" + tile);
-			// if (tile instanceof DelayTile) {
-			// ((DelayTile) tile).setStartingY(h);
-			// }
-			h += tile.getPreferredHeight(stringBounder);
+		for (LivingSpace livingSpace : livingSpaces.values()) {
+			max2.add(livingSpace.getPosD(tileArguments.getStringBounder()));
+			max2.add(livingSpace.getPosC2(tileArguments.getStringBounder()));
 		}
+
+		this.min = RealUtils.min(min2);
+		this.max = RealUtils.max(max2);
+
+		this.isShowFootbox = diagram.isShowFootbox();
 	}
 
 	public void drawU(UGraphic ug) {
 		final StringBounder stringBounder = ug.getStringBounder();
 		final LiveBoxFinder liveBoxFinder = new LiveBoxFinder(stringBounder);
 
-		drawUInternal(liveBoxFinder);
-		drawUInternal(new UGraphicInterceptorUDrawable(ug));
+		drawUInternal(liveBoxFinder, false);
+		final UGraphicInterceptorTile interceptor = new UGraphicInterceptorTile(ug, true);
+		drawUInternal(interceptor, false);
 	}
 
-	private void drawUInternal(UGraphic ug) {
+	public void drawForeground(UGraphic ug) {
+		final UGraphicInterceptorTile interceptor = new UGraphicInterceptorTile(ug, false);
+		drawUInternal(interceptor, false);
+	}
+
+	private double drawUInternal(UGraphic ug, boolean trace) {
 		final StringBounder stringBounder = ug.getStringBounder();
-		double h = 0;
-		for (Tile tile : tiles) {
-			// tile.drawU(ug.apply(new UTranslate(0, h)));
-			ug.apply(new UTranslate(0, h)).draw(tile);
-			h += tile.getPreferredHeight(stringBounder);
+		final List<YPositionedTile> positionedTiles = new ArrayList<YPositionedTile>();
+		final double y = GroupingTile.fillPositionelTiles(stringBounder, startingY, tiles, positionedTiles);
+		for (YPositionedTile tile : positionedTiles) {
+			tile.drawU(ug);
 		}
+		// System.err.println("MainTile::drawUInternal finalY=" + y);
+		return y;
 	}
 
 	public double getPreferredHeight(StringBounder stringBounder) {
-		return height;
+		final LimitFinder limitFinder = new LimitFinder(stringBounder, true);
+		final UGraphicInterceptorTile interceptor = new UGraphicInterceptorTile(limitFinder, false);
+		final double finalY = drawUInternal(interceptor, false);
+		final double result = Math.max(limitFinder.getMinMax().getDimension().getHeight(), finalY) + 10;
+		// System.err.println("MainTile::getPreferredHeight=" + result);
+		return result;
 	}
 
 	public void addConstraints(StringBounder stringBounder) {
@@ -127,6 +134,22 @@ public class MainTile implements Tile {
 
 	public Event getEvent() {
 		return null;
+	}
+
+	public boolean isShowFootbox() {
+		return isShowFootbox;
+	}
+
+	public LivingSpaces getLivingSpaces() {
+		return livingSpaces;
+	}
+
+	public double getBorder1() {
+		return min.getCurrentValue();
+	}
+
+	public double getBorder2() {
+		return max.getCurrentValue();
 	}
 
 }

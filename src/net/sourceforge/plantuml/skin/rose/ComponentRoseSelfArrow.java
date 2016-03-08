@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -33,18 +33,18 @@ import java.awt.geom.Point2D;
 
 import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.skin.Area;
 import net.sourceforge.plantuml.skin.ArrowConfiguration;
 import net.sourceforge.plantuml.skin.ArrowDecoration;
-import net.sourceforge.plantuml.skin.ArrowDressing;
+import net.sourceforge.plantuml.skin.ArrowHead;
 import net.sourceforge.plantuml.skin.ArrowPart;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
 import net.sourceforge.plantuml.ugraphic.UEllipse;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UPolygon;
@@ -54,14 +54,13 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 public class ComponentRoseSelfArrow extends AbstractComponentRoseArrow {
 
 	private final double arrowWidth = 45;
-	private final double diamCircle = 8;
-	private final double thinCircle = 1.5;
 	private final boolean niceArrow;
 
-	public ComponentRoseSelfArrow(HtmlColor foregroundColor, HtmlColor colorFont, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font, Display stringsToDisplay,
-			ArrowConfiguration arrowConfiguration, ISkinSimple spriteContainer, double maxMessageSize, boolean niceArrow) {
-		super(foregroundColor, colorFont, hyperlinkColor, useUnderlineForHyperlink, font, stringsToDisplay, arrowConfiguration, spriteContainer,
-				HorizontalAlignment.LEFT, maxMessageSize);
+	public ComponentRoseSelfArrow(HtmlColor foregroundColor, FontConfiguration font, Display stringsToDisplay,
+			ArrowConfiguration arrowConfiguration, ISkinSimple spriteContainer, double maxMessageSize,
+			boolean niceArrow) {
+		super(foregroundColor, font, stringsToDisplay, arrowConfiguration, spriteContainer, HorizontalAlignment.LEFT,
+				maxMessageSize);
 		this.niceArrow = niceArrow;
 	}
 
@@ -81,20 +80,26 @@ public class ComponentRoseSelfArrow extends AbstractComponentRoseArrow {
 		double x2 = area.getDeltaX1() > 0 ? -area.getDeltaX1() : 0 + 1;
 
 		final double textAndArrowHeight = textHeight + getArrowOnlyHeight(stringBounder);
-		final UEllipse circle = new UEllipse(diamCircle, diamCircle);
+		final UEllipse circle = new UEllipse(ComponentRoseArrow.diamCircle, ComponentRoseArrow.diamCircle);
 		if (getArrowConfiguration().getDecoration1() == ArrowDecoration.CIRCLE) {
-			ug.apply(new UStroke(thinCircle))
+			ug.apply(new UStroke(ComponentRoseArrow.thinCircle))
 					.apply(new UChangeColor(getForegroundColor()))
-					.apply(new UTranslate(x1 + 1 - diamCircle / 2 - thinCircle, textHeight - diamCircle / 2
-							- thinCircle / 2)).draw(circle);
-			x1 += diamCircle / 2;
+					.apply(new UTranslate(x1 + 1 - ComponentRoseArrow.diamCircle / 2 - ComponentRoseArrow.thinCircle,
+							textHeight - ComponentRoseArrow.diamCircle / 2 - ComponentRoseArrow.thinCircle / 2))
+					.draw(circle);
+			x1 += ComponentRoseArrow.diamCircle / 2;
 		}
 		if (getArrowConfiguration().getDecoration2() == ArrowDecoration.CIRCLE) {
-			ug.apply(new UStroke(thinCircle))
+			ug.apply(new UStroke(ComponentRoseArrow.thinCircle))
 					.apply(new UChangeColor(getForegroundColor()))
-					.apply(new UTranslate(x2 - diamCircle / 2 - thinCircle, textAndArrowHeight - diamCircle / 2
-							- thinCircle / 2)).draw(circle);
-			x2 += diamCircle / 2;
+					.apply(new UTranslate(x2 - ComponentRoseArrow.diamCircle / 2 - ComponentRoseArrow.thinCircle,
+							textAndArrowHeight - ComponentRoseArrow.diamCircle / 2 - ComponentRoseArrow.thinCircle / 2))
+					.draw(circle);
+			x2 += ComponentRoseArrow.diamCircle / 2;
+		}
+		final boolean hasFinalCrossX = getArrowConfiguration().getDressing2().getHead() == ArrowHead.CROSSX;
+		if (hasFinalCrossX) {
+			x2 += 2 * ComponentRoseArrow.spaceCrossX;
 		}
 
 		final double arrowHeight = textAndArrowHeight - textHeight;
@@ -113,9 +118,19 @@ public class ComponentRoseSelfArrow extends AbstractComponentRoseArrow {
 			if (getArrowConfiguration().getPart() != ArrowPart.TOP_PART) {
 				ug.apply(new UTranslate(x2, textAndArrowHeight)).draw(new ULine(getArrowDeltaX(), getArrowDeltaY()));
 			}
+		} else if (hasFinalCrossX) {
+			ug = ug.apply(new UStroke(2));
+			ug.apply(
+					new UTranslate(ComponentRoseArrow.spaceCrossX, textHeight - getArrowDeltaX() / 2
+							+ getArrowOnlyHeight(stringBounder))).draw(new ULine(getArrowDeltaX(), getArrowDeltaX()));
+			ug.apply(
+					new UTranslate(ComponentRoseArrow.spaceCrossX, textHeight + getArrowDeltaX() / 2
+							+ getArrowOnlyHeight(stringBounder))).draw(new ULine(getArrowDeltaX(), -getArrowDeltaX()));
+
 		} else {
 			final UPolygon polygon = getPolygon(textAndArrowHeight);
 			ug.apply(new UChangeBackColor(getForegroundColor())).apply(new UTranslate(x2, 0)).draw(polygon);
+
 		}
 
 		getTextBlock().drawU(ug.apply(new UTranslate(getMarginX1(), 0)));

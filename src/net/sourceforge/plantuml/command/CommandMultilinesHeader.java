@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,39 +28,38 @@
  */
 package net.sourceforge.plantuml.command;
 
-import java.util.List;
 import java.util.regex.Matcher;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.UmlDiagram;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.cucadiagram.DisplayPositionned;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
-import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.graphic.VerticalAlignment;
 
 public class CommandMultilinesHeader extends CommandMultilines<UmlDiagram> {
 
 	public CommandMultilinesHeader() {
 		super("(?i)^(?:(left|right|center)?[%s]*)header$");
 	}
-	
+
 	@Override
 	public String getPatternEnd() {
 		return "(?i)^end[%s]?header$";
 	}
 
-
-	public CommandExecutionResult execute(final UmlDiagram diagram, List<String> lines) {
-		StringUtils.trim(lines, false);
-		final Matcher m = getStartingPattern().matcher(lines.get(0).trim());
+	public CommandExecutionResult execute(final UmlDiagram diagram, BlocLines lines) {
+		lines = lines.trim(false);
+		final Matcher m = getStartingPattern().matcher(StringUtils.trin(lines.getFirst499()));
 		if (m.find() == false) {
 			throw new IllegalStateException();
 		}
 		final String align = m.group(1);
-		if (align != null) {
-			diagram.setHeaderAlignment(HorizontalAlignment.valueOf(StringUtils.goUpperCase(align)));
-		}
-		final Display strings = Display.create(lines.subList(1, lines.size() - 1));
+		lines = lines.subExtract(1, 1);
+		final Display strings = lines.toDisplay();
 		if (strings.size() > 0) {
-			diagram.setHeader(strings);
+			diagram.setHeader(new DisplayPositionned(strings, HorizontalAlignment.fromString(align,
+					HorizontalAlignment.RIGHT), VerticalAlignment.TOP));
 			return CommandExecutionResult.ok();
 		}
 		return CommandExecutionResult.error("Empty header");

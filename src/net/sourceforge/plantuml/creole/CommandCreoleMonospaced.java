@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -36,14 +36,18 @@ import net.sourceforge.plantuml.graphic.FontConfiguration;
 
 public class CommandCreoleMonospaced implements Command {
 
+	public static final String MONOSPACED = "monospaced";
+	
 	private final Pattern pattern;
+	private final String monospacedFamily;
 
-	public static Command create() {
-		return new CommandCreoleMonospaced("^(?i)([%g][%g](.*?)[%g][%g])");
+	public static Command create(String monospacedFamily) {
+		return new CommandCreoleMonospaced("^(?i)([%g][%g](.*?)[%g][%g])", monospacedFamily);
 	}
 
-	private CommandCreoleMonospaced(String p) {
+	private CommandCreoleMonospaced(String p, String monospacedFamily) {
 		this.pattern = MyPattern.cmpile(p);
+		this.monospacedFamily = monospacedFamily;
 	}
 
 	public int matchingSize(String line) {
@@ -60,7 +64,7 @@ public class CommandCreoleMonospaced implements Command {
 			throw new IllegalStateException();
 		}
 		final FontConfiguration fc1 = stripe.getActualFontConfiguration();
-		final FontConfiguration fc2 = fc1.changeFamily("monospaced");
+		final FontConfiguration fc2 = fc1.changeFamily(monospacedFamily);
 		stripe.setActualFontConfiguration(fc2);
 		stripe.analyzeAndAdd(m.group(2));
 		stripe.setActualFontConfiguration(fc1);

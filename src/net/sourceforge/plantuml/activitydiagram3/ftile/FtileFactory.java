@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -37,6 +37,7 @@ import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 
 public interface FtileFactory extends ISkinSimple {
@@ -49,7 +50,9 @@ public interface FtileFactory extends ISkinSimple {
 
 	public Ftile stop(Swimlane swimlane);
 
-	public Ftile activity(Display label, HtmlColor color, Swimlane swimlane, BoxStyle style);
+	public Ftile end(Swimlane swimlane);
+
+	public Ftile activity(Display label, Swimlane swimlane, BoxStyle style, Colors colors);
 
 	public Ftile addNote(Ftile ftile, Display note, NotePosition notePosition);
 
@@ -61,17 +64,20 @@ public interface FtileFactory extends ISkinSimple {
 
 	public Ftile assembly(Ftile tile1, Ftile tile2);
 
-	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test, Display yes, Display out, HtmlColor color);
+	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test, Display yes, Display out, HtmlColor color,
+			LinkRendering backRepeatLinkRendering);
 
 	public Ftile createWhile(Swimlane swimlane, Ftile whileBlock, Display test, Display yes, Display out,
 			LinkRendering afterEndwhile, HtmlColor color);
 
-	public Ftile createIf(Swimlane swimlane, List<Branch> thens, Branch elseBranch);
+	public Ftile createIf(Swimlane swimlane, List<Branch> thens, Branch elseBranch, LinkRendering afterEndwhile,
+			LinkRendering topInlinkRendering);
 
 	public Ftile createFork(Swimlane swimlane, List<Ftile> all);
 
 	public Ftile createSplit(List<Ftile> all);
 
-	public Ftile createGroup(Ftile list, Display name, HtmlColor backColor, HtmlColor titleColor, Display headerNote);
+	public Ftile createGroup(Ftile list, Display name, HtmlColor backColor, HtmlColor titleColor, Display headerNote,
+			HtmlColor borderColor);
 
 }

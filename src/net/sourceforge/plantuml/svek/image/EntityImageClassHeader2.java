@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -34,6 +34,7 @@ import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.SkinParamUtils;
+import net.sourceforge.plantuml.creole.CreoleMode;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.EntityPortion;
 import net.sourceforge.plantuml.cucadiagram.ILeaf;
@@ -67,35 +68,32 @@ public class EntityImageClassHeader2 extends AbstractEntityImage {
 		final HtmlColor color = SkinParamUtils.getFontColor(getSkinParam(), FontParam.CLASS, getStereo());
 		final Stereotype stereotype = entity.getStereotype();
 		final String generic = entity.getGeneric();
-		FontConfiguration fontConfigurationName = new FontConfiguration(SkinParamUtils.getFont(getSkinParam(), FontParam.CLASS, stereotype),
-				color, getSkinParam().getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink());
+		FontConfiguration fontConfigurationName = new FontConfiguration(getSkinParam(), FontParam.CLASS, stereotype);
 		if (italic) {
 			fontConfigurationName = fontConfigurationName.italic();
 		}
-		final TextBlock name = TextBlockUtils.withMargin(TextBlockUtils.create(entity.getDisplay(),
-				fontConfigurationName, HorizontalAlignment.CENTER, skinParam), 3, 3, 0, 0);
+		final TextBlock name = TextBlockUtils.withMargin(
+				entity.getDisplay().createWithNiceCreoleMode(fontConfigurationName, HorizontalAlignment.CENTER,
+						skinParam), 3, 3, 0, 0);
 
 		final TextBlock stereo;
-		if (stereotype == null || stereotype.getLabel() == null
+		if (stereotype == null || stereotype.getLabel(false) == null
 				|| portionShower.showPortion(EntityPortion.STEREOTYPE, entity) == false) {
 			stereo = null;
 		} else {
-			stereo = TextBlockUtils.withMargin(TextBlockUtils.create(
-					Display.create(stereotype.getLabels()),
-					new FontConfiguration(SkinParamUtils.getFont(getSkinParam(),
-							FontParam.CLASS_STEREOTYPE, stereotype), SkinParamUtils.getFontColor(getSkinParam(),
-					FontParam.CLASS_STEREOTYPE, stereotype), getSkinParam().getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink()), HorizontalAlignment.CENTER, skinParam), 1, 0);
+			stereo = TextBlockUtils.withMargin(
+					Display.create(stereotype.getLabels(skinParam.useGuillemet())).create(
+							new FontConfiguration(getSkinParam(), FontParam.CLASS_STEREOTYPE, stereotype),
+							HorizontalAlignment.CENTER, skinParam), 1, 0);
 		}
 
 		TextBlock genericBlock;
 		if (generic == null) {
 			genericBlock = null;
 		} else {
-			genericBlock = TextBlockUtils.create(
-					Display.getWithNewlines(generic),
-					new FontConfiguration(SkinParamUtils.getFont(getSkinParam(),
-							FontParam.CLASS_STEREOTYPE, stereotype), SkinParamUtils.getFontColor(getSkinParam(),
-					FontParam.CLASS_STEREOTYPE, stereotype), skinParam.getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink()), HorizontalAlignment.CENTER, skinParam);
+			genericBlock = Display.getWithNewlines(generic).create(
+					new FontConfiguration(getSkinParam(), FontParam.CLASS_STEREOTYPE, stereotype),
+					HorizontalAlignment.CENTER, skinParam);
 			genericBlock = TextBlockUtils.withMargin(genericBlock, 1, 1);
 			final HtmlColor classBackground = SkinParamUtils
 					.getColor(getSkinParam(), ColorParam.background, stereotype);

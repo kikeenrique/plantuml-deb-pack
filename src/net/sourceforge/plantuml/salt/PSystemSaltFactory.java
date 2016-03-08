@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,6 +28,7 @@
  */
 package net.sourceforge.plantuml.salt;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.command.PSystemBasicFactory;
 import net.sourceforge.plantuml.core.DiagramType;
 
@@ -56,7 +57,7 @@ public class PSystemSaltFactory extends PSystemBasicFactory<PSystemSalt> {
 		if (system == null) {
 			return null;
 		}
-		system.add(line.trim());
+		system.add(StringUtils.trin(line));
 		return system;
 	}
 

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -38,6 +38,7 @@ import java.util.Map;
 import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.IGroup;
 import net.sourceforge.plantuml.cucadiagram.ILeaf;
+import net.sourceforge.plantuml.cucadiagram.Link;
 
 public class Bibliotekon {
 
@@ -59,7 +60,7 @@ public class Bibliotekon {
 				return cl;
 			}
 		}
-		throw new IllegalArgumentException();
+		return null;
 	}
 
 	public void addLine(Line line) {
@@ -165,4 +166,31 @@ public class Bibliotekon {
 		return Collections.unmodifiableList(result);
 	}
 
+	public Line getLine(Link link) {
+		for (Line line : allLines) {
+			if (line.isLink(link)) {
+				return line;
+			}
+		}
+		throw new IllegalArgumentException();
+	}
+
+	public IEntity getOnlyOther(IEntity entity) {
+		for (Line line : allLines) {
+			final IEntity other = line.getOther(entity);
+			if (other != null) {
+				return other;
+			}
+		}
+		return null;
+	}
+
+	public ILeaf getLeaf(Shape shape) {
+		for (Map.Entry<ILeaf, Shape> ent : shapeMap.entrySet()) {
+			if (ent.getValue() == shape) {
+				return ent.getKey();
+			}
+		}
+		throw new IllegalArgumentException();
+	}
 }

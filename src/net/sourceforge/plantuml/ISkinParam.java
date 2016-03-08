@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -35,6 +35,8 @@ import net.sourceforge.plantuml.cucadiagram.dot.GraphvizLayoutStrategy;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.IHtmlColorSet;
+import net.sourceforge.plantuml.graphic.SkinParameter;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.svek.ConditionStyle;
 import net.sourceforge.plantuml.svek.PackageStyle;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
@@ -44,20 +46,24 @@ import net.sourceforge.plantuml.ugraphic.UStroke;
 public interface ISkinParam extends ISkinSimple {
 
 	public HtmlColor getHyperlinkColor();
-	
+
 	public boolean useUnderlineForHyperlink();
 
 	public HtmlColor getBackgroundColor();
 
 	public HtmlColor getHtmlColor(ColorParam param, Stereotype stereotype, boolean clickable);
 
-	public HtmlColor getFontHtmlColor(FontParam param, Stereotype stereotype);
+	public Colors getColors(ColorParam param, Stereotype stereotype);
+
+	public HtmlColor getFontHtmlColor(Stereotype stereotype, FontParam... param);
 
 	public UStroke getThickness(LineParam param, Stereotype stereotype);
 
-	public UFont getFont(FontParam fontParam, Stereotype stereotype, boolean inPackageTitle);
+	public UFont getFont(Stereotype stereotype, boolean inPackageTitle, FontParam... fontParam);
 
 	public HorizontalAlignment getHorizontalAlignment(AlignParam param);
+
+	public HorizontalAlignment getDefaultTextAlignment();
 
 	public int getCircledCharacterRadius();
 
@@ -72,6 +78,10 @@ public interface ISkinParam extends ISkinSimple {
 	public GraphvizLayoutStrategy getStrategy();
 
 	public boolean shadowing();
+	
+	public boolean shadowingForNote(Stereotype stereotype);
+
+	public boolean shadowing2(SkinParameter skinParameter);
 
 	public PackageStyle getPackageStyle();
 
@@ -79,7 +89,7 @@ public interface ISkinParam extends ISkinSimple {
 
 	public boolean stereotypePositionTop();
 
-	public boolean useSwimlanes();
+	public boolean useSwimlanes(UmlDiagramType type);
 
 	public double getNodesep();
 
@@ -100,10 +110,19 @@ public interface ISkinParam extends ISkinSimple {
 	public boolean sameClassWidth();
 
 	public Rankdir getRankdir();
-	
-	public boolean useOctagonForActivity(Stereotype stereotype);
-	
-	public IHtmlColorSet getIHtmlColorSet();
 
+	public boolean useOctagonForActivity(Stereotype stereotype);
+
+	public int groupInheritance();
+
+	public boolean useGuillemet();
+
+	public boolean handwritten();
+
+	public String getSvgLinkTarget();
+	
+	public int getTabSize();
+	
+	public int maxAsciiMessageLength();
 
 }

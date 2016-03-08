@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -35,37 +35,38 @@ import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.real.Real;
 import net.sourceforge.plantuml.sequencediagram.Event;
 import net.sourceforge.plantuml.sequencediagram.MessageExo;
+import net.sourceforge.plantuml.sequencediagram.MessageExoType;
 import net.sourceforge.plantuml.skin.Area;
+import net.sourceforge.plantuml.skin.ArrowComponent;
 import net.sourceforge.plantuml.skin.ArrowConfiguration;
+import net.sourceforge.plantuml.skin.ArrowDecoration;
 import net.sourceforge.plantuml.skin.Component;
 import net.sourceforge.plantuml.skin.ComponentType;
-import net.sourceforge.plantuml.skin.SimpleContext2D;
+import net.sourceforge.plantuml.skin.Context2D;
 import net.sourceforge.plantuml.skin.Skin;
+import net.sourceforge.plantuml.skin.rose.ComponentRoseArrow;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class CommunicationExoTile implements Tile {
+public class CommunicationExoTile implements TileWithUpdateStairs {
 
 	private final LivingSpace livingSpace;
 	private final MessageExo message;
 	private final Skin skin;
 	private final ISkinParam skinParam;
-	private final Real alpha;
-	private final Real omega;
-	
+	private final TileArguments tileArguments;
+
 	public Event getEvent() {
 		return message;
 	}
 
-
 	public CommunicationExoTile(LivingSpace livingSpace, MessageExo message, Skin skin, ISkinParam skinParam,
-			Real alpha, Real omega) {
+			TileArguments tileArguments) {
+		this.tileArguments = tileArguments;
 		this.livingSpace = livingSpace;
 		this.message = message;
 		this.skin = skin;
 		this.skinParam = skinParam;
-		this.alpha = alpha;
-		this.omega = omega;
 	}
 
 	private Component getComponent(StringBounder stringBounder) {
@@ -82,11 +83,39 @@ public class CommunicationExoTile implements Tile {
 		final StringBounder stringBounder = ug.getStringBounder();
 		final Component comp = getComponent(stringBounder);
 		final Dimension2D dim = comp.getPreferredDimension(stringBounder);
-		final double x1 = getPoint1(stringBounder).getCurrentValue();
-		final double x2 = getPoint2(stringBounder).getCurrentValue();
+		double x1 = getPoint1Value(stringBounder);
+		double x2 = getPoint2Value(stringBounder);
+		final int level = livingSpace.getLevelAt(this, EventsHistoryMode.IGNORE_FUTURE_DEACTIVATE);
+		if (level > 0) {
+			if (message.getType().isRightBorder()) {
+				x1 += CommunicationTile.LIVE_DELTA_SIZE * level;
+			} else {
+				x2 += CommunicationTile.LIVE_DELTA_SIZE * (level - 2);
+			}
+		}
+
+		final ArrowConfiguration arrowConfiguration = message.getArrowConfiguration();
+		final MessageExoType type = message.getType();
+		if (arrowConfiguration.getDecoration1() == ArrowDecoration.CIRCLE && type == MessageExoType.FROM_LEFT) {
+			x1 += ComponentRoseArrow.diamCircle / 2 + 2;
+		}
+		if (arrowConfiguration.getDecoration2() == ArrowDecoration.CIRCLE && type == MessageExoType.TO_LEFT) {
+			x1 += ComponentRoseArrow.diamCircle / 2 + 2;
+		}
+		if (arrowConfiguration.getDecoration2() == ArrowDecoration.CIRCLE && type == MessageExoType.TO_RIGHT) {
+			x2 -= ComponentRoseArrow.diamCircle / 2 + 2;
+		}
+		if (arrowConfiguration.getDecoration1() == ArrowDecoration.CIRCLE && type == MessageExoType.FROM_RIGHT) {
+			x2 -= ComponentRoseArrow.diamCircle / 2 + 2;
+		}
+
 		final Area area = new Area(x2 - x1, dim.getHeight());
 		ug = ug.apply(new UTranslate(x1, 0));
-		comp.drawU(ug, area, new SimpleContext2D(false));
+		comp.drawU(ug, area, (Context2D) ug);
+	}
+
+	private boolean isShortArrow() {
+		return message.isShortArrow();
 	}
 
 	public double getPreferredHeight(StringBounder stringBounder) {
@@ -95,32 +124,70 @@ public class CommunicationExoTile implements Tile {
 		return dim.getHeight();
 	}
 
+	private double getPreferredWidth(StringBounder stringBounder) {
+		final Component comp = getComponent(stringBounder);
+		final Dimension2D dim = comp.getPreferredDimension(stringBounder);
+		return dim.getWidth();
+	}
+
 	public void addConstraints(StringBounder stringBounder) {
 		final Component comp = getComponent(stringBounder);
 		final Dimension2D dim = comp.getPreferredDimension(stringBounder);
 		final double width = dim.getWidth();
 
-		final Real point1 = getPoint1(stringBounder);
-		final Real point2 = getPoint2(stringBounder);
-		if (point1.getCurrentValue() < point2.getCurrentValue()) {
-			point2.ensureBiggerThan(point1.addFixed(width));
+		if (message.getType().isRightBorder()) {
+
 		} else {
-			point1.ensureBiggerThan(point2.addFixed(width));
+			livingSpace.getPosC(stringBounder).ensureBiggerThan(tileArguments.getOrigin().addFixed(width));
 		}
+
+		// final Real point1 = getPoint1(stringBounder);
+		// if (message.getType().isRightBorder()) {
+		// final Real point2 = point1.addFixed(width);
+		// } else {
+		// final Real point2 = getPoint2(stringBounder);
+		// if (point1.getCurrentValue() < point2.getCurrentValue()) {
+		// point2.ensureBiggerThan(point1.addFixed(width));
+		// } else {
+		// point1.ensureBiggerThan(point2.addFixed(width));
+		// }
+		// }
+	}
+
+	public void updateStairs(StringBounder stringBounder, double y) {
+		final ArrowComponent comp = (ArrowComponent) getComponent(stringBounder);
+		final Dimension2D dim = comp.getPreferredDimension(stringBounder);
+		final double arrowY = comp.getStartPoint(stringBounder, dim).getY();
+
+		livingSpace.addStepForLivebox(getEvent(), y + arrowY);
+
 	}
 
 	private Real getPoint1(final StringBounder stringBounder) {
 		if (message.getType().isRightBorder()) {
 			return livingSpace.getPosC(stringBounder);
 		}
-		return alpha;
+		return tileArguments.getOrigin();
 	}
 
-	private Real getPoint2(final StringBounder stringBounder) {
+	private double getPoint1Value(final StringBounder stringBounder) {
 		if (message.getType().isRightBorder()) {
-			return omega;
+			return livingSpace.getPosC(stringBounder).getCurrentValue();
 		}
-		return livingSpace.getPosC(stringBounder);
+		if (isShortArrow()) {
+			return getPoint2Value(stringBounder) - getPreferredWidth(stringBounder);
+		}
+		return tileArguments.getBorder1();
+	}
+
+	private double getPoint2Value(final StringBounder stringBounder) {
+		if (message.getType().isRightBorder()) {
+			if (isShortArrow()) {
+				return getPoint1Value(stringBounder) + getPreferredWidth(stringBounder);
+			}
+			return tileArguments.getBorder2();
+		}
+		return livingSpace.getPosC(stringBounder).getCurrentValue();
 	}
 
 	public Real getMinX(StringBounder stringBounder) {
@@ -128,7 +195,10 @@ public class CommunicationExoTile implements Tile {
 	}
 
 	public Real getMaxX(StringBounder stringBounder) {
-		return getPoint2(stringBounder);
+		final Component comp = getComponent(stringBounder);
+		final Dimension2D dim = comp.getPreferredDimension(stringBounder);
+		final double width = dim.getWidth();
+		return getPoint1(stringBounder).addFixed(width);
 	}
 
 }

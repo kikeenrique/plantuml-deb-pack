@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -88,6 +88,7 @@ public class MainWindow2 extends JFrame {
 	private final JScrollPane scrollPane;
 	private final JButton changeDirButton = new JButton("Change Directory");
 	private final JTextField extensions = new JTextField();
+	private final int period = 300;
 
 	final private List<SimpleLine2> currentDirectoryListing2 = new ArrayList<SimpleLine2>();
 	final private Set<ImageWindow2> openWindows2 = new HashSet<ImageWindow2>();
@@ -267,7 +268,7 @@ public class MainWindow2 extends JFrame {
 
 	private void startTimer() {
 		Log.info("Init done");
-		final Timer timer = new Timer(3000, new ActionListener() {
+		final Timer timer = new Timer(period, new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				tick();
 			}
@@ -347,7 +348,7 @@ public class MainWindow2 extends JFrame {
 			final File file = ent.getKey();
 			removeAllThatUseThisFile(file);
 			final Future<List<GeneratedImage>> future = ent.getValue();
-			final SimpleLine2 simpleLine = new SimpleLine2(file, null, future);
+			final SimpleLine2 simpleLine = SimpleLine2.fromFuture(file, future);
 			currentDirectoryListing2.add(simpleLine);
 			changed = true;
 		}
@@ -359,7 +360,7 @@ public class MainWindow2 extends JFrame {
 				final Future<List<GeneratedImage>> future = line.getFuture();
 				for (GeneratedImage im : future.get()) {
 					mayRefreshImageWindow(im.getPngFile());
-					final SimpleLine2 simpleLine = new SimpleLine2(line.getFile(), im, null);
+					final SimpleLine2 simpleLine = SimpleLine2.fromGeneratedImage(line.getFile(), im);
 					currentDirectoryListing2.add(simpleLine);
 				}
 			}
@@ -383,7 +384,7 @@ public class MainWindow2 extends JFrame {
 				continue;
 			}
 			if (pngFile.equals(win.getSimpleLine().getGeneratedImage().getPngFile())) {
-				win.refreshImage();
+				win.refreshImage(true);
 			}
 		}
 
@@ -394,6 +395,10 @@ public class MainWindow2 extends JFrame {
 		if (ok == false) {
 			throw new IllegalStateException();
 		}
+	}
+
+	public List<SimpleLine2> getCurrentDirectoryListing2() {
+		return Collections.unmodifiableList(currentDirectoryListing2);
 	}
 
 }

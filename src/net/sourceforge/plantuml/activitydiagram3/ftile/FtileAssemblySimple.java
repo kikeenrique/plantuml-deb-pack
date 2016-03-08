@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -35,11 +35,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class FtileAssemblySimple implements Ftile {
+public class FtileAssemblySimple extends AbstractTextBlock implements Ftile {
 
 	private final Ftile tile1;
 	private final Ftile tile2;
@@ -85,7 +86,6 @@ public class FtileAssemblySimple implements Ftile {
 		ug.apply(getTranslated1(stringBounder)).draw(tile1);
 		ug.apply(getTranslated2(stringBounder)).draw(tile2);
 	}
-
 
 	public LinkRendering getInLinkRendering() {
 		return tile1.getInLinkRendering();

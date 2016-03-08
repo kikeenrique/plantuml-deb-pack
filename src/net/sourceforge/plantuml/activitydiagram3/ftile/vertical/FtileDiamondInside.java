@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -35,6 +35,7 @@ import java.util.Set;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.activitydiagram3.ftile.AbstractFtile;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Diamond;
+import net.sourceforge.plantuml.activitydiagram3.ftile.Ftile;
 import net.sourceforge.plantuml.activitydiagram3.ftile.FtileGeometry;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
 import net.sourceforge.plantuml.graphic.HtmlColor;
@@ -76,6 +77,10 @@ public class FtileDiamondInside extends AbstractFtile {
 		return new FtileDiamondInside(shadowing(), backColor, borderColor, swimlane, label, north, south, west, east);
 	}
 
+	public Ftile withWestAndEast(TextBlock tb1, TextBlock tb2) {
+		return withWest(tb1).withEast(tb2);
+	}
+
 	public FtileDiamondInside withSouth(TextBlock south) {
 		return new FtileDiamondInside(shadowing(), backColor, borderColor, swimlane, label, north, south, west, east);
 	}
@@ -111,29 +116,26 @@ public class FtileDiamondInside extends AbstractFtile {
 	public void drawU(UGraphic ug) {
 		final StringBounder stringBounder = ug.getStringBounder();
 		final Dimension2D dimLabel = label.calculateDimension(stringBounder);
-		final Dimension2D dimTotal = calculateDimension(stringBounder);
+		final Dimension2D dimTotal = calculateDimensionAlone(stringBounder);
 		ug = ug.apply(new UChangeColor(borderColor)).apply(new UStroke(1.5)).apply(new UChangeBackColor(backColor));
 		ug.draw(Diamond.asPolygon(shadowing(), dimTotal.getWidth(), dimTotal.getHeight()));
 
-		// final Dimension2D dimNorth = west.calculateDimension(stringBounder);
 		north.drawU(ug.apply(new UTranslate(4 + dimTotal.getWidth() / 2, dimTotal.getHeight())));
-
-		final Dimension2D dimSouth = south.calculateDimension(ug.getStringBounder());
 		south.drawU(ug.apply(new UTranslate(4 + dimTotal.getWidth() / 2, dimTotal.getHeight())));
 
 		final double lx = (dimTotal.getWidth() - dimLabel.getWidth()) / 2;
 		final double ly = (dimTotal.getHeight() - dimLabel.getHeight()) / 2;
 		label.drawU(ug.apply(new UTranslate(lx, ly)));
 
-		final Dimension2D dimWeat = west.calculateDimension(stringBounder);
-		west.drawU(ug.apply(new UTranslate(-dimWeat.getWidth(), -dimWeat.getHeight() + dimTotal.getHeight() / 2)));
+		final Dimension2D dimWest = west.calculateDimension(stringBounder);
+		west.drawU(ug.apply(new UTranslate(-dimWest.getWidth(), -dimWest.getHeight() + dimTotal.getHeight() / 2)));
 
 		final Dimension2D dimEast = east.calculateDimension(stringBounder);
 		east.drawU(ug.apply(new UTranslate(dimTotal.getWidth(), -dimEast.getHeight() + dimTotal.getHeight() / 2)));
 
 	}
 
-	public FtileGeometry calculateDimension(StringBounder stringBounder) {
+	private FtileGeometry calculateDimensionAlone(StringBounder stringBounder) {
 		final Dimension2D dimLabel = label.calculateDimension(stringBounder);
 		final Dimension2D dim;
 		if (dimLabel.getWidth() == 0 || dimLabel.getHeight() == 0) {
@@ -143,8 +145,16 @@ public class FtileDiamondInside extends AbstractFtile {
 					Dimension2DDouble.atLeast(dimLabel, Diamond.diamondHalfSize * 2, Diamond.diamondHalfSize * 2),
 					Diamond.diamondHalfSize * 2, 0);
 		}
-
 		return new FtileGeometry(dim, dim.getWidth() / 2, 0, dim.getHeight());
+	}
+
+	public FtileGeometry calculateDimension(StringBounder stringBounder) {
+		final FtileGeometry dimDiamonAlone = calculateDimensionAlone(stringBounder);
+		final Dimension2D dimWest = west.calculateDimension(stringBounder);
+		final Dimension2D dimEast = east.calculateDimension(stringBounder);
+		final double northHeight = north.calculateDimension(stringBounder).getHeight();
+		return dimDiamonAlone.incHeight(northHeight);
+		// return dimDiamonAlone.incHeight(northHeight).addMarginX(dimWest.getWidth(), dimEast.getWidth());
 	}
 
 }

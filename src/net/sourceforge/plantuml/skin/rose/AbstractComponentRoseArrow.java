@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,12 +30,12 @@ package net.sourceforge.plantuml.skin.rose;
 
 import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.skin.AbstractTextualComponent;
 import net.sourceforge.plantuml.skin.ArrowComponent;
 import net.sourceforge.plantuml.skin.ArrowConfiguration;
-import net.sourceforge.plantuml.ugraphic.UFont;
 
 public abstract class AbstractComponentRoseArrow extends AbstractTextualComponent implements ArrowComponent {
 
@@ -44,10 +44,11 @@ public abstract class AbstractComponentRoseArrow extends AbstractTextualComponen
 	private final HtmlColor foregroundColor;
 	private final ArrowConfiguration arrowConfiguration;
 
-	public AbstractComponentRoseArrow(HtmlColor foregroundColor, HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font,
-			Display stringsToDisplay, ArrowConfiguration arrowConfiguration, ISkinSimple spriteContainer,
-			HorizontalAlignment textHorizontalAlignment, double maxMessageSize) {
-		super(stringsToDisplay, fontColor, hyperlinkColor, useUnderlineForHyperlink, font, textHorizontalAlignment, 7, 7, 1, spriteContainer, maxMessageSize, false);
+	public AbstractComponentRoseArrow(HtmlColor foregroundColor, FontConfiguration font, Display stringsToDisplay,
+			ArrowConfiguration arrowConfiguration, ISkinSimple spriteContainer, HorizontalAlignment textHorizontalAlignment,
+			double maxMessageSize) {
+		super(stringsToDisplay, font, textHorizontalAlignment, 7, 7, 1, spriteContainer,
+				maxMessageSize, false, null, null);
 		this.arrowConfiguration = arrowConfiguration;
 		this.foregroundColor = foregroundColor;
 	}

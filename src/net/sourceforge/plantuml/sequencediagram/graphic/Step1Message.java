@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -58,7 +58,7 @@ class Step1Message extends Step1Abstract {
 			this.messageArrow = null;
 		} else {
 			final Component comp = drawingSet.getSkin().createComponent(ComponentType.ARROW, getConfig(),
-					drawingSet.getSkinParam(), getLabelOfMessage(message));
+					drawingSet.getSkinParam(), message.getLabelNumbered());
 			final Component compAliveBox = drawingSet.getSkin().createComponent(ComponentType.ALIVE_BOX_OPEN_OPEN,
 					null, drawingSet.getSkinParam(), null);
 
@@ -67,8 +67,7 @@ class Step1Message extends Step1Abstract {
 		}
 
 		if (message.getNote() != null) {
-			final ISkinParam skinParam = new SkinParamBackcolored(drawingSet.getSkinParam(),
-					message.getSpecificBackColor());
+			final ISkinParam skinParam = message.getSkinParamNoteBackcolored(drawingSet.getSkinParam());
 			setNote(drawingSet.getSkin().createComponent(ComponentType.NOTE, null, skinParam, message.getNote()));
 		}
 
@@ -185,7 +184,7 @@ class Step1Message extends Step1Abstract {
 		}
 
 		return new MessageSelfArrow(posY, getDrawingSet().getSkin(), getDrawingSet().getSkin().createComponent(
-				ComponentType.ARROW, getConfig(), getDrawingSet().getSkinParam(), getLabelOfMessage(getMessage())),
+				ComponentType.ARROW, getConfig(), getDrawingSet().getSkinParam(), getMessage().getLabelNumbered()),
 				getLivingParticipantBox1(), deltaY, getMessage().getUrl(), deltaX);
 	}
 
@@ -223,10 +222,16 @@ class Step1Message extends Step1Abstract {
 		if (m.getArrowConfiguration().isAsync()) {
 			result = result.withHead(ArrowHead.ASYNC);
 		}
+		if (m.getArrowConfiguration().getDressing2().getHead() == ArrowHead.CROSSX) {
+			result = result.withHead2(m.getArrowConfiguration().getDressing2().getHead());
+			System.err.println("WARNING : CROSSX");
+			// assert false;
+		}
 		result = result.withPart(m.getArrowConfiguration().getPart());
 		result = result.withColor(m.getArrowConfiguration().getColor());
 		result = result.withDecoration1(m.getArrowConfiguration().getDecoration1());
 		result = result.withDecoration2(m.getArrowConfiguration().getDecoration2());
+
 		return result;
 	}
 

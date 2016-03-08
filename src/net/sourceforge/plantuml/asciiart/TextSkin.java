@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -56,7 +56,7 @@ public class TextSkin implements Skin {
 		}
 		if (type.isArrow()
 				&& ((config.getArrowDirection() == ArrowDirection.LEFT_TO_RIGHT_NORMAL) || (config.getArrowDirection() == ArrowDirection.RIGHT_TO_LEFT_REVERSE))) {
-			return new ComponentTextArrow(type, config, stringsToDisplay, fileFormat);
+			return new ComponentTextArrow(type, config, stringsToDisplay, fileFormat, param.maxAsciiMessageLength());
 		}
 		if (type.isArrow() && config.isSelfArrow()) {
 			return new ComponentTextSelfArrow(type, config, stringsToDisplay, fileFormat);

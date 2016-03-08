@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,18 +30,29 @@ package net.sourceforge.plantuml.graphic;
 
 import java.awt.geom.Dimension2D;
 
-import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
-import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.URectangle;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 class USymbolRect extends USymbol {
 
-	public USymbolRect(ColorParam colorParamBack, ColorParam colorParamBorder, FontParam fontParam,
-			FontParam fontParamStereotype) {
-		super(colorParamBack, colorParamBorder, fontParam, fontParamStereotype);
+	private final SkinParameter skinParameter;
+	private final HorizontalAlignment stereotypeAlignement;
+
+	public USymbolRect(SkinParameter skinParameter, HorizontalAlignment stereotypeAlignement) {
+		this.skinParameter = skinParameter;
+		this.stereotypeAlignement = stereotypeAlignement;
+	}
+
+	@Override
+	public USymbol withStereoAlignment(HorizontalAlignment alignment) {
+		return new USymbolRect(skinParameter, alignment);
+	}
+
+	@Override
+	public SkinParameter getSkinParameter() {
+		return skinParameter;
 	}
 
 	private void drawRect(UGraphic ug, double width, double height, boolean shadowing) {
@@ -56,15 +67,16 @@ class USymbolRect extends USymbol {
 		return new Margin(10, 10, 10, 10);
 	}
 
-	public TextBlock asSmall(final TextBlock label, final TextBlock stereotype, final SymbolContext symbolContext) {
-		return new TextBlock() {
+	public TextBlock asSmall(TextBlock name, final TextBlock label, final TextBlock stereotype,
+			final SymbolContext symbolContext) {
+		return new AbstractTextBlock() {
 
 			public void drawU(UGraphic ug) {
 				final Dimension2D dim = calculateDimension(ug.getStringBounder());
 				ug = symbolContext.apply(ug);
 				drawRect(ug, dim.getWidth(), dim.getHeight(), symbolContext.isShadowing());
 				final Margin margin = getMargin();
-				final TextBlock tb = TextBlockUtils.mergeTB(stereotype, label, HorizontalAlignment.CENTER);
+				final TextBlock tb = TextBlockUtils.mergeTB(stereotype, label, stereotypeAlignement);
 				tb.drawU(ug.apply(new UTranslate(margin.getX1(), margin.getY1())));
 			}
 
@@ -78,15 +90,22 @@ class USymbolRect extends USymbol {
 
 	public TextBlock asBig(final TextBlock title, final TextBlock stereotype, final double width, final double height,
 			final SymbolContext symbolContext) {
-		return new TextBlock() {
-
+		return new AbstractTextBlock() {
 			public void drawU(UGraphic ug) {
 				final Dimension2D dim = calculateDimension(ug.getStringBounder());
 				ug = symbolContext.apply(ug);
 				drawRect(ug, dim.getWidth(), dim.getHeight(), symbolContext.isShadowing());
 				final Dimension2D dimStereo = stereotype.calculateDimension(ug.getStringBounder());
-				final double posStereo = (width - dimStereo.getWidth()) / 2;
-				stereotype.drawU(ug.apply(new UTranslate(posStereo, 2)));
+				final double posStereoX;
+				final double posStereoY;
+				if (stereotypeAlignement == HorizontalAlignment.RIGHT) {
+					posStereoX = width - dimStereo.getWidth() - getMargin().getX1() / 2;
+					posStereoY = getMargin().getY1() / 2;
+				} else {
+					posStereoX = (width - dimStereo.getWidth()) / 2;
+					posStereoY = 2;
+				}
+				stereotype.drawU(ug.apply(new UTranslate(posStereoX, posStereoY)));
 				final Dimension2D dimTitle = title.calculateDimension(ug.getStringBounder());
 				final double posTitle = (width - dimTitle.getWidth()) / 2;
 				title.drawU(ug.apply(new UTranslate(posTitle, 2 + dimStereo.getHeight())));

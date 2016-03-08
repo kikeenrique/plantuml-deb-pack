@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -35,6 +35,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.ugraphic.MinMax;
 
 public class AffineTransformation {
@@ -83,7 +84,7 @@ public class AffineTransformation {
 	}
 
 	private static AffineTransformation createSimple(String value) {
-		Matcher m = rotate.matcher(value.trim());
+		Matcher m = rotate.matcher(StringUtils.trin(value));
 		if (m.find()) {
 			final double angle = Double.parseDouble(m.group(1));
 			return new AffineTransformation(AffineTransform.getRotateInstance(angle * Math.PI / 180.0));

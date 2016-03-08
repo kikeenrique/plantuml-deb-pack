@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -46,6 +46,7 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
+import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.svek.AbstractEntityImage;
 import net.sourceforge.plantuml.svek.ShapeType;
 import net.sourceforge.plantuml.ugraphic.AbstractUGraphicHorizontalLine;
@@ -71,16 +72,14 @@ public class EntityImageUseCase extends AbstractEntityImage {
 		final Stereotype stereotype = entity.getStereotype();
 
 		final TextBlock tmp = new BodyEnhanced(entity.getDisplay(), FontParam.USECASE, skinParam,
-				HorizontalAlignment.CENTER, stereotype, true, false);
+				HorizontalAlignment.CENTER, stereotype, true, false, false);
 
-		if (stereotype == null || stereotype.getLabel() == null) {
+		if (stereotype == null || stereotype.getLabel(false) == null) {
 			this.desc = tmp;
 		} else {
-			final TextBlock stereo = TextBlockUtils.create(
-					Display.getWithNewlines(stereotype.getLabel()),
-					new FontConfiguration(SkinParamUtils.getFont(getSkinParam(),
-							FontParam.ACTOR_STEREOTYPE, stereotype), SkinParamUtils.getFontColor(getSkinParam(),
-					FontParam.ACTOR_STEREOTYPE, null), getSkinParam().getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink()), HorizontalAlignment.CENTER, skinParam);
+			final TextBlock stereo = Display.getWithNewlines(stereotype.getLabel(getSkinParam().useGuillemet()))
+					.create(new FontConfiguration(getSkinParam(), FontParam.ACTOR_STEREOTYPE, stereotype),
+							HorizontalAlignment.CENTER, skinParam);
 			this.desc = TextBlockUtils.mergeTB(stereo, tmp, HorizontalAlignment.CENTER);
 		}
 		this.url = entity.getUrl99();
@@ -104,7 +103,7 @@ public class EntityImageUseCase extends AbstractEntityImage {
 
 		ug = ug.apply(stroke).apply(
 				new UChangeColor(SkinParamUtils.getColor(getSkinParam(), ColorParam.usecaseBorder, getStereo())));
-		HtmlColor backcolor = getEntity().getSpecificBackColor();
+		HtmlColor backcolor = getEntity().getColors(getSkinParam()).getColor(ColorType.BACK);
 		if (backcolor == null) {
 			backcolor = SkinParamUtils.getColor(getSkinParam(), ColorParam.usecaseBackground, getStereo());
 		}

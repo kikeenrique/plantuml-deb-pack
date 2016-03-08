@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -33,6 +33,7 @@ import java.awt.geom.Point2D;
 
 import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.skin.Area;
@@ -40,7 +41,6 @@ import net.sourceforge.plantuml.skin.ArrowConfiguration;
 import net.sourceforge.plantuml.skin.ArrowPart;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UPolygon;
@@ -51,9 +51,8 @@ public class ComponentBlueModernSelfArrow extends AbstractComponentBlueModernArr
 
 	private final double arrowWidth = 45;
 
-	public ComponentBlueModernSelfArrow(HtmlColor foregroundColor, HtmlColor colorFont, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font,
-			Display stringsToDisplay, ArrowConfiguration arrowConfiguration, ISkinSimple spriteContainer) {
-		super(foregroundColor, colorFont, hyperlinkColor, useUnderlineForHyperlink, font, stringsToDisplay, arrowConfiguration, spriteContainer);
+	public ComponentBlueModernSelfArrow(HtmlColor foregroundColor, FontConfiguration font, Display stringsToDisplay, ArrowConfiguration arrowConfiguration, ISkinSimple spriteContainer) {
+		super(foregroundColor, font, stringsToDisplay, arrowConfiguration, spriteContainer);
 	}
 
 	@Override

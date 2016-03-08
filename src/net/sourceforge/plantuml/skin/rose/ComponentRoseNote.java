@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,14 +31,12 @@ package net.sourceforge.plantuml.skin.rose;
 import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.creole.Stencil;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
-import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.graphic.SymbolContext;
 import net.sourceforge.plantuml.skin.AbstractTextualComponent;
 import net.sourceforge.plantuml.skin.Area;
-import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
-import net.sourceforge.plantuml.ugraphic.UChangeColor;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UGraphicStencil;
 import net.sourceforge.plantuml.ugraphic.ULine;
@@ -49,34 +47,27 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 final public class ComponentRoseNote extends AbstractTextualComponent implements Stencil {
 
 	private final int cornersize = 10;
-	private final HtmlColor back;
-	private final HtmlColor foregroundColor;
 	private final double paddingX;
 	private final double paddingY;
-	private final double deltaShadow;
-	private final UStroke stroke;
+	private final SymbolContext symbolContext;
 
-	public ComponentRoseNote(HtmlColor back, HtmlColor foregroundColor, HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font,
-			Display strings, double paddingX, double paddingY, ISkinSimple spriteContainer, double deltaShadow,
-			UStroke stroke) {
-		super(strings, fontColor, hyperlinkColor, useUnderlineForHyperlink, font, HorizontalAlignment.LEFT, 6, 15, 5, spriteContainer, 0, true);
-		this.back = back;
-		this.foregroundColor = foregroundColor;
+	public ComponentRoseNote(SymbolContext symbolContext, FontConfiguration font, Display strings, double paddingX, double paddingY,
+			ISkinSimple spriteContainer) {
+		super(strings, font, HorizontalAlignment.LEFT, 6, 15, 5, spriteContainer, 0, true, null, null);
 		this.paddingX = paddingX;
 		this.paddingY = paddingY;
-		this.deltaShadow = deltaShadow;
-		this.stroke = stroke;
+		this.symbolContext = symbolContext;
 	}
 
 	@Override
 	final public double getPreferredWidth(StringBounder stringBounder) {
-		final double result = getTextWidth(stringBounder) + 2 * getPaddingX() + deltaShadow;
+		final double result = getTextWidth(stringBounder) + 2 * getPaddingX() + symbolContext.getDeltaShadow();
 		return result;
 	}
 
 	@Override
 	final public double getPreferredHeight(StringBounder stringBounder) {
-		return getTextHeight(stringBounder) + 2 * getPaddingY() + deltaShadow;
+		return getTextHeight(stringBounder) + 2 * getPaddingY() + symbolContext.getDeltaShadow();
 	}
 
 	@Override
@@ -111,10 +102,9 @@ final public class ComponentRoseNote extends AbstractTextualComponent implements
 		polygon.addPoint(x2, cornersize);
 		polygon.addPoint(x2 - cornersize, 0);
 		polygon.addPoint(0, 0);
-		polygon.setDeltaShadow(deltaShadow);
+		polygon.setDeltaShadow(symbolContext.getDeltaShadow());
 
-		ug = ug.apply(new UChangeBackColor(back)).apply(new UChangeColor(foregroundColor));
-		ug = ug.apply(stroke);
+		ug = symbolContext.apply(ug);
 		ug.draw(polygon);
 
 		ug.apply(new UTranslate(x2 - cornersize, 0)).draw(new ULine(0, cornersize));
@@ -125,7 +115,7 @@ final public class ComponentRoseNote extends AbstractTextualComponent implements
 		getTextBlock().drawU(ug2);
 
 	}
-	
+
 	public double getStartingX(StringBounder stringBounder, double y) {
 		return 0;
 	}
@@ -133,6 +123,5 @@ final public class ComponentRoseNote extends AbstractTextualComponent implements
 	public double getEndingX(StringBounder stringBounder, double y) {
 		return getTextWidth(stringBounder);
 	}
-
 
 }

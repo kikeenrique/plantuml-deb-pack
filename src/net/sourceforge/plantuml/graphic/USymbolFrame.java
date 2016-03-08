@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,9 +30,7 @@ package net.sourceforge.plantuml.graphic;
 
 import java.awt.geom.Dimension2D;
 
-import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
-import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UPath;
 import net.sourceforge.plantuml.ugraphic.URectangle;
@@ -40,9 +38,11 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 class USymbolFrame extends USymbol {
 
-	public USymbolFrame() {
-		super(ColorParam.frameBackground, ColorParam.frameBorder, FontParam.FRAME, FontParam.FRAME_STEREOTYPE);
+	@Override
+	public SkinParameter getSkinParameter() {
+		return SkinParameter.FRAME;
 	}
+
 
 	private void drawFrame(UGraphic ug, double width, double height, Dimension2D dimTitle, boolean shadowing) {
 		final URectangle shape = new URectangle(width, height);
@@ -85,8 +85,8 @@ class USymbolFrame extends USymbol {
 		return new Margin(10 + 5, 20 + 5, 15 + 5, 5 + 5);
 	}
 
-	public TextBlock asSmall(final TextBlock label, final TextBlock stereotype, final SymbolContext symbolContext) {
-		return new TextBlock() {
+	public TextBlock asSmall(TextBlock name, final TextBlock label, final TextBlock stereotype, final SymbolContext symbolContext) {
+		return new AbstractTextBlock() {
 
 			public void drawU(UGraphic ug) {
 				final Dimension2D dim = calculateDimension(ug.getStringBounder());
@@ -107,7 +107,7 @@ class USymbolFrame extends USymbol {
 
 	public TextBlock asBig(final TextBlock title, final TextBlock stereotype, final double width, final double height,
 			final SymbolContext symbolContext) {
-		return new TextBlock() {
+		return new AbstractTextBlock() {
 
 			public void drawU(UGraphic ug) {
 				final StringBounder stringBounder = ug.getStringBounder();

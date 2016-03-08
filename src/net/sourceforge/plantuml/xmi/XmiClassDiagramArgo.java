@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -235,7 +235,7 @@ public class XmiClassDiagramArgo implements IXmiClassDiagram {
 		final Element feature = document.createElement("UML:Classifier.feature");
 		cla.appendChild(feature);
 
-		for (Member m : entity.getFieldsToDisplay()) {
+		for (Member m : entity.getBodier().getFieldsToDisplay()) {
 			// <UML:Attribute xmi.id="UMLAttribute.6" name="Attribute1"
 			// visibility="public" isSpecification="false"
 			// ownerScope="instance" changeability="changeable"
@@ -246,7 +246,7 @@ public class XmiClassDiagramArgo implements IXmiClassDiagram {
 			feature.appendChild(attribute);
 		}
 
-		for (Member m : entity.getMethodsToDisplay()) {
+		for (Member m : entity.getBodier().getMethodsToDisplay()) {
 			// <UML:Operation xmi.id="UMLOperation.7" name="Operation1"
 			// visibility="public" isSpecification="false"
 			// ownerScope="instance" isQuery="false" concurrency="sequential"

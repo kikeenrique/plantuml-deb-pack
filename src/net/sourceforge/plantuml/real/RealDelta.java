@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -34,12 +34,13 @@ class RealDelta extends RealMoveable {
 	private final double diff;
 
 	RealDelta(Real delegated, double diff) {
-		super("[Delegated {" + delegated.getName() + "} d=" + diff + "]");
+		super(((AbstractReal) delegated).getLine(), "[Delegated {" + delegated.getName() + "} d=" + diff + "]");
 		this.delegated = delegated;
 		this.diff = diff;
 	}
 
-	public double getCurrentValue() {
+	@Override
+	double getCurrentValueInternal() {
 		return delegated.getCurrentValue() + diff;
 	}
 
@@ -49,19 +50,10 @@ class RealDelta extends RealMoveable {
 
 	public void ensureBiggerThan(Real other) {
 		delegated.ensureBiggerThan(new RealDelta(other, -diff));
-
-	}
-
-	public void compile() {
-		delegated.compile();
 	}
 
 	void move(double delta) {
 		((RealMoveable) delegated).move(delta);
-	}
-
-	RealLine getLine() {
-		return ((RealMoveable) delegated).getLine();
 	}
 
 }

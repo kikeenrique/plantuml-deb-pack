@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,29 +30,18 @@ package net.sourceforge.plantuml.graphic;
 
 import java.awt.geom.Dimension2D;
 
-import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
-import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 abstract class USymbolSimpleAbstract extends USymbol {
 
-//	public USymbolSimpleAbstract(ColorParam colorParamBack, ColorParam colorParamBorder) {
-//		super(colorParamBack, colorParamBorder);
-//	}
-
-	public USymbolSimpleAbstract(ColorParam colorParamBack, ColorParam colorParamBorder, FontParam fontParam,
-			FontParam fontParamStereotype) {
-		super(colorParamBack, colorParamBorder, fontParam, fontParamStereotype);
-	}
-
-	public TextBlock asSmall(final TextBlock label, final TextBlock stereotype, final SymbolContext symbolContext) {
+	public TextBlock asSmall(TextBlock name, final TextBlock label, final TextBlock stereotype, final SymbolContext symbolContext) {
 		if (stereotype == null) {
 			throw new IllegalArgumentException();
 		}
 		final TextBlock stickman = getDrawing(symbolContext);
-		return new TextBlock() {
+		return new AbstractTextBlock() {
 
 			public void drawU(UGraphic ug) {
 				final StringBounder stringBounder = ug.getStringBounder();

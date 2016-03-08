@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,6 +31,8 @@ package net.sourceforge.plantuml.svg;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import net.sourceforge.plantuml.StringUtils;
 
 public final class SvgData {
 
@@ -87,8 +89,8 @@ public final class SvgData {
 		while (st.hasMoreTokens()) {
 			final String token = st.nextToken();
 			final StringTokenizer st2 = new StringTokenizer(token, ",");
-			final double x = Double.parseDouble(st2.nextToken().trim());
-			final double y = Double.parseDouble(st2.nextToken().trim());
+			final double x = Double.parseDouble(StringUtils.trin(st2.nextToken()));
+			final double y = Double.parseDouble(StringUtils.trin(st2.nextToken()));
 			if (x < minX) {
 				minX = x;
 			}

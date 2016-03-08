@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -50,6 +50,7 @@ import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UPath;
 import net.sourceforge.plantuml.ugraphic.UPolygon;
 import net.sourceforge.plantuml.ugraphic.URectangle;
+import net.sourceforge.plantuml.ugraphic.UText;
 
 public class UGraphicTikz extends AbstractUGraphic<TikzGraphics> implements ClipContainer, UGraphic2 {
 
@@ -62,8 +63,8 @@ public class UGraphicTikz extends AbstractUGraphic<TikzGraphics> implements Clip
 
 	}
 
-	public UGraphicTikz(ColorMapper colorMapper) {
-		this(colorMapper, new TikzGraphics());
+	public UGraphicTikz(ColorMapper colorMapper, boolean withPreamble) {
+		this(colorMapper, new TikzGraphics(withPreamble));
 
 	}
 
@@ -80,7 +81,7 @@ public class UGraphicTikz extends AbstractUGraphic<TikzGraphics> implements Clip
 
 	private void register() {
 		registerDriver(URectangle.class, new DriverRectangleTikz());
-		// registerDriver(UText.class, new DriverNoneTikz());
+		registerDriver(UText.class, new DriverUTextTikz());
 		registerDriver(AtomText.class, new DriverAtomTextTikz());
 		registerDriver(ULine.class, new DriverLineTikz());
 		registerDriver(UPolygon.class, new DriverPolygonTikz());
@@ -97,9 +98,11 @@ public class UGraphicTikz extends AbstractUGraphic<TikzGraphics> implements Clip
 	}
 
 	public void startUrl(Url url) {
+		getGraphicObject().openLink(url.getUrl(), url.getTooltip());
 	}
 
 	public void closeAction() {
+		getGraphicObject().closeLink();
 	}
 
 	public void writeImageTOBEMOVED(OutputStream os, String metadata, int dpi) throws IOException {

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -36,6 +36,7 @@ import java.util.StringTokenizer;
 import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
+import net.sourceforge.plantuml.graphic.HtmlColor;
 
 public class StripeTable implements Stripe {
 
@@ -61,18 +62,47 @@ public class StripeTable implements Stripe {
 		return Collections.<Atom> singletonList(marged);
 	}
 
-	private static Atom asAtom(List<StripeSimple> cells) {
+	static Atom asAtom(List<StripeSimple> cells, double padding) {
 		final Sheet sheet = new Sheet(HorizontalAlignment.LEFT);
 		for (StripeSimple cell : cells) {
 			sheet.add(cell);
 		}
-		return new SheetBlock1(sheet, 0);
+		return new SheetBlock1(sheet, 0, padding);
+	}
+
+	private HtmlColor getBackColor(String line) {
+		if (CreoleParser.doesStartByColor(line)) {
+			final int idx1 = line.indexOf('#');
+			final int idx2 = line.indexOf('>');
+			if (idx2 == -1) {
+				throw new IllegalStateException();
+			}
+			final String color = line.substring(idx1, idx2);
+			return skinParam.getIHtmlColorSet().getColorIfValid(color);
+		}
+		return null;
+	}
+
+	private String withouBackColor(String line) {
+		final int idx2 = line.indexOf('>');
+		if (idx2 == -1) {
+			throw new IllegalStateException();
+		}
+		return line.substring(idx2 + 1);
 	}
 
 	private void analyzeAndAddInternal(String line, Mode mode) {
-		table.newLine();
+		HtmlColor lineBackColor = getBackColor(line);
+		if (lineBackColor != null) {
+			line = withouBackColor(line);
+		}
+		table.newLine(lineBackColor);
 		for (final StringTokenizer st = new StringTokenizer(line, "|"); st.hasMoreTokens();) {
 			String v = st.nextToken();
+			HtmlColor cellBackColor = getBackColor(v);
+			if (cellBackColor != null) {
+				v = withouBackColor(v);
+			}
 			if (mode == Mode.HEADER && v.startsWith("=")) {
 				v = v.substring(1);
 			}
@@ -80,15 +110,15 @@ public class StripeTable implements Stripe {
 			final List<StripeSimple> cells = new ArrayList<StripeSimple>();
 			for (String s : lines) {
 				final StripeSimple cell = new StripeSimple(getFontConfiguration(mode), stripeStyle,
-						new CreoleContext(), skinParam, false);
+						new CreoleContext(), skinParam, CreoleMode.FULL);
 				cell.analyzeAndAdd(s);
 				cells.add(cell);
 			}
-			table.addCell(asAtom(cells));
+			table.addCell(asAtom(cells, skinParam.getPadding()), cellBackColor);
 		}
 	}
 
-	private static List<String> getWithNewlinesInternal(String s) {
+	static List<String> getWithNewlinesInternal(String s) {
 		final List<String> result = new ArrayList<String>();
 		final StringBuilder current = new StringBuilder();
 		for (int i = 0; i < s.length(); i++) {

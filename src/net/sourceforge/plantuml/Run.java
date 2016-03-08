@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -59,8 +59,8 @@ import net.sourceforge.plantuml.preproc.Defines;
 import net.sourceforge.plantuml.sequencediagram.SequenceDiagramFactory;
 import net.sourceforge.plantuml.statediagram.StateDiagramFactory;
 import net.sourceforge.plantuml.swing.MainWindow2;
-import net.sourceforge.plantuml.ugraphic.SpriteGrayLevel;
-import net.sourceforge.plantuml.ugraphic.SpriteUtils;
+import net.sourceforge.plantuml.ugraphic.sprite.SpriteGrayLevel;
+import net.sourceforge.plantuml.ugraphic.sprite.SpriteUtils;
 import net.sourceforge.plantuml.version.Version;
 
 public class Run {
@@ -196,7 +196,7 @@ public class Run {
 		ftpServer.go();
 	}
 
-	static void printFonts() {
+	public static void printFonts() {
 		final Font fonts[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
 		for (Font f : fonts) {
 			System.out.println("f=" + f + "/" + f.getPSName() + "/" + f.getName() + "/" + f.getFontName() + "/"
@@ -239,7 +239,7 @@ public class Run {
 		managePipe(option, br, System.out);
 	}
 
-	static void managePipe(Option option, final BufferedReader br, final PrintStream ps) throws IOException {
+	public static void managePipe(Option option, final BufferedReader br, final PrintStream ps) throws IOException {
 		final StringBuilder sb = new StringBuilder();
 		String s = null;
 		while ((s = br.readLine()) != null) {

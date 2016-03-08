@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,6 +31,7 @@ package net.sourceforge.plantuml.creole;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.graphic.Splitter;
 
@@ -59,14 +60,12 @@ public class CommandCreoleImg implements Command {
 		if (m.find() == false) {
 			throw new IllegalStateException();
 		}
-		// final int size = Integer.parseInt(m.group(2));
-		// final FontConfiguration fc1 = stripe.getActualFontConfiguration();
-		// final FontConfiguration fc2 = fc1.changeSize(size);
-		// stripe.setActualFontConfiguration(fc2);
-		// stripe.analyzeAndAdd(m.group(3));
-		final String src = m.group(2);
+		String src = m.group(2);
+		if (src.toLowerCase().startsWith("src=")) {
+			src = src.substring(4);
+		}
+		src = StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote(src, "\"");
 		stripe.addImage(src);
-		// stripe.setActualFontConfiguration(fc1);
 		return line.substring(m.group(1).length());
 	}
 

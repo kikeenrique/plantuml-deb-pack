@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -34,18 +34,18 @@ import java.util.List;
 
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinSimple;
+import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
-import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockLineBefore;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.TextBlockVertical2;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 
-public class BodyEnhanced2 implements TextBlock {
+public class BodyEnhanced2 extends AbstractTextBlock implements TextBlock {
 
 	private TextBlock area2;
 	private final FontConfiguration titleConfig;
@@ -56,13 +56,12 @@ public class BodyEnhanced2 implements TextBlock {
 
 	// private final List<Url> urls = new ArrayList<Url>();
 
-	public BodyEnhanced2(Display rawBody, FontParam fontParam, ISkinSimple spriteContainer,
-			HorizontalAlignment align, UFont fontNote, HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink) {
+	public BodyEnhanced2(Display rawBody, FontParam fontParam, ISkinSimple spriteContainer, HorizontalAlignment align,
+			FontConfiguration titleConfig) {
 		this.rawBody2 = rawBody;
-		// this.fontParam = fontParam;
 		this.spriteContainer = spriteContainer;
 
-		this.titleConfig = new FontConfiguration(fontNote, fontColor, hyperlinkColor, useUnderlineForHyperlink);
+		this.titleConfig = titleConfig;
 		this.align = align;
 	}
 
@@ -115,7 +114,7 @@ public class BodyEnhanced2 implements TextBlock {
 	}
 
 	private TextBlock getTextBlock(Display members2, StringBounder stringBounder) {
-		final TextBlock result = TextBlockUtils.create(members2, titleConfig, align, spriteContainer);
+		final TextBlock result = members2.create(titleConfig, align, spriteContainer);
 		return result;
 	}
 
@@ -139,9 +138,8 @@ public class BodyEnhanced2 implements TextBlock {
 		if (s.length() <= 4) {
 			return null;
 		}
-		s = s.substring(2, s.length() - 2).trim();
-		return TextBlockUtils
-				.create(Display.getWithNewlines(s), titleConfig, HorizontalAlignment.LEFT, spriteContainer);
+		s = StringUtils.trin(s.substring(2, s.length() - 2));
+		return Display.getWithNewlines(s).create(titleConfig, HorizontalAlignment.LEFT, spriteContainer);
 	}
 
 	public void drawU(UGraphic ug) {

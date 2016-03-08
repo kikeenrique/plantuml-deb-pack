@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -35,6 +35,7 @@ public class CharHidder {
 	}
 
 	public static String hide(String s) {
+		// System.err.println("hide " + s);
 		final StringBuilder result = new StringBuilder();
 		for (int i = 0; i < s.length(); i++) {
 			final char c = s.charAt(i);
@@ -52,11 +53,13 @@ public class CharHidder {
 				result.append(c);
 			}
 		}
+		// System.err.println("---> " + result);
 		return result.toString();
 	}
 
 	private static boolean isToBeHidden(final char c) {
-		if (c == '_' || c == '\"' || c == '#' || c == ']' || c == '[' || c == '*' || c == '.') {
+		if (c == '_' || c == '-' || c == '\"' || c == '#' || c == ']' || c == '[' || c == '*' || c == '.' || c == '/'
+				|| c == '<') {
 			return true;
 		}
 		return false;
@@ -82,6 +85,7 @@ public class CharHidder {
 			final char c = s.charAt(i);
 			result.append(unhideChar(c));
 		}
+		// System.err.println("unhide " + result);
 		return result.toString();
 	}
 

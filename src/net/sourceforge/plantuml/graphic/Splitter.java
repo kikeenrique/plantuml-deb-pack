@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -36,8 +36,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.command.regex.MyPattern;
+import net.sourceforge.plantuml.ugraphic.sprite.SpriteUtils;
 
 public class Splitter {
 
@@ -53,8 +54,8 @@ public class Splitter {
 	public static final String fontFamilyPattern = "\\<font[\\s:]+([^>]+)/?\\>";
 	public static final String svgAttributePattern = "\\<text[\\s:]+([^>]+)/?\\>";
 	public static final String openiconPattern = "\\<&([-\\w]+)\\>";
-	public static final String spritePattern = "\\<\\$[\\p{L}0-9_]+\\>";
-	public static final String spritePattern2 = "\\<\\$([\\p{L}0-9_]+)\\>";
+	public static final String spritePattern = "\\<\\$" + SpriteUtils.SPRITE_NAME + "\\>";
+	public static final String spritePattern2 = "\\<\\$(" + SpriteUtils.SPRITE_NAME + ")\\>";
 	static final String htmlTag;
 
 	static final String linkPattern = "\\[\\[([^\\[\\]]+)\\]\\]";

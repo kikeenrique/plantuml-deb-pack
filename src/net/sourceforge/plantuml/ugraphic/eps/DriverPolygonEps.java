@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,6 +31,8 @@ package net.sourceforge.plantuml.ugraphic.eps;
 import java.awt.geom.Point2D;
 
 import net.sourceforge.plantuml.eps.EpsGraphics;
+import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.HtmlColorGradient;
 import net.sourceforge.plantuml.ugraphic.ClipContainer;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
 import net.sourceforge.plantuml.ugraphic.UClip;
@@ -40,9 +42,9 @@ import net.sourceforge.plantuml.ugraphic.UPolygon;
 import net.sourceforge.plantuml.ugraphic.UShape;
 
 public class DriverPolygonEps implements UDriver<EpsGraphics> {
-	
+
 	private final ClipContainer clipContainer;
-	
+
 	public DriverPolygonEps(ClipContainer clipContainer) {
 		this.clipContainer = clipContainer;
 	}
@@ -57,9 +59,8 @@ public class DriverPolygonEps implements UDriver<EpsGraphics> {
 			points[i++] = pt.getX() + x;
 			points[i++] = pt.getY() + y;
 		}
-		
-		final UClip clip = clipContainer.getClip();
 
+		final UClip clip = clipContainer.getClip();
 		if (clip != null) {
 			for (int j = 0; j < points.length; j += 2) {
 				if (clip.isInside(points[j], points[j + 1]) == false) {
@@ -67,15 +68,20 @@ public class DriverPolygonEps implements UDriver<EpsGraphics> {
 				}
 			}
 		}
-		
+
 		if (shape.getDeltaShadow() != 0) {
 			eps.epsPolygonShadow(shape.getDeltaShadow(), points);
 		}
 
+		final HtmlColor back = param.getBackcolor();
+		if (back instanceof HtmlColorGradient) {
+			eps.setStrokeColor(mapper.getMappedColor(param.getColor()));
+			eps.epsPolygon((HtmlColorGradient) back, mapper, points);
+		} else {
 
-		eps.setFillColor(mapper.getMappedColor(param.getBackcolor()));
-		eps.setStrokeColor(mapper.getMappedColor(param.getColor()));
-
-		eps.epsPolygon(points);
+			eps.setFillColor(mapper.getMappedColor(back));
+			eps.setStrokeColor(mapper.getMappedColor(param.getColor()));
+			eps.epsPolygon(points);
+		}
 	}
 }

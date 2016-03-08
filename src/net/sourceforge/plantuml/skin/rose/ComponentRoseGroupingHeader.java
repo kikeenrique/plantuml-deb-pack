@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -36,13 +36,12 @@ import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.graphic.SymbolContext;
 import net.sourceforge.plantuml.graphic.TextBlock;
-import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.skin.AbstractTextualComponent;
 import net.sourceforge.plantuml.skin.Area;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UPolygon;
 import net.sourceforge.plantuml.ugraphic.URectangle;
@@ -56,33 +55,28 @@ public class ComponentRoseGroupingHeader extends AbstractTextualComponent {
 
 	private final TextBlock commentTextBlock;
 
-	private final HtmlColor groupBackground;
-	private final HtmlColor groupBorder;
 	private final HtmlColor background;
-	private final double deltaShadow;
-	private final UStroke stroke;
+	private final SymbolContext symbolContext;
 
-	public ComponentRoseGroupingHeader(HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, HtmlColor background, HtmlColor groupBackground,
-			HtmlColor groupBorder, UFont bigFont, UFont smallFont, Display strings, ISkinSimple spriteContainer,
-			double deltaShadow, UStroke stroke) {
-		super(strings.get(0), fontColor, hyperlinkColor, useUnderlineForHyperlink, bigFont, HorizontalAlignment.LEFT, 15, 30, 1, spriteContainer, 0);
-		this.groupBackground = groupBackground;
-		this.groupBorder = groupBorder;
+	public ComponentRoseGroupingHeader(HtmlColor background, SymbolContext symbolContext, FontConfiguration bigFont,
+			FontConfiguration smallFont2, Display strings, ISkinSimple spriteContainer) {
+		super(strings.get(0), bigFont, HorizontalAlignment.LEFT, 15, 30, 1, spriteContainer, 0, null, null);
+		this.symbolContext = symbolContext;
 		this.background = background;
-		this.stroke = stroke;
-		this.deltaShadow = deltaShadow;
 		if (strings.size() == 1 || strings.get(1) == null) {
 			this.commentTextBlock = null;
 		} else {
 			final Display display = Display.getWithNewlines("[" + strings.get(1) + "]");
-			this.commentTextBlock = TextBlockUtils.create(display, new FontConfiguration(smallFont, fontColor, hyperlinkColor, useUnderlineForHyperlink),
-					HorizontalAlignment.LEFT, spriteContainer);
+			// final FontConfiguration smallFont2 = bigFont.forceFont(smallFont, null);
+			this.commentTextBlock = display.create(smallFont2, HorizontalAlignment.LEFT, spriteContainer);
 		}
 		if (this.background == null) {
 			throw new IllegalArgumentException();
 		}
-
 	}
+
+	// new FontConfiguration(smallFont, bigFont.getColor(), bigFont.getHyperlinkColor(),
+	// bigFont.useUnderlineForHyperlink());
 
 	private double getSuppHeightForComment(StringBounder stringBounder) {
 		if (commentTextBlock == null) {
@@ -117,16 +111,16 @@ public class ComponentRoseGroupingHeader extends AbstractTextualComponent {
 	@Override
 	protected void drawBackgroundInternalU(UGraphic ug, Area area) {
 		final Dimension2D dimensionToUse = area.getDimensionToUse();
-		ug = ug.apply(stroke).apply(new UChangeColor(groupBorder));
+		ug = symbolContext.applyStroke(ug).apply(new UChangeColor(symbolContext.getForeColor()));
 		final URectangle rect = new URectangle(dimensionToUse.getWidth(), dimensionToUse.getHeight());
-		rect.setDeltaShadow(deltaShadow);
+		rect.setDeltaShadow(symbolContext.getDeltaShadow());
 		ug.apply(new UChangeBackColor(background)).draw(rect);
 	}
 
 	@Override
 	protected void drawInternalU(UGraphic ug, Area area) {
 		final Dimension2D dimensionToUse = area.getDimensionToUse();
-		ug = ug.apply(stroke).apply(new UChangeColor(groupBorder));
+		ug = symbolContext.applyStroke(ug).apply(new UChangeColor(symbolContext.getForeColor()));
 		final URectangle rect = new URectangle(dimensionToUse.getWidth(), dimensionToUse.getHeight());
 		ug.draw(rect);
 
@@ -144,7 +138,7 @@ public class ComponentRoseGroupingHeader extends AbstractTextualComponent {
 		polygon.addPoint(0, textHeight);
 		polygon.addPoint(0, 0);
 
-		ug.apply(new UChangeColor(groupBorder)).apply(new UChangeBackColor(groupBackground)).draw(polygon);
+		symbolContext.applyColors(ug).draw(polygon);
 
 		ug = ug.apply(new UStroke());
 

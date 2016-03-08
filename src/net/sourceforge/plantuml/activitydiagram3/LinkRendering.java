@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -34,7 +34,7 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 public class LinkRendering {
 
 	private final HtmlColor color;
-	private Display display;
+	private Display display = Display.NULL;
 
 	public LinkRendering(HtmlColor color) {
 		this.color = color;
@@ -54,7 +54,7 @@ public class LinkRendering {
 
 	@Override
 	public String toString() {
-		return super.toString() + " " + color;
+		return super.toString() + " " + display + " " + color;
 	}
 
 	public static HtmlColor getColor(LinkRendering inLinkRendering, HtmlColor defaultColor) {
@@ -73,7 +73,7 @@ public class LinkRendering {
 
 	public static Display getDisplay(LinkRendering linkRendering) {
 		if (linkRendering == null) {
-			return null;
+			return Display.NULL;
 		}
 		return linkRendering.getDisplay();
 	}

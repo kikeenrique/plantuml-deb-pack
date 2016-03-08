@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,34 +31,25 @@ package net.sourceforge.plantuml.svek;
 import java.awt.geom.Dimension2D;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
-import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.graphic.SymbolContext;
 import net.sourceforge.plantuml.graphic.TextBlock;
-import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
-import net.sourceforge.plantuml.ugraphic.UChangeColor;
 import net.sourceforge.plantuml.ugraphic.UEllipse;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULine;
-import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class EntityDomain implements TextBlock {
+public class EntityDomain extends AbstractTextBlock implements TextBlock {
 
 	private final double margin = 4;
 
 	private final double radius = 12;
 	private final double suppY = 2;
-	private final HtmlColor backgroundColor;
-	private final HtmlColor foregroundColor;
-	private final double thickness;
+	private final SymbolContext symbolContext;
 
-	private final double deltaShadow;
-
-	public EntityDomain(HtmlColor backgroundColor, HtmlColor foregroundColor, double deltaShadow, double thickness) {
-		this.backgroundColor = backgroundColor;
-		this.foregroundColor = foregroundColor;
-		this.deltaShadow = deltaShadow;
-		this.thickness = thickness;
+	public EntityDomain(SymbolContext symbolContext) {
+		this.symbolContext = symbolContext;
 	}
 
 	public void drawU(UGraphic ug) {
@@ -66,10 +57,9 @@ public class EntityDomain implements TextBlock {
 		double y = 0;
 		x += margin;
 		y += margin;
-		ug = ug.apply(new UStroke(thickness)).apply(new UChangeBackColor(backgroundColor))
-				.apply(new UChangeColor(foregroundColor));
+		ug = symbolContext.apply(ug);
 		final UEllipse circle = new UEllipse(radius * 2, radius * 2);
-		circle.setDeltaShadow(deltaShadow);
+		circle.setDeltaShadow(symbolContext.getDeltaShadow());
 		ug.apply(new UTranslate(x, y)).draw(circle);
 		ug.apply(new UTranslate(x, y + 2 * radius + suppY)).draw(new ULine(2 * radius, 0));
 	}

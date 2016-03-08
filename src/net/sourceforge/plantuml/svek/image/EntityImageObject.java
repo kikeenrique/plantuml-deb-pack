@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -40,10 +40,7 @@ import net.sourceforge.plantuml.SkinParamUtils;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.creole.Stencil;
 import net.sourceforge.plantuml.cucadiagram.Display;
-import net.sourceforge.plantuml.cucadiagram.EntityPortion;
-import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.ILeaf;
-import net.sourceforge.plantuml.cucadiagram.PortionShower;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
@@ -53,6 +50,7 @@ import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockEmpty;
 import net.sourceforge.plantuml.graphic.TextBlockLineBefore;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
+import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.svek.AbstractEntityImage;
 import net.sourceforge.plantuml.svek.ShapeType;
 import net.sourceforge.plantuml.ugraphic.PlacementStrategyY1Y2;
@@ -81,33 +79,21 @@ public class EntityImageObject extends AbstractEntityImage implements Stencil {
 		this.lineConfig = entity;
 		final Stereotype stereotype = entity.getStereotype();
 		this.roundCorner = skinParam.getRoundCorner();
-		this.name = TextBlockUtils.withMargin(TextBlockUtils.create(
-				entity.getDisplay(),
-				new FontConfiguration(SkinParamUtils.getFont(getSkinParam(),
-						FontParam.OBJECT, stereotype), SkinParamUtils.getFontColor(getSkinParam(), FontParam.OBJECT,
-				stereotype), getSkinParam().getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink()), HorizontalAlignment.CENTER, skinParam), 2, 2);
-		if (stereotype == null || stereotype.getLabel() == null) {
+		this.name = TextBlockUtils.withMargin(
+				entity.getDisplay().create(new FontConfiguration(getSkinParam(), FontParam.OBJECT, stereotype),
+						HorizontalAlignment.CENTER, skinParam), 2, 2);
+		if (stereotype == null || stereotype.getLabel(false) == null) {
 			this.stereo = null;
 		} else {
-			this.stereo = TextBlockUtils.create(
-					Display.getWithNewlines(stereotype.getLabel()),
-					new FontConfiguration(SkinParamUtils.getFont(getSkinParam(),
-							FontParam.OBJECT_STEREOTYPE, stereotype), SkinParamUtils.getFontColor(getSkinParam(),
-					FontParam.OBJECT_STEREOTYPE, stereotype), getSkinParam().getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink()), HorizontalAlignment.CENTER, skinParam);
+			this.stereo = Display.getWithNewlines(stereotype.getLabel(getSkinParam().useGuillemet())).create(
+					new FontConfiguration(getSkinParam(), FontParam.OBJECT_STEREOTYPE, stereotype),
+					HorizontalAlignment.CENTER, skinParam);
 		}
 
-		if (entity.getFieldsToDisplay().size() == 0) {
+		if (entity.getBodier().getFieldsToDisplay().size() == 0) {
 			this.fields = new TextBlockLineBefore(new TextBlockEmpty(10, 16));
 		} else {
-			// this.fields =
-			// entity.getFieldsToDisplay().asTextBlock(FontParam.OBJECT_ATTRIBUTE,
-			// skinParam);
-			this.fields = entity.getBody(new PortionShower() {
-				public boolean showPortion(EntityPortion portion, IEntity entity) {
-					return true;
-				}
-			}).asTextBlock(FontParam.OBJECT_ATTRIBUTE, skinParam);
-
+			this.fields = entity.getBodier().getBody(FontParam.OBJECT_ATTRIBUTE, skinParam, false, true, entity.getStereotype());
 		}
 		this.url = entity.getUrl99();
 
@@ -137,7 +123,7 @@ public class EntityImageObject extends AbstractEntityImage implements Stencil {
 		}
 
 		ug = ug.apply(new UChangeColor(SkinParamUtils.getColor(getSkinParam(), ColorParam.objectBorder, getStereo())));
-		HtmlColor backcolor = getEntity().getSpecificBackColor();
+		HtmlColor backcolor = getEntity().getColors(getSkinParam()).getColor(ColorType.BACK);
 		if (backcolor == null) {
 			backcolor = SkinParamUtils.getColor(getSkinParam(), ColorParam.objectBackground, getStereo());
 		}
@@ -154,7 +140,7 @@ public class EntityImageObject extends AbstractEntityImage implements Stencil {
 			header.add(stereo);
 		}
 		header.add(name);
-		header.drawU(ug, 0, 0, dimTotal.getWidth(), dimTitle.getHeight());
+		header.drawU(ug, dimTotal.getWidth(), dimTitle.getHeight());
 
 		final UGraphic ug2 = new UGraphicStencil(ug, this, stroke);
 		fields.drawU(ug2.apply(new UTranslate(0, dimTitle.getHeight())));
@@ -165,7 +151,7 @@ public class EntityImageObject extends AbstractEntityImage implements Stencil {
 	}
 
 	private UStroke getStroke() {
-		UStroke stroke = lineConfig.getSpecificLineStroke();
+		UStroke stroke = lineConfig.getColors(getSkinParam()).getSpecificLineStroke();
 		if (stroke == null) {
 			stroke = getSkinParam().getThickness(LineParam.objectBorder, getStereo());
 		}

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -43,7 +43,7 @@ import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 
-public class InstructionIf implements Instruction {
+public class InstructionIf implements Instruction, InstructionCollection {
 
 	private final List<Branch> thens = new ArrayList<Branch>();
 	private Branch elseBranch;
@@ -52,7 +52,8 @@ public class InstructionIf implements Instruction {
 	private final Instruction parent;
 
 	private Branch current;
-	private final LinkRendering inlinkRendering;
+	private final LinkRendering topInlinkRendering;
+	private LinkRendering afterEndwhile;
 
 	private final Swimlane swimlane;
 
@@ -60,8 +61,7 @@ public class InstructionIf implements Instruction {
 			LinkRendering inlinkRendering, HtmlColor color, ISkinParam skinParam) {
 		this.parent = parent;
 		this.skinParam = skinParam;
-
-		this.inlinkRendering = inlinkRendering;
+		this.topInlinkRendering = inlinkRendering;
 		this.swimlane = swimlane;
 		this.thens.add(new Branch(swimlane, whenThen, labelTest, color));
 		this.current = this.thens.get(0);
@@ -79,10 +79,10 @@ public class InstructionIf implements Instruction {
 			branch.updateFtile(factory);
 		}
 		if (elseBranch == null) {
-			this.elseBranch = new Branch(swimlane, null, null, null);
+			this.elseBranch = new Branch(swimlane, Display.NULL, Display.NULL, null);
 		}
 		elseBranch.updateFtile(factory);
-		Ftile result = factory.createIf(swimlane, thens, elseBranch);
+		Ftile result = factory.createIf(swimlane, thens, elseBranch, afterEndwhile, topInlinkRendering);
 		if (note != null) {
 			result = new FtileWithNoteOpale(result, note, position, skinParam, false);
 		}
@@ -98,24 +98,25 @@ public class InstructionIf implements Instruction {
 			return false;
 		}
 		this.current.setInlinkRendering(nextLinkRenderer);
-		this.elseBranch = new Branch(swimlane, whenElse, null, null);
+		this.elseBranch = new Branch(swimlane, whenElse, Display.NULL, null);
 		this.current = elseBranch;
 		return true;
 	}
 
-	public void elseIf(Display test, Display whenThen, LinkRendering nextLinkRenderer, HtmlColor color) {
+	public boolean elseIf(Display test, Display whenThen, LinkRendering nextLinkRenderer, HtmlColor color) {
 		if (elseBranch != null) {
-			throw new IllegalStateException();
+			return false;
 		}
 		this.current.setInlinkRendering(nextLinkRenderer);
 		this.current = new Branch(swimlane, whenThen, test, color);
 		this.thens.add(current);
+		return true;
 
 	}
 
 	public void endif(LinkRendering nextLinkRenderer) {
 		if (elseBranch == null) {
-			this.elseBranch = new Branch(swimlane, null, null, null);
+			this.elseBranch = new Branch(swimlane, Display.NULL, Display.NULL, null);
 		}
 		this.current.setInlinkRendering(nextLinkRenderer);
 	}
@@ -125,15 +126,16 @@ public class InstructionIf implements Instruction {
 	}
 
 	public LinkRendering getInLinkRendering() {
-		return inlinkRendering;
+		return topInlinkRendering;
 	}
 
-	public void addNote(Display note, NotePosition position) {
+	public boolean addNote(Display note, NotePosition position) {
 		if (current.isEmpty()) {
 			this.note = note;
 			this.position = position;
+			return true;
 		} else {
-			current.addNote(note, position);
+			return current.addNote(note, position);
 		}
 	}
 
@@ -155,6 +157,17 @@ public class InstructionIf implements Instruction {
 
 	public Swimlane getSwimlaneOut() {
 		return swimlane;
+	}
+
+	public Instruction getLast() {
+		if (elseBranch == null) {
+			return thens.get(thens.size() - 1).getLast();
+		}
+		return elseBranch.getLast();
+	}
+
+	public void afterEndwhile(LinkRendering linkRenderer) {
+		this.afterEndwhile = linkRenderer;
 	}
 
 }

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -73,7 +73,7 @@ public class PSystemProject extends AbstractPSystem {
 			final BufferedImage im = createImage(diagram);
 			PngIO.write(im, os, fileFormatOption.isWithMetadata() ? getMetadata() : null, 96);
 		} else if (fileFormat == FileFormat.SVG) {
-			final UGraphicSvg svg = new UGraphicSvg(colorMapper, StringUtils.getAsHtml(background), false, 1.0);
+			final UGraphicSvg svg = new UGraphicSvg(colorMapper, StringUtils.getAsHtml(background), false, 1.0, fileFormatOption.getSvgLinkTarget());
 			diagram.draw(svg, 0, 0);
 			svg.createXml(os);
 		} else if (fileFormat == FileFormat.EPS) {

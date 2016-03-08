@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,29 +28,38 @@
  */
 package net.sourceforge.plantuml.real;
 
-abstract class RealMoveable implements Real {
+import java.util.concurrent.atomic.AtomicInteger;
 
+abstract class RealMoveable extends AbstractReal implements Real {
+
+	public static final AtomicInteger CPT = new AtomicInteger();
+	private final int cpt = CPT.getAndIncrement();
 	private final String name;
+	private final Throwable creationPoint;
 
-	RealMoveable(String name) {
+	RealMoveable(RealLine line, String name) {
+		super(line);
 		this.name = name;
+		this.creationPoint = new Throwable();
+		this.creationPoint.fillInStackTrace();
 	}
 
 	abstract void move(double delta);
 
-	abstract RealLine getLine();
+	final public void printCreationStackTrace() {
+		creationPoint.printStackTrace();
+	}
 
 	final public Real addFixed(double delta) {
 		return new RealDelta(this, delta);
 	}
 
 	@Override
-	public String toString() {
-		return name;
+	public final String toString() {
+		return "#" + cpt + "_" + name;
 	}
 
 	final public String getName() {
 		return name;
 	}
-
 }

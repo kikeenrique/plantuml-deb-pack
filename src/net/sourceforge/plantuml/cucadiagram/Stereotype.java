@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -36,19 +36,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.sourceforge.plantuml.Hideable;
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.IHtmlColorSet;
 import net.sourceforge.plantuml.svek.PackageStyle;
 import net.sourceforge.plantuml.ugraphic.UFont;
-import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.ugraphic.sprite.SpriteUtils;
 
 public class Stereotype implements CharSequence, Hideable {
 	private final static Pattern circleChar = MyPattern
 			.cmpile("\\<\\<[%s]*\\(?(\\S)[%s]*,[%s]*(#[0-9a-fA-F]{6}|\\w+)[%s]*(?:[),](.*?))?\\>\\>");
-	private final static Pattern circleSprite = MyPattern
-			.cmpile("\\<\\<[%s]*\\(?\\$([\\p{L}0-9_]+)[%s]*(?:,[%s]*(#[0-9a-fA-F]{6}|\\w+))?[%s]*(?:[),](.*?))?\\>\\>");
+	private final static Pattern circleSprite = MyPattern.cmpile("\\<\\<[%s]*\\(?\\$(" + SpriteUtils.SPRITE_NAME
+			+ ")[%s]*(?:,[%s]*(#[0-9a-fA-F]{6}|\\w+))?[%s]*(?:[),](.*?))?\\>\\>");
 
 	private final String label;
 	private final HtmlColor htmlColor;
@@ -62,7 +63,8 @@ public class Stereotype implements CharSequence, Hideable {
 		this(label, radius, circledFont, true, htmlColorSet);
 	}
 
-	public Stereotype(String label, double radius, UFont circledFont, boolean automaticPackageStyle, IHtmlColorSet htmlColorSet) {
+	public Stereotype(String label, double radius, UFont circledFont, boolean automaticPackageStyle,
+			IHtmlColorSet htmlColorSet) {
 		if (label == null) {
 			throw new IllegalArgumentException();
 		}
@@ -114,7 +116,11 @@ public class Stereotype implements CharSequence, Hideable {
 		this.character = '\0';
 		this.radius = 0;
 		this.circledFont = null;
-		this.sprite = null;
+		if (label.startsWith("<<$") && label.endsWith(">>")) {
+			this.sprite = label.substring(3, label.length() - 2).trim();
+		} else {
+			this.sprite = null;
+		}
 	}
 
 	public HtmlColor getHtmlColor() {
@@ -133,12 +139,27 @@ public class Stereotype implements CharSequence, Hideable {
 		return "<<O-O>>".equalsIgnoreCase(label);
 	}
 
-	public String getLabel() {
+	public String getLabel(boolean withGuillement) {
 		assert label == null || label.length() > 0;
 		if (isWithOOSymbol()) {
 			return null;
 		}
+		if (withGuillement) {
+			return StringUtils.manageGuillemet(label);
+		}
 		return label;
+	}
+
+	public List<String> getMultipleLabels() {
+		final List<String> result = new ArrayList<String>();
+		if (label != null) {
+			final Pattern p = Pattern.compile("\\<\\<\\s?([^<>]+?)\\s?\\>\\>");
+			final Matcher m = p.matcher(label);
+			while (m.find()) {
+				result.add(m.group(1));
+			}
+		}
+		return Collections.unmodifiableList(result);
 	}
 
 	public boolean isSpotted() {
@@ -176,15 +197,19 @@ public class Stereotype implements CharSequence, Hideable {
 		return circledFont;
 	}
 
-	public List<String> getLabels() {
-		if (getLabel() == null) {
+	public List<String> getLabels(boolean useGuillemet) {
+		if (getLabel(false) == null) {
 			return null;
 		}
 		final List<String> result = new ArrayList<String>();
 		final Pattern p = MyPattern.cmpile("\\<\\<.*?\\>\\>");
-		final Matcher m = p.matcher(getLabel());
+		final Matcher m = p.matcher(getLabel(false));
 		while (m.find()) {
-			result.add(m.group());
+			if (useGuillemet) {
+				result.add(StringUtils.manageGuillemetStrict(m.group()));
+			} else {
+				result.add(m.group());
+			}
 		}
 		return Collections.unmodifiableList(result);
 	}

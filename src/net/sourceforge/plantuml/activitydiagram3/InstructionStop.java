@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -37,6 +37,8 @@ import net.sourceforge.plantuml.sequencediagram.NotePosition;
 public class InstructionStop extends MonoSwimable implements Instruction {
 
 	private final LinkRendering inlinkRendering;
+	private Display note;
+	private NotePosition notePosition;
 
 	public InstructionStop(Swimlane swimlane, LinkRendering inlinkRendering) {
 		super(swimlane);
@@ -44,7 +46,11 @@ public class InstructionStop extends MonoSwimable implements Instruction {
 	}
 
 	public Ftile createFtile(FtileFactory factory) {
-		return factory.stop(getSwimlaneIn());
+		Ftile result = factory.stop(getSwimlaneIn());
+		if (note != null) {
+			result = factory.addNote(result, note, notePosition);
+		}
+		return result;
 	}
 
 	public void add(Instruction other) {
@@ -59,8 +65,10 @@ public class InstructionStop extends MonoSwimable implements Instruction {
 		return inlinkRendering;
 	}
 
-	public void addNote(Display note, NotePosition position) {
-		throw new UnsupportedOperationException();
+	public boolean addNote(Display note, NotePosition position) {
+		this.note = note;
+		this.notePosition = position;
+		return true;
 	}
 
 }

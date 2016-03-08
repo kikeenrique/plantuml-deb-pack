@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -41,7 +41,7 @@ import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 
-public class InstructionList implements Instruction {
+public class InstructionList implements Instruction, InstructionCollection {
 
 	private final List<Instruction> all = new ArrayList<Instruction>();
 	private final Swimlane defaultSwimlane;
@@ -85,7 +85,9 @@ public class InstructionList implements Instruction {
 			} else {
 				result = factory.assembly(result, cur);
 			}
-
+		}
+		if (outlinkRendering != null) {
+			result = factory.decorateOut(result, outlinkRendering);
 		}
 		// if (killed) {
 		// result = new FtileKilled(result);
@@ -111,8 +113,11 @@ public class InstructionList implements Instruction {
 		return all.get(all.size() - 1);
 	}
 
-	public void addNote(Display note, NotePosition position) {
-		getLast().addNote(note, position);
+	public boolean addNote(Display note, NotePosition position) {
+		if (getLast() == null) {
+			return false;
+		}
+		return getLast().addNote(note, position);
 	}
 
 	public Set<Swimlane> getSwimlanes() {
@@ -120,10 +125,16 @@ public class InstructionList implements Instruction {
 	}
 
 	public Swimlane getSwimlaneIn() {
+		if (getSwimlanes().size() == 0) {
+			return null;
+		}
 		return all.get(0).getSwimlaneIn();
 	}
 
 	public Swimlane getSwimlaneOut() {
+		if (getSwimlanes().size() == 0) {
+			return null;
+		}
 		return getLast().getSwimlaneOut();
 	}
 
@@ -133,6 +144,12 @@ public class InstructionList implements Instruction {
 			result.addAll(ins.getSwimlanes());
 		}
 		return Collections.unmodifiableSet(result);
+	}
+
+	private LinkRendering outlinkRendering;
+
+	public void setOutRendering(LinkRendering outlinkRendering) {
+		this.outlinkRendering = outlinkRendering;
 	}
 
 }

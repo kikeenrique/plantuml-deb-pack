@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -29,11 +29,16 @@
 package net.sourceforge.plantuml.sequencediagram;
 
 import net.sourceforge.plantuml.ColorParam;
+import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.SkinParamBackcolored;
 import net.sourceforge.plantuml.SpecificBackcolorable;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
 import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.SymbolContext;
+import net.sourceforge.plantuml.graphic.color.ColorType;
+import net.sourceforge.plantuml.graphic.color.Colors;
 
 public class Participant implements SpecificBackcolorable {
 
@@ -52,7 +57,7 @@ public class Participant implements SpecificBackcolorable {
 		if (code == null || code.length() == 0) {
 			throw new IllegalArgumentException();
 		}
-		if (display == null || display.size() == 0) {
+		if (Display.isNull(display) || display.size() == 0) {
 			throw new IllegalArgumentException();
 		}
 		this.code = code;
@@ -102,25 +107,31 @@ public class Participant implements SpecificBackcolorable {
 		return initialLife;
 	}
 
-	private HtmlColor liveBackcolor;
+	private SymbolContext liveBackcolors;
 
-	public final void incInitialLife(HtmlColor backcolor) {
+	public final void incInitialLife(SymbolContext colors) {
 		initialLife++;
-		this.liveBackcolor = backcolor;
+		this.liveBackcolors = colors;
 	}
 
-	public HtmlColor getLiveSpecificBackColor() {
-		return liveBackcolor;
+	public SymbolContext getLiveSpecificBackColors() {
+		return liveBackcolors;
 	}
 
-	private HtmlColor specificBackcolor;
-
-	public HtmlColor getSpecificBackColor() {
-		return specificBackcolor;
+	public Colors getColors(ISkinParam skinParam) {
+		return colors;
 	}
 
-	public void setSpecificBackcolor(HtmlColor color) {
-		this.specificBackcolor = color;
+	public void setSpecificColorTOBEREMOVED(ColorType type, HtmlColor color) {
+		if (color != null) {
+			this.colors = colors.add(type, color);
+		}
+	}
+
+	private Colors colors = Colors.empty();
+
+	public void setColors(Colors colors) {
+		this.colors = colors;
 	}
 
 	private Url url;
@@ -139,6 +150,22 @@ public class Participant implements SpecificBackcolorable {
 
 	public ColorParam getBackgroundColorParam() {
 		return type.getBackgroundColorParam();
+	}
+
+	public SkinParamBackcolored getSkinParamBackcolored(ISkinParam skinParam) {
+		HtmlColor specificBackColor = getColors(skinParam).getColor(ColorType.BACK);
+		final boolean clickable = getUrl() != null;
+		final HtmlColor stereoBackColor = skinParam.getHtmlColor(getBackgroundColorParam(), getStereotype(), clickable);
+		if (stereoBackColor != null && specificBackColor == null) {
+			specificBackColor = stereoBackColor;
+		}
+		final SkinParamBackcolored result = new SkinParamBackcolored(skinParam, specificBackColor, clickable);
+		final HtmlColor stereoBorderColor = skinParam.getHtmlColor(ColorParam.participantBorder, getStereotype(),
+				clickable);
+		if (stereoBorderColor != null) {
+			result.forceColor(ColorParam.participantBorder, stereoBorderColor);
+		}
+		return result;
 	}
 
 }

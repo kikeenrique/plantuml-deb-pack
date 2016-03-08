@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,6 +30,8 @@ package net.sourceforge.plantuml.real;
 
 public interface Real {
 
+	public void printCreationStackTrace();
+
 	public String getName();
 
 	public double getCurrentValue();
@@ -40,6 +42,8 @@ public interface Real {
 
 	public void ensureBiggerThan(Real other);
 
-	public void compile();
-
+//	public Real getMaxAbsolute();
+//
+//	public Real getMinAbsolute();
+//
 }

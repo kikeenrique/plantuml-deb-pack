@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -32,9 +32,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.core.Diagram;
-import net.sourceforge.plantuml.StringUtils;
 
 public abstract class SingleLineCommand<S extends Diagram> implements Command<S> {
 
@@ -55,14 +55,15 @@ public abstract class SingleLineCommand<S extends Diagram> implements Command<S>
 		return new String[] { pattern.pattern() };
 	}
 
-	final public CommandControl isValid(List<String> lines) {
+	final public CommandControl isValid(BlocLines lines) {
 		if (lines.size() != 1) {
 			return CommandControl.NOT_OK;
 		}
+		lines = lines.removeInnerComments();
 		if (isCommandForbidden()) {
 			return CommandControl.NOT_OK;
 		}
-		final String line = lines.get(0).trim();
+		final String line = StringUtils.trin(lines.getFirst499());
 		final Matcher m = pattern.matcher(line);
 		final boolean result = m.find();
 		if (result) {
@@ -78,11 +79,12 @@ public abstract class SingleLineCommand<S extends Diagram> implements Command<S>
 	protected void actionIfCommandValid() {
 	}
 
-	public final CommandExecutionResult execute(S system, List<String> lines) {
+	public final CommandExecutionResult execute(S system, BlocLines lines) {
 		if (lines.size() != 1) {
 			throw new IllegalArgumentException();
 		}
-		final String line = lines.get(0).trim();
+		lines = lines.removeInnerComments();
+		final String line = StringUtils.trin(lines.getFirst499());
 		if (isForbidden(line)) {
 			return CommandExecutionResult.error("Forbidden line " + line);
 		}

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -32,16 +32,15 @@ import java.awt.geom.Dimension2D;
 
 import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
-import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.skin.AbstractTextualComponent;
 import net.sourceforge.plantuml.skin.Area;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.URectangle;
@@ -51,15 +50,17 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 public class ComponentRoseDivider extends AbstractTextualComponent {
 
 	// private final int outMargin = 5;
+	private final HtmlColor borderColor;
 	private final HtmlColor background;
 	private final boolean empty;
 	private final boolean withShadow;
 	private final UStroke stroke;
 
-	public ComponentRoseDivider(HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font, HtmlColor background, Display stringsToDisplay,
-			ISkinSimple spriteContainer, boolean withShadow, UStroke stroke) {
-		super(stringsToDisplay, fontColor, hyperlinkColor, useUnderlineForHyperlink, font, HorizontalAlignment.CENTER, 4, 4, 4, spriteContainer, 0, false);
+	public ComponentRoseDivider(FontConfiguration font, HtmlColor background, Display stringsToDisplay,
+			ISkinSimple spriteContainer, boolean withShadow, UStroke stroke, HtmlColor borderColor) {
+		super(stringsToDisplay, font, HorizontalAlignment.CENTER, 4, 4, 4, spriteContainer, 0, false, null, null);
 		this.background = background;
+		this.borderColor = borderColor;
 		this.empty = stringsToDisplay.get(0).length() == 0;
 		this.withShadow = withShadow;
 		this.stroke = stroke;
@@ -83,7 +84,7 @@ public class ComponentRoseDivider extends AbstractTextualComponent {
 
 			drawSep(ug.apply(new UTranslate(0, dimensionToUse.getHeight() / 2)), dimensionToUse.getWidth());
 
-			ug = ug.apply(new UChangeColor(HtmlColorUtils.BLACK));
+			ug = ug.apply(new UChangeColor(borderColor));
 			ug = ug.apply(stroke);
 			final URectangle rect = new URectangle(textWidth + deltaX, textHeight);
 			if (withShadow) {
@@ -113,7 +114,7 @@ public class ComponentRoseDivider extends AbstractTextualComponent {
 	}
 
 	private void drawDoubleLine(UGraphic ug, final double width) {
-		ug = ug.apply(new UStroke(stroke.getThickness() / 2)).apply(new UChangeColor(HtmlColorUtils.BLACK));
+		ug = ug.apply(new UStroke(stroke.getThickness() / 2)).apply(new UChangeColor(borderColor));
 		final ULine line = new ULine(width, 0);
 		ug.apply(new UTranslate(0, -1)).draw(line);
 		ug.apply(new UTranslate(0, 2)).draw(line);

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -29,63 +29,77 @@
 package net.sourceforge.plantuml.sequencediagram.teoz;
 
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 import net.sourceforge.plantuml.ISkinParam;
-import net.sourceforge.plantuml.graphic.UDrawable;
-import net.sourceforge.plantuml.sequencediagram.graphic.Stairs;
-import net.sourceforge.plantuml.skin.Area;
-import net.sourceforge.plantuml.skin.Component;
-import net.sourceforge.plantuml.skin.ComponentType;
+import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.sequencediagram.Participant;
+import net.sourceforge.plantuml.skin.Context2D;
 import net.sourceforge.plantuml.skin.SimpleContext2D;
 import net.sourceforge.plantuml.skin.Skin;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class LiveBoxes implements UDrawable {
+public class LiveBoxes {
 
-	private final Stairs stairs;
+	private final EventsHistory eventsHistory;
 	private final Skin skin;
 	private final ISkinParam skinParam;
-	private final double totalHeight;
+	private final Map<Double, Double> delays = new TreeMap<Double, Double>();
 
-	public LiveBoxes(Stairs stairs, Skin skin, ISkinParam skinParam, double totalHeight) {
-		this.stairs = stairs;
+	public LiveBoxes(EventsHistory eventsHistory, Skin skin, ISkinParam skinParam, Participant participant) {
+		this.eventsHistory = eventsHistory;
 		this.skin = skin;
 		this.skinParam = skinParam;
-		this.totalHeight = totalHeight;
 	}
 
-	public void drawU(UGraphic ug) {
-		stairs.addStep(totalHeight, stairs.getLastValue());
-		System.err.println("stairs=" + stairs);
-		for (Double y : stairs.getYs()) {
-			System.err.println("LiveBoxes y=" + y + " " + stairs.getValue(y));
-		}
+	public double getMaxPosition(StringBounder stringBounder) {
+		final int max = eventsHistory.getMaxValue();
+		final LiveBoxesDrawer drawer = new LiveBoxesDrawer(new SimpleContext2D(true), skin, skinParam, delays);
+		return drawer.getWidth(stringBounder) / 2.0 * max;
+	}
+
+	public void drawBoxes(UGraphic ug, Context2D context, double createY, double endY) {
+		final Stairs2 stairs = eventsHistory.getStairs(createY, endY);
 		final int max = stairs.getMaxValue();
+		if (max == 0) {
+			drawDestroys(ug, stairs, context);
+		}
 		for (int i = 1; i <= max; i++) {
-			drawOneLevel(ug, i);
+			drawOneLevel(ug, i, stairs, context);
 		}
 	}
 
-	private void drawOneLevel(UGraphic ug, int levelToDraw) {
-		final Component comp = skin.createComponent(ComponentType.ALIVE_BOX_CLOSE_CLOSE, null, skinParam, null);
-		final double width = comp.getPreferredWidth(ug.getStringBounder());
-		ug = ug.apply(new UTranslate((levelToDraw - 1) * width / 2.0, 0));
+	private void drawDestroys(UGraphic ug, Stairs2 stairs, Context2D context) {
+		final LiveBoxesDrawer drawer = new LiveBoxesDrawer(context, skin, skinParam, delays);
+		for (StairsPosition yposition : stairs.getYs()) {
+			drawer.drawDestroyIfNeeded(ug, yposition);
+		}
+	}
 
-		double y1 = Double.MAX_VALUE;
-		for (Iterator<Double> it = stairs.getYs().iterator(); it.hasNext();) {
-			// for (Double y : stairs.getYs()) {
-			final double y = it.next();
-			final int level = stairs.getValue(y);
-			if (y1 == Double.MAX_VALUE && level == levelToDraw) {
-				y1 = y;
-			} else if (y1 != Double.MAX_VALUE && (it.hasNext() == false || level < levelToDraw)) {
-				final double y2 = y;
-				final Area area = new Area(width, y2 - y1);
-				comp.drawU(ug.apply(new UTranslate(-width / 2, y1)), area, new SimpleContext2D(false));
-				y1 = Double.MAX_VALUE;
+	private void drawOneLevel(UGraphic ug, int levelToDraw, Stairs2 stairs, Context2D context) {
+		final LiveBoxesDrawer drawer = new LiveBoxesDrawer(context, skin, skinParam, delays);
+		ug = ug.apply(new UTranslate((levelToDraw - 1) * drawer.getWidth(ug.getStringBounder()) / 2.0, 0));
+
+		boolean pending = true;
+		for (Iterator<StairsPosition> it = stairs.getYs().iterator(); it.hasNext();) {
+			final StairsPosition yposition = it.next();
+			final IntegerColored integerColored = stairs.getValue(yposition.getValue());
+			final int level = integerColored.getValue();
+			if (pending && level == levelToDraw) {
+				drawer.addStart(yposition.getValue(), integerColored.getColors());
+				pending = false;
+			} else if (pending == false && (it.hasNext() == false || level < levelToDraw)) {
+				drawer.doDrawing(ug, yposition);
+				drawer.drawDestroyIfNeeded(ug, yposition);
+				pending = true;
 			}
 		}
+	}
+
+	public void delayOn(double y, double height) {
+		delays.put(y, height);
 	}
 
 }

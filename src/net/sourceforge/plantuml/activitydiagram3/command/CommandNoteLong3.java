@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,7 +30,9 @@ package net.sourceforge.plantuml.activitydiagram3.command;
 
 import java.util.List;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.activitydiagram3.ActivityDiagram3;
+import net.sourceforge.plantuml.command.BlocLines;
 import net.sourceforge.plantuml.command.CommandExecutionResult;
 import net.sourceforge.plantuml.command.CommandMultilines2;
 import net.sourceforge.plantuml.command.MultilinesStrategy;
@@ -39,7 +41,6 @@ import net.sourceforge.plantuml.command.regex.RegexLeaf;
 import net.sourceforge.plantuml.command.regex.RegexResult;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
-import net.sourceforge.plantuml.StringUtils;
 
 public class CommandNoteLong3 extends CommandMultilines2<ActivityDiagram3> {
 
@@ -51,12 +52,13 @@ public class CommandNoteLong3 extends CommandMultilines2<ActivityDiagram3> {
 		return "(?i)^end[%s]?note$";
 	}
 
-	public CommandExecutionResult executeNow(final ActivityDiagram3 diagram, List<String> lines) {
-		// final RegexResult line0 = getStartingPattern().matcher(lines.get(0).trim());
-		final List<String> in = StringUtils.removeEmptyColumns(lines.subList(1, lines.size() - 1));
-		final RegexResult line0 = getStartingPattern().matcher(lines.get(0).trim());
+	public CommandExecutionResult executeNow(final ActivityDiagram3 diagram, BlocLines lines) {
+		// final List<? extends CharSequence> in = StringUtils.removeEmptyColumns2(lines.subList(1, lines.size() - 1));
+		final RegexResult line0 = getStartingPattern().matcher(StringUtils.trin(lines.getFirst499()));
+		lines = lines.subExtract(1, 1);
+		lines = lines.removeEmptyColumns();
 		final NotePosition position = getPosition(line0.get("POSITION", 0));
-		final Display note = Display.create(in);
+		final Display note = lines.toDisplay();
 		return diagram.addNote(note, position);
 	}
 

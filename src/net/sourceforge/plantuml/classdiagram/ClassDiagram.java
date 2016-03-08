@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -34,6 +34,7 @@ import java.io.OutputStream;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.UmlDiagramType;
 import net.sourceforge.plantuml.core.ImageData;
+import net.sourceforge.plantuml.creole.CreoleMode;
 import net.sourceforge.plantuml.cucadiagram.Code;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.EntityUtils;
@@ -133,9 +134,10 @@ public class ClassDiagram extends AbstractClassOrObjectDiagram {
 			group = getOrCreateNamespaceInternal(namespace2, Display.getWithNewlines(namespace), GroupType.PACKAGE,
 					getRootGroup());
 		}
-		return createLeafInternal(fullyCode,
-				display == null ? Display.getWithNewlines(fullyCode.getShortName(getLeafs())) : display, type, group,
-				symbol);
+		return createLeafInternal(
+				fullyCode,
+				Display.isNull(display) ? Display.getWithNewlines(fullyCode.getShortName(getLeafs())).withCreoleMode(
+						CreoleMode.SIMPLE_LINE) : display, type, group, symbol);
 	}
 
 	private final String getNamespace(Code fullyCode) {
@@ -206,9 +208,9 @@ public class ClassDiagram extends AbstractClassOrObjectDiagram {
 			fullLayout.addRowLayout(rawLayout);
 		}
 		final ImageBuilder imageBuilder = new ImageBuilder(getSkinParam().getColorMapper(), 1, HtmlColorUtils.WHITE,
-				null, null, 0, 10, null);
-		imageBuilder.addUDrawable(fullLayout);
-		return imageBuilder.writeImageTOBEMOVED(fileFormatOption.getFileFormat(), os);
+				null, null, 0, 10, null, getSkinParam().handwritten());
+		imageBuilder.setUDrawable(fullLayout);
+		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, os);
 	}
 
 	private RowLayout getRawLayout(int raw) {

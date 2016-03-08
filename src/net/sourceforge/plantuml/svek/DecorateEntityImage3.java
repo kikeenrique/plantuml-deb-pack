@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,12 +30,13 @@ package net.sourceforge.plantuml.svek;
 
 import java.awt.geom.Dimension2D;
 
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 
-public class DecorateEntityImage3 implements TextBlockBackcolored {
+public class DecorateEntityImage3 extends AbstractTextBlock  implements TextBlockBackcolored {
 
 	private final TextBlock original;
 	private final HtmlColor color;

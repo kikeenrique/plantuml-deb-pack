@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.sourceforge.plantuml.ISkinSimple;
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.salt.DataSource;
 import net.sourceforge.plantuml.salt.Terminated;
 import net.sourceforge.plantuml.salt.element.Element;
@@ -62,7 +63,7 @@ public class ElementFactoryCheckboxOff implements ElementFactory {
 
 	private List<String> extracted(final String text) {
 		final int x = text.indexOf(']');
-		return Arrays.asList(text.substring(x + 1).trim());
+		return Arrays.asList(StringUtils.trin(text.substring(x + 1)));
 	}
 
 	public boolean ready() {

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,40 +28,50 @@
  */
 package net.sourceforge.plantuml.sequencediagram.teoz;
 
-import java.util.Collections;
-import java.util.Map;
-
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.SkinParamBackcolored;
+import net.sourceforge.plantuml.SkinParamBackcoloredReference;
+import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.real.Real;
 import net.sourceforge.plantuml.sequencediagram.Participant;
+import net.sourceforge.plantuml.sequencediagram.Reference;
 import net.sourceforge.plantuml.skin.Skin;
 
-public class TileArguments {
+public class TileArguments implements Bordered {
 	private final StringBounder stringBounder;
-	private final Real omega;
 	private final Real origin;
 	private final LivingSpaces livingSpaces;
 	private final Skin skin;
 	private final ISkinParam skinParam;
 
-	public TileArguments(StringBounder stringBounder, Real omega, LivingSpaces livingSpaces, Skin skin,
-			ISkinParam skinParam, Real origin) {
+	public TileArguments(StringBounder stringBounder, LivingSpaces livingSpaces, Skin skin, ISkinParam skinParam,
+			Real origin) {
 		this.stringBounder = stringBounder;
 		this.origin = origin;
-		this.omega = omega;
 		this.livingSpaces = livingSpaces;
 		this.skin = skin;
 		this.skinParam = skinParam;
+	}
+
+	public TileArguments withBackColorGeneral(HtmlColor backColorElement, HtmlColor backColorGeneral) {
+		return new TileArguments(stringBounder, livingSpaces, skin, new SkinParamBackcolored(skinParam,
+				backColorElement, backColorGeneral), origin);
+	}
+
+	public TileArguments withBackColor(Reference reference) {
+		final ISkinParam newSkinParam = new SkinParamBackcoloredReference(skinParam, reference.getBackColorElement(),
+				reference.getBackColorGeneral());
+		return new TileArguments(stringBounder, livingSpaces, skin, newSkinParam, origin);
 	}
 
 	public final StringBounder getStringBounder() {
 		return stringBounder;
 	}
 
-	public final Real getOmega() {
-		return omega;
-	}
+	// public final Real getMaxAbsolute() {
+	// return origin.getMaxAbsolute();
+	// }
 
 	public final Real getOrigin() {
 		return origin;
@@ -94,6 +104,28 @@ public class TileArguments {
 		}
 		return result;
 	}
+
+	private Bordered bordered;
+
+	public void setBordered(Bordered bordered) {
+		this.bordered = bordered;
+	}
+
+	public double getBorder1() {
+		return bordered.getBorder1();
+	}
+
+	public double getBorder2() {
+		return bordered.getBorder2();
+	}
+
+	// public double getAbsoluteMin() {
+	// return line.getAbsoluteMin();
+	// }
+	//
+	// public double getAbsoluteMax() {
+	// return line.getAbsoluteMax();
+	// }
 
 	// public void ensure(Tile tile) {
 	// getAlpha().ensureLowerThan(tile.getMinX(getStringBounder()));

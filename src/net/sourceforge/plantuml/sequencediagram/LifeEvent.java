@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,16 +28,15 @@
  */
 package net.sourceforge.plantuml.sequencediagram;
 
-import net.sourceforge.plantuml.Url;
-import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.SymbolContext;
 
-public class LifeEvent implements Event {
+public class LifeEvent extends AbstractEvent implements Event {
 
 	private final Participant p;
 	private final LifeEventType type;
-	private final HtmlColor backcolor;
+	private final SymbolContext backcolor;
 
-	public LifeEvent(Participant p, LifeEventType type, HtmlColor backcolor) {
+	public LifeEvent(Participant p, LifeEventType type, SymbolContext backcolor) {
 		this.p = p;
 		this.type = type;
 		this.backcolor = backcolor;
@@ -56,7 +55,7 @@ public class LifeEvent implements Event {
 		return type;
 	}
 
-	public HtmlColor getSpecificBackColor() {
+	public SymbolContext getSpecificColors() {
 		return backcolor;
 	}
 
@@ -64,39 +63,45 @@ public class LifeEvent implements Event {
 		return this.p == someone;
 	}
 
-	public Url getUrl() {
-		return null;
+	public boolean isActivate() {
+		return type == LifeEventType.ACTIVATE;
 	}
 
-	public boolean hasUrl() {
-		return false;
+	public boolean isDeactivateOrDestroy() {
+		return type == LifeEventType.DEACTIVATE || type == LifeEventType.DESTROY;
 	}
 
-//	public double getStrangePos() {
-//		return message.getPosYendLevel();
-//	}
-//
+	@Deprecated
+	public boolean isDestroy() {
+		return type == LifeEventType.DESTROY;
+	}
+
+	public boolean isDestroy(Participant p) {
+		return this.p == p && type == LifeEventType.DESTROY;
+	}
+
+	// public double getStrangePos() {
+	// return message.getPosYendLevel();
+	// }
+	//
 	private AbstractMessage message;
 
 	public void setMessage(AbstractMessage message) {
 		this.message = message;
 	}
-	
+
 	public AbstractMessage getMessage() {
 		return message;
 	}
-	
-	private boolean linkedToGroupingEnd;
 
-	public boolean isLinkedToGroupingEnd() {
-		return linkedToGroupingEnd;
-	}
+	// private boolean linkedToGroupingEnd;
+	//
+	// // public boolean isLinkedToGroupingEnd() {
+	// // return linkedToGroupingEnd;
+	// // }
 
 	public void setLinkedToGroupingEnd(boolean linkedToGroupingEnd) {
-		this.linkedToGroupingEnd = linkedToGroupingEnd;
+		// this.linkedToGroupingEnd = linkedToGroupingEnd;
 	}
-	
-
-
 
 }

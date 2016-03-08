@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -69,8 +69,8 @@ class GrayComponent extends AbstractComponent {
 			strings.add(n.substring(i, Math.min(i + split, n.length())));
 		}
 
-		final TextBlock textBlock = TextBlockUtils.create(Display.create(strings), new FontConfiguration(NORMAL, HtmlColorUtils.BLACK,
-				HtmlColorUtils.BLUE, true), HorizontalAlignment.LEFT, new SpriteContainerEmpty());
+		final TextBlock textBlock = Display.create(strings).create(FontConfiguration.blackBlueTrue(NORMAL),
+				HorizontalAlignment.LEFT, new SpriteContainerEmpty());
 		textBlock.drawU(ug);
 	}
 

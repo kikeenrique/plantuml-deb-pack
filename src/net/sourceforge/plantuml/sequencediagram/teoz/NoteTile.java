@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -37,10 +37,11 @@ import net.sourceforge.plantuml.real.RealUtils;
 import net.sourceforge.plantuml.sequencediagram.Event;
 import net.sourceforge.plantuml.sequencediagram.Note;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
+import net.sourceforge.plantuml.sequencediagram.NoteStyle;
 import net.sourceforge.plantuml.skin.Area;
 import net.sourceforge.plantuml.skin.Component;
 import net.sourceforge.plantuml.skin.ComponentType;
-import net.sourceforge.plantuml.skin.SimpleContext2D;
+import net.sourceforge.plantuml.skin.Context2D;
 import net.sourceforge.plantuml.skin.Skin;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
@@ -52,11 +53,10 @@ public class NoteTile implements Tile {
 	private final Skin skin;
 	private final ISkinParam skinParam;
 	private final Note note;
-	
+
 	public Event getEvent() {
 		return note;
 	}
-
 
 	public NoteTile(LivingSpace livingSpace1, LivingSpace livingSpace2, Note note, Skin skin, ISkinParam skinParam) {
 		this.livingSpace1 = livingSpace1;
@@ -67,8 +67,19 @@ public class NoteTile implements Tile {
 	}
 
 	private Component getComponent(StringBounder stringBounder) {
-		final Component comp = skin.createComponent(ComponentType.NOTE, null, skinParam, note.getStrings());
+		final Component comp = skin.createComponent(getNoteComponentType(note.getStyle()), null,
+				note.getSkinParamBackcolored(skinParam), note.getStrings());
 		return comp;
+	}
+
+	private ComponentType getNoteComponentType(NoteStyle noteStyle) {
+		if (noteStyle == NoteStyle.HEXAGONAL) {
+			return ComponentType.NOTE_HEXAGONAL;
+		}
+		if (noteStyle == NoteStyle.BOX) {
+			return ComponentType.NOTE_BOX;
+		}
+		return ComponentType.NOTE;
 	}
 
 	public void drawU(UGraphic ug) {
@@ -79,7 +90,7 @@ public class NoteTile implements Tile {
 		final Area area = new Area(getUsedWidth(stringBounder), dim.getHeight());
 
 		ug = ug.apply(new UTranslate(x, 0));
-		comp.drawU(ug, area, new SimpleContext2D(false));
+		comp.drawU(ug, area, (Context2D) ug);
 		// ug.draw(new ULine(x2 - x1, 0));
 	}
 
@@ -104,7 +115,9 @@ public class NoteTile implements Tile {
 		if (position == NotePosition.LEFT) {
 			return livingSpace1.getPosC(stringBounder).addFixed(-width);
 		} else if (position == NotePosition.RIGHT) {
-			return livingSpace1.getPosC(stringBounder);
+			final int level = livingSpace1.getLevelAt(this, EventsHistoryMode.IGNORE_FUTURE_DEACTIVATE);
+			final double dx = level * CommunicationTile.LIVE_DELTA_SIZE;
+			return livingSpace1.getPosC(stringBounder).addFixed(dx);
 		} else if (position == NotePosition.OVER_SEVERAL) {
 			final Real x1 = livingSpace1.getPosC(stringBounder);
 			final Real x2 = livingSpace2.getPosC(stringBounder);

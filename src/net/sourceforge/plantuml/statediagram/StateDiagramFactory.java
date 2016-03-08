@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -78,19 +78,20 @@ public class StateDiagramFactory extends UmlDiagramFactory {
 				"ENTITY", new RegexLeaf("[\\p{L}0-9_.]+"), //
 				new RegexLeaf("[%g][^%g]+[%g]") //
 				));
-		cmds.add(factoryNoteOnEntityCommand.createMultiLine());
+		cmds.add(factoryNoteOnEntityCommand.createMultiLine(true));
+		cmds.add(factoryNoteOnEntityCommand.createMultiLine(false));
 
 		cmds.add(new CommandHideEmptyDescription());
 
 		cmds.add(factoryNoteOnEntityCommand.createSingleLine());
 		final FactoryNoteOnLinkCommand factoryNoteOnLinkCommand = new FactoryNoteOnLinkCommand();
 		cmds.add(factoryNoteOnLinkCommand.createSingleLine());
-		cmds.add(factoryNoteOnLinkCommand.createMultiLine());
+		cmds.add(factoryNoteOnLinkCommand.createMultiLine(false));
 		cmds.add(new CommandUrl());
 
 		final FactoryNoteCommand factoryNoteCommand = new FactoryNoteCommand();
 		cmds.add(factoryNoteCommand.createSingleLine());
-		cmds.add(factoryNoteCommand.createMultiLine());
+		cmds.add(factoryNoteCommand.createMultiLine(false));
 
 		addCommonCommands(cmds);
 

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,23 +30,18 @@ package net.sourceforge.plantuml;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.sourceforge.plantuml.command.regex.MyPattern;
-import net.sourceforge.plantuml.cucadiagram.Code;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorTransparent;
-import net.sourceforge.plantuml.preproc.ReadLineReader;
-import net.sourceforge.plantuml.preproc.UncommentReadLine;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
 
 // Do not move
@@ -56,11 +51,7 @@ public class StringUtils {
 		return file.getAbsolutePath();
 	}
 
-	public static List<String> getWithNewlines2(Code s) {
-		return getWithNewlines2(s.getFullName());
-	}
-
-	public static List<String> getWithNewlines2(String s) {
+	public static List<String> getWithNewlines(CharSequence s) {
 		if (s == null) {
 			return null;
 		}
@@ -87,17 +78,6 @@ public class StringUtils {
 		return Collections.unmodifiableList(result);
 	}
 
-	public static String getMergedLines(List<? extends CharSequence> strings) {
-		final StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < strings.size(); i++) {
-			sb.append(strings.get(i));
-			if (i < strings.size() - 1) {
-				sb.append("\\n");
-			}
-		}
-		return sb.toString();
-	}
-
 	final static public List<String> getSplit(Pattern pattern, String line) {
 		final Matcher m = pattern.matcher(line);
 		if (m.find() == false) {
@@ -112,7 +92,7 @@ public class StringUtils {
 	}
 
 	public static boolean isNotEmpty(String input) {
-		return input != null && input.trim().length() > 0;
+		return input != null && trin(input).length() > 0;
 	}
 
 	public static boolean isNotEmpty(List<? extends CharSequence> input) {
@@ -120,7 +100,7 @@ public class StringUtils {
 	}
 
 	public static boolean isEmpty(String input) {
-		return input == null || input.trim().length() == 0;
+		return input == null || trin(input).length() == 0;
 	}
 
 	public static String manageHtml(String s) {
@@ -174,7 +154,7 @@ public class StringUtils {
 	public static String capitalize(String s) {
 		return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
 	}
-	
+
 	public static String goUpperCase(String s) {
 		return s.toUpperCase(Locale.ENGLISH);
 	}
@@ -308,6 +288,10 @@ public class StringUtils {
 		return '\u0006';
 	}
 
+	public static char hiddenNewLine() {
+		return '\u0009';
+	}
+
 	public static String hideComparatorCharacters(String s) {
 		s = s.replace('<', hiddenLesserThan());
 		s = s.replace('>', hiddenBiggerThan());
@@ -318,16 +302,6 @@ public class StringUtils {
 		s = s.replace(hiddenLesserThan(), '<');
 		s = s.replace(hiddenBiggerThan(), '>');
 		return s;
-	}
-
-	public static int getWidth(List<? extends CharSequence> stringsToDisplay) {
-		int result = 1;
-		for (CharSequence s : stringsToDisplay) {
-			if (result < s.length()) {
-				result = s.length();
-			}
-		}
-		return result;
 	}
 
 	public static int getWidth(Display stringsToDisplay) {
@@ -348,72 +322,8 @@ public class StringUtils {
 		return stringsToDisplay.size();
 	}
 
-	private static void removeFirstColumn(List<String> data) {
-		for (int i = 0; i < data.size(); i++) {
-			final String s = data.get(i);
-			if (s.length() > 0) {
-				data.set(i, s.substring(1));
-			}
-		}
-	}
-
-	private static boolean firstColumnRemovable(List<String> data) {
-		boolean allEmpty = true;
-		for (String s : data) {
-			if (s.length() == 0) {
-				continue;
-			}
-			allEmpty = false;
-			final char c = s.charAt(0);
-			if (c != ' ' && c != '\t') {
-				return false;
-			}
-		}
-		return allEmpty == false;
-	}
-
-	public static List<String> removeEmptyColumns(List<String> data) {
-		if (firstColumnRemovable(data) == false) {
-			return data;
-		}
-		final List<String> result = new ArrayList<String>(data);
-		do {
-			removeFirstColumn(result);
-		} while (firstColumnRemovable(result));
-		return result;
-	}
-
-	public static void trim(List<String> data, boolean removeEmptyLines) {
-		for (int i = 0; i < data.size(); i++) {
-			final String s = data.get(i);
-			data.set(i, s.trim());
-		}
-		if (removeEmptyLines) {
-			for (final Iterator<String> it = data.iterator(); it.hasNext();) {
-				if (it.next().length() == 0) {
-					it.remove();
-				}
-			}
-		}
-	}
-
-	public static String uncommentSource(String source) {
-		final StringReader sr = new StringReader(source);
-		final UncommentReadLine un = new UncommentReadLine(new ReadLineReader(sr));
-		final StringBuilder sb = new StringBuilder();
-		String s = null;
-		try {
-			while ((s = un.readLine()) != null) {
-				sb.append(s);
-				sb.append('\n');
-			}
-		} catch (IOException e) {
-			Log.error("Error " + e);
-			throw new IllegalStateException(e.toString());
-		}
-
-		sr.close();
-		return sb.toString();
+	private static boolean isSpaceOrTab(char c) {
+		return c == ' ' || c == '\t';
 	}
 
 	public static boolean isDiagramCacheable(String uml) {
@@ -434,7 +344,7 @@ public class StringUtils {
 	}
 
 	public static List<String> splitComma(String s) {
-		s = s.trim();
+		s = trin(s);
 		// if (s.matches("([\\p{L}0-9_.]+|[%g][^%g]+[%g])(\\s*,\\s*([\\p{L}0-9_.]+|[%g][^%g]+[%g]))*") == false) {
 		// throw new IllegalArgumentException();
 		// }
@@ -475,10 +385,6 @@ public class StringUtils {
 		return uid1 + String.format("%04d", uid2);
 	}
 
-	public static boolean isMethod(String s) {
-		return s.contains("(") || s.contains(")");
-	}
-
 	public static <O> List<O> merge(List<O> l1, List<O> l2) {
 		final List<O> result = new ArrayList<O>(l1);
 		result.addAll(l2);
@@ -487,6 +393,86 @@ public class StringUtils {
 
 	public static boolean endsWithBackslash(final String s) {
 		return s.endsWith("\\") && s.endsWith("\\\\") == false;
+	}
+
+	public static String manageGuillemetStrict(String st) {
+		if (st.startsWith("<< ")) {
+			st = "\u00AB" + st.substring(3);
+		} else if (st.startsWith("<<")) {
+			st = "\u00AB" + st.substring(2);
+		}
+		if (st.endsWith(" >>")) {
+			st = st.substring(0, st.length() - 3) + "\u00BB";
+		} else if (st.endsWith(">>")) {
+			st = st.substring(0, st.length() - 2) + "\u00BB";
+		}
+		return st;
+	}
+
+	public static String manageGuillemet(String st) {
+		return st.replaceAll("\\<\\<\\s?([^<>]+?)\\s?\\>\\>", "\u00AB$1\u00BB");
+	}
+
+	public static String manageUnicodeNotationUplus(String s) {
+		final Pattern pattern = Pattern.compile("\\<U\\+([0-9a-fA-F]{4})\\>");
+		final Matcher matcher = pattern.matcher(s);
+		final StringBuffer result = new StringBuffer();
+		while (matcher.find()) {
+			final String num = matcher.group(1);
+			final int value = Integer.parseInt(num, 16);
+			final char c = (char) value;
+			matcher.appendReplacement(result, "" + c);
+		}
+		matcher.appendTail(result);
+		return result.toString();
+	}
+
+	public static String manageAmpDiese(String s) {
+		final Pattern pattern = Pattern.compile("\\&#([0-9]+);");
+		final Matcher matcher = pattern.matcher(s);
+		final StringBuffer result = new StringBuffer();
+		while (matcher.find()) {
+			final String num = matcher.group(1);
+			final char c = (char) Integer.parseInt(num);
+			matcher.appendReplacement(result, "" + c);
+		}
+		matcher.appendTail(result);
+		return result.toString();
+	}
+
+	public static String manageTildeArobaseStart(String s) {
+		s = s.replaceAll("~@start", "@start");
+		return s;
+	}
+
+	public static String trinNoTrace(CharSequence s) {
+		return s.toString().trim();
+	}
+
+	public static String trin(CharSequence arg) {
+		if (arg.length() == 0) {
+			return arg.toString();
+		}
+		int i = 0;
+		while (i < arg.length() && isSpaceOrTab(arg.charAt(i))) {
+			i++;
+		}
+		int j = arg.length() - 1;
+		while (j >= i && isSpaceOrTab(arg.charAt(j))) {
+			j--;
+		}
+		if (i == 0 && j == arg.length() - 1) {
+			return arg.toString();
+		}
+		return arg.subSequence(i, j + 1).toString();
+	}
+
+	public static List<String> splitHiddenNewLine(String s) {
+		return Arrays.asList(s.split("" + hiddenNewLine()));
+	}
+
+	public static String manageNewLine(String string) {
+		return string.replace(hiddenNewLine(), '\n');
 	}
 
 	// http://docs.oracle.com/javase/tutorial/i18n/format/dateFormat.html

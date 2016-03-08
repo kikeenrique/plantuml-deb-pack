@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -29,12 +29,11 @@
 package net.sourceforge.plantuml.sequencediagram;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import net.sourceforge.plantuml.Url;
-
-public class Notes implements Event, Iterable<Note> {
+public class Notes extends AbstractEvent implements Event, Iterable<Note> {
 
 	private final List<Note> notes = new ArrayList<Note>();
 
@@ -56,15 +55,15 @@ public class Notes implements Event, Iterable<Note> {
 		return false;
 	}
 
-	public Url getUrl() {
-		return null;
-	}
-	
-	public boolean hasUrl() {
-		return false;
-	}
-
 	public Iterator<Note> iterator() {
 		return notes.iterator();
+	}
+
+	public Note get(int i) {
+		return notes.get(i);
+	}
+
+	public List<Note> asList() {
+		return Collections.unmodifiableList(notes);
 	}
 }

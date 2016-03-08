@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,14 +31,16 @@ package net.sourceforge.plantuml.svek;
 import java.awt.geom.Dimension2D;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
+import net.sourceforge.plantuml.graphic.VerticalAlignment;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class DecorateEntityImage implements TextBlockBackcolored {
+public class DecorateEntityImage extends AbstractTextBlock implements TextBlockBackcolored {
 
 	private final TextBlock original;
 	private final HorizontalAlignment horizontal1;
@@ -55,6 +57,14 @@ public class DecorateEntityImage implements TextBlockBackcolored {
 
 	public static DecorateEntityImage addBottom(TextBlock original, TextBlock text, HorizontalAlignment horizontal) {
 		return new DecorateEntityImage(original, null, null, text, horizontal);
+	}
+
+	public static DecorateEntityImage add(TextBlock original, TextBlock text, HorizontalAlignment horizontal,
+			VerticalAlignment verticalAlignment) {
+		if (verticalAlignment == VerticalAlignment.TOP) {
+			return addTop(original, text, horizontal);
+		}
+		return addBottom(original, text, horizontal);
 	}
 
 	public DecorateEntityImage(TextBlock original, TextBlock text1, HorizontalAlignment horizontal1, TextBlock text2,

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -41,6 +41,11 @@ public final class Message extends AbstractMessage {
 		super(label, arrowConfiguration, messageNumber);
 		this.p1 = p1;
 		this.p2 = p2;
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " " + p1 + "->" + p2 + " " + getLabel();
 	}
 
 	public Participant getParticipant1() {

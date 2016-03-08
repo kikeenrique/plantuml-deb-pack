@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -80,8 +80,8 @@ public class PSystemSalt extends AbstractPSystem {
 
 		final Dimension2D size = salt.getPreferredDimension(TextBlockUtils.getDummyStringBounder(), 0, 0);
 		final ImageBuilder builder = new ImageBuilder(new ColorMapperIdentity(), 1.0, HtmlColorUtils.WHITE, null,
-				null, 5, 5, null);
-		builder.addUDrawable(new UDrawable() {
+				null, 5, 5, null, false);
+		builder.setUDrawable(new UDrawable() {
 
 			public void drawU(UGraphic ug) {
 				ug = ug.apply(new UChangeColor(HtmlColorUtils.BLACK));
@@ -89,7 +89,7 @@ public class PSystemSalt extends AbstractPSystem {
 				salt.drawU(ug, 1, new Dimension2DDouble(size.getWidth(), size.getHeight()));
 			}
 		});
-		return builder.writeImageTOBEMOVED(fileFormat.getFileFormat(), os);
+		return builder.writeImageTOBEMOVED(fileFormat, os);
 	}
 
 	private ImageData exportDiagramOld(OutputStream os, int num, FileFormatOption fileFormat) throws IOException {

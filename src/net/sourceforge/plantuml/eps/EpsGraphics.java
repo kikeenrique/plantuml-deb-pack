@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -67,11 +67,7 @@ public class EpsGraphics {
 
 	public EpsGraphics() {
 		header.append("%!PS-Adobe-3.0 EPSF-3.0\n");
-		String v = Version.versionString();
-		if (v.endsWith("beta") == false) {
-			v += "    ";
-		}
-		header.append("%%Creator: PlantUML v" + v + "\n");
+		header.append("%%Creator: PlantUML v" + Version.versionString(10) + "\n");
 		header.append("%%Title: noTitle\n");
 		// header.append("%%CreationDate: " + new Date() + "\n");
 		setcolorgradient.add(new PostScriptCommandRaw("3 index 7 index sub 1 index mul 7 index add", true));
@@ -306,6 +302,11 @@ public class EpsGraphics {
 
 	}
 
+	public void epsPolygon(HtmlColorGradient gr, ColorMapper mapper, double... points) {
+		setFillColor(mapper.getMappedColor(gr.getColor1()));
+		epsPolygon(points);
+	}
+
 	public void epsPolygon(double... points) {
 		checkCloseDone();
 		double lastX = 0;
@@ -363,14 +364,6 @@ public class EpsGraphics {
 			epsRectangleInternal(x, y, width, height, rx, ry, false);
 			append("closepath stroke", true);
 		}
-	}
-
-	public void epsUrlLink(int x, int y, int width, int height, String url) {
-		append("[ /Rect [ " + x + " " + y + " " + (x + width) + " " + (y + height) + " ]", true);
-		append("/Border [ 0 0 0 ]", true);
-		append("/Action << /Subtype /URI /URI (" + url + ") >>", true);
-		append("/Subtype /Link", true);
-		append("/ANN pdfmark", true);
 	}
 
 	public void epsRectangle(double x, double y, double width, double height, double rx, double ry,
@@ -519,6 +512,9 @@ public class EpsGraphics {
 	}
 
 	protected void appendColor(Color c) {
+		if (c == null) {
+			return;
+		}
 		final double r = c.getRed() / 255.0;
 		final double g = c.getGreen() / 255.0;
 		final double b = c.getBlue() / 255.0;
@@ -526,6 +522,9 @@ public class EpsGraphics {
 	}
 
 	protected void appendColorShort(Color c) {
+		if (c == null) {
+			return;
+		}
 		final double r = c.getRed() / 255.0;
 		final double g = c.getGreen() / 255.0;
 		final double b = c.getBlue() / 255.0;
@@ -712,6 +711,14 @@ public class EpsGraphics {
 			epsUrlLink(urlArea.xmin, urlArea.ymin, width, height, urlArea.url);
 		}
 		this.urlArea = null;
+	}
+
+	public void epsUrlLink(int x, int y, int width, int height, String url) {
+		append("[ /Rect [ " + x + " " + y + " " + (x + width) + " " + (y + height) + " ]", true);
+		append("/Border [ 0 0 0 ]", true);
+		append("/Action << /Subtype /URI /URI (" + url + ") >>", true);
+		append("/Subtype /Link", true);
+		append("/ANN pdfmark", true);
 	}
 
 	public void openLink(String url) {

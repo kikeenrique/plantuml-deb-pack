@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -113,11 +113,13 @@ public class Frame implements Component {
 	}
 
 	private TextBlock createTextBloc() {
-		final UFont font = skinParam.getFont(FontParam.PACKAGE, null, false);
-		final HtmlColor textColor = skinParam.getFontHtmlColor(FontParam.PACKAGE, null);
-		final TextBlock bloc = TextBlockUtils.create(Display.create(name), new FontConfiguration(font, textColor, skinParam.getHyperlinkColor(), skinParam.useUnderlineForHyperlink()),
-				HorizontalAlignment.LEFT, new SpriteContainerEmpty());
-		return bloc;
+		final UFont font = skinParam.getFont(null, false, FontParam.PACKAGE);
+		final HtmlColor textColor = skinParam.getFontHtmlColor(null, FontParam.PACKAGE);
+		// final TextBlock bloc = Display.create(name).create(new FontConfiguration(font, textColor,
+		// skinParam.getHyperlinkColor(), skinParam.useUnderlineForHyperlink()), HorizontalAlignment.LEFT, new
+		// SpriteContainerEmpty());
+		// return bloc;
+		throw new UnsupportedOperationException();
 	}
 
 	public final Dimension2D getPreferredDimension(StringBounder stringBounder) {

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,6 +28,7 @@
  */
 package net.sourceforge.plantuml.descdiagram.command;
 
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.UrlBuilder;
 import net.sourceforge.plantuml.classdiagram.AbstractEntityDiagram;
 import net.sourceforge.plantuml.command.CommandExecutionResult;
@@ -41,9 +42,9 @@ import net.sourceforge.plantuml.cucadiagram.GroupType;
 import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.IGroup;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
-import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.USymbol;
-import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.graphic.color.ColorParser;
+import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.utils.UniqueSequence;
 
 public class CommandPackageWithUSymbol extends SingleLineCommand2<AbstractEntityDiagram> {
@@ -63,7 +64,7 @@ public class CommandPackageWithUSymbol extends SingleLineCommand2<AbstractEntity
 				new RegexLeaf("[%s]*"), //
 				new RegexLeaf("URL", "(" + UrlBuilder.getRegexp() + ")?"), //
 				new RegexLeaf("[%s]*"), //
-				new RegexLeaf("COLOR", "(" + HtmlColorUtils.COLOR_REGEXP + ")?"), //
+				ColorParser.exp1(), //
 				new RegexLeaf("[%s]*\\{$"));
 	}
 
@@ -94,7 +95,7 @@ public class CommandPackageWithUSymbol extends SingleLineCommand2<AbstractEntity
 		}
 		final String color = arg.get("COLOR", 0);
 		if (color != null) {
-			p.setSpecificBackcolor(diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(color));
+			p.setSpecificColorTOBEREMOVED(ColorType.BACK, diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(color));
 		}
 		return CommandExecutionResult.ok();
 	}

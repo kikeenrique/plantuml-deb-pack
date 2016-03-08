@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -36,11 +36,12 @@ import net.sourceforge.plantuml.activitydiagram3.ftile.Connection;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Ftile;
 import net.sourceforge.plantuml.activitydiagram3.ftile.FtileGeometry;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public abstract class FtileDecorate implements Ftile {
+public abstract class FtileDecorate extends AbstractTextBlock implements Ftile {
 
 	final private Ftile ftile;
 
@@ -92,7 +93,7 @@ public abstract class FtileDecorate implements Ftile {
 	public boolean shadowing() {
 		return ftile.shadowing();
 	}
-
+	
 	protected final Ftile getFtileDelegated() {
 		return ftile;
 	}

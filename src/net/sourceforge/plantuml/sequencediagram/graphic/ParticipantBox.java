@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -46,7 +46,7 @@ public class ParticipantBox implements Pushable {
 
 	private static int CPT = 0;
 
-	private final int outMargin = 5;
+	private final int outMargin;
 
 	private double startingX;
 
@@ -57,7 +57,8 @@ public class ParticipantBox implements Pushable {
 
 	private int cpt = CPT++;
 
-	public ParticipantBox(Component head, Component line, Component tail, Component delayLine, double startingX) {
+	public ParticipantBox(Component head, Component line, Component tail, Component delayLine, double startingX, int outMargin) {
+		this.outMargin = outMargin;
 		this.startingX = startingX;
 		this.head = head;
 		this.line = line;
@@ -147,22 +148,23 @@ public class ParticipantBox implements Pushable {
 		// ug.translate(-outMargin, 0);
 	}
 
-	public void drawLineU(UGraphic ug, double startingY, double endingY, boolean showTail, double myDelta) {
-		ug = ug.apply(new UTranslate(startingX, 0));
-		if (delays.size() > 0) {
-			final StringBounder stringBounder = ug.getStringBounder();
-			for (GraphicalDelayText delay : delays) {
-				if (delay.getStartingY() - myDelta >= startingY) {
-					drawLine(ug, startingY, delay.getStartingY() - myDelta, line);
-					drawLine(ug, delay.getStartingY() - myDelta, delay.getEndingY(stringBounder) - myDelta, delayLine);
-					startingY = delay.getEndingY(stringBounder) - myDelta;
-				}
-			}
-			if (delays.get(delays.size() - 1).getEndingY(stringBounder) - myDelta > startingY) {
-				startingY = delays.get(delays.size() - 1).getEndingY(stringBounder) - myDelta;
-			}
-		}
-		drawLine(ug, startingY, endingY, line);
+	public void drawLineUTOBEREMOVED_4243(UGraphic ug, double startingY, double endingY, boolean showTail, double myDelta) {
+		throw new UnsupportedOperationException();
+//		ug = ug.apply(new UTranslate(startingX, 0));
+//		if (delays.size() > 0) {
+//			final StringBounder stringBounder = ug.getStringBounder();
+//			for (GraphicalDelayText delay : delays) {
+//				if (delay.getStartingY() - myDelta >= startingY) {
+//					drawLine(ug, startingY, delay.getStartingY() - myDelta, line);
+//					drawLine(ug, delay.getStartingY() - myDelta, delay.getEndingY(stringBounder) - myDelta, delayLine);
+//					startingY = delay.getEndingY(stringBounder) - myDelta;
+//				}
+//			}
+//			if (delays.get(delays.size() - 1).getEndingY(stringBounder) - myDelta > startingY) {
+//				startingY = delays.get(delays.size() - 1).getEndingY(stringBounder) - myDelta;
+//			}
+//		}
+//		drawLine(ug, startingY, endingY, line);
 	}
 
 	public void drawLineU22(UGraphic ug, double startingY, final double endingY, boolean showTail, double myDelta) {
@@ -185,7 +187,9 @@ public class ParticipantBox implements Pushable {
 	}
 
 	private void drawLineIfLowerThan(UGraphic ug, double startingY, double endingY, Component comp, double limitY) {
-		if (startingY <= limitY && endingY <= limitY) {
+		startingY = Math.min(startingY, limitY);
+		endingY = Math.min(endingY, limitY);
+		if (startingY < limitY || endingY < limitY) {
 			drawLine(ug, startingY, endingY, comp);
 		}
 

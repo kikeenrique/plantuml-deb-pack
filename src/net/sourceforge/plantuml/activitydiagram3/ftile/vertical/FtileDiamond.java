@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -135,6 +135,10 @@ public class FtileDiamond extends AbstractFtile {
 	public FtileGeometry calculateDimension(StringBounder stringBounder) {
 		final Dimension2D dim = new Dimension2DDouble(Diamond.diamondHalfSize * 2, Diamond.diamondHalfSize * 2);
 		return new FtileGeometry(dim, dim.getWidth() / 2, 0, dim.getHeight());
+	}
+
+	public Ftile withWestAndEast(TextBlock tb1, TextBlock tb2) {
+		return withWest(tb1).withEast(tb2);
 	}
 
 }

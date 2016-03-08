@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -29,8 +29,10 @@
 package net.sourceforge.plantuml.ugraphic;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Map;
 
+import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 
 public class ULayoutGroup {
@@ -41,17 +43,29 @@ public class ULayoutGroup {
 		this.placementStrategy = placementStrategy;
 	}
 
-	public void drawU(UGraphic ug, double x, double y, double width, double height) {
+	public void drawU(UGraphic ug, double width, double height) {
 		for (Map.Entry<TextBlock, Point2D> ent : placementStrategy.getPositions(width, height).entrySet()) {
 			final TextBlock block = ent.getKey();
 			final Point2D pos = ent.getValue();
-			block.drawU(ug.apply(new UTranslate((x + pos.getX()), (y + pos.getY()))));
+			block.drawU(ug.apply(new UTranslate(pos)));
 		}
 	}
 
 	public void add(TextBlock block) {
 		placementStrategy.add(block);
 
+	}
+
+	public Rectangle2D getInnerPosition(String member, double width, double height, StringBounder stringBounder) {
+		for (Map.Entry<TextBlock, Point2D> ent : placementStrategy.getPositions(width, height).entrySet()) {
+			final TextBlock block = ent.getKey();
+			final Rectangle2D result = block.getInnerPosition(member, stringBounder);
+			if (result != null) {
+				final UTranslate translate = new UTranslate(ent.getValue());
+				return translate.apply(result);
+			}
+		}
+		return null;
 	}
 
 }

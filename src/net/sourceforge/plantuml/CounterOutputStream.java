@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -69,6 +69,17 @@ public class CounterOutputStream extends OutputStream {
 
 	public int getLength() {
 		return length;
+	}
+	
+	@Override
+	public void flush() throws IOException {
+		os.flush();
+	}
+	
+	
+	@Override
+	public void close() throws IOException {
+		os.close();
 	}
 
 }

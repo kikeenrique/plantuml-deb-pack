@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -38,6 +38,11 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -54,11 +59,14 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.GeneratedImage;
 import net.sourceforge.plantuml.graphic.GraphicStrings;
 import net.sourceforge.plantuml.ugraphic.ColorMapperIdentity;
@@ -67,15 +75,16 @@ import net.sourceforge.plantuml.version.PSystemVersion;
 
 class ImageWindow2 extends JFrame {
 
-	final private static Preferences prefs = Preferences.userNodeForPackage(ImageWindow2.class);
-	final private static String KEY_ZOOM_FIT = "zoomfit";
+	private final static Preferences prefs = Preferences.userNodeForPackage(ImageWindow2.class);
+	private final static String KEY_ZOOM_FIT = "zoomfit";
 
 	private SimpleLine2 simpleLine2;
-	final private JScrollPane scrollPane;
+	private final JScrollPane scrollPane;
 	private final JButton next = new JButton("Next");
 	private final JButton copy = new JButton("Copy");
 	private final JButton previous = new JButton("Previous");
 	private final JCheckBox zoomFitButt = new JCheckBox("Zoom fit");
+	private final MainWindow2 main;
 
 	private final ListModel listModel;
 	private int index;
@@ -86,33 +95,40 @@ class ImageWindow2 extends JFrame {
 
 	private SizeMode sizeMode = SizeMode.FULL_SIZE;
 
+	private int startX, startY;
+
 	public ImageWindow2(SimpleLine2 simpleLine, final MainWindow2 main, ListModel listModel, int index) {
 		super(simpleLine.toString());
 		setIconImage(PSystemVersion.getPlantumlSmallIcon2());
 		this.simpleLine2 = simpleLine;
 		this.listModel = listModel;
 		this.index = index;
+		this.main = main;
 
 		final JPanel north = new JPanel();
 		north.add(previous);
 		north.add(copy);
 		north.add(next);
 		north.add(zoomFitButt);
+		copy.setFocusable(false);
 		copy.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				copy();
 			}
 		});
+		next.setFocusable(false);
 		next.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				next();
 			}
 		});
+		previous.setFocusable(false);
 		previous.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				previous();
 			}
 		});
+		zoomFitButt.setFocusable(false);
 		zoomFitButt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				zoomFit();
@@ -134,10 +150,11 @@ class ImageWindow2 extends JFrame {
 			}
 		});
 
+
 		this.addComponentListener(new java.awt.event.ComponentAdapter() {
 			public void componentResized(java.awt.event.ComponentEvent e) {
 				super.componentResized(e);
-				refreshImage();
+				refreshImage(false);
 			}
 		});
 
@@ -146,6 +163,34 @@ class ImageWindow2 extends JFrame {
 		if (zoomChecked) {
 			sizeMode = SizeMode.ZOOM_FIT;
 		}
+
+		this.setFocusable(true);
+		this.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent evt) {
+				if (evt.isControlDown() && evt.getKeyCode() == KeyEvent.VK_RIGHT) {
+					next();
+				} else if (evt.isControlDown() && evt.getKeyCode() == KeyEvent.VK_LEFT) {
+					previous();
+				} else if (evt.isAltDown() && evt.getKeyCode() == KeyEvent.VK_RIGHT) {
+					next();
+				} else if (evt.isAltDown() && evt.getKeyCode() == KeyEvent.VK_LEFT) {
+					previous();
+				} else if (evt.getKeyCode() == KeyEvent.VK_RIGHT) {
+					imageRight();
+				} else if (evt.getKeyCode() == KeyEvent.VK_LEFT) {
+					imageLeft();
+				} else if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
+					imageDown();
+				} else if (evt.getKeyCode() == KeyEvent.VK_UP) {
+					imageUp();
+				} else if (evt.getKeyCode() == KeyEvent.VK_C) {
+					copy();
+				} else if (evt.getKeyCode() == KeyEvent.VK_Z) {
+					zoomFitButt.setSelected(!zoomFitButt.isSelected());
+					zoomFit();
+				}
+			}
+		});
 
 	}
 
@@ -159,6 +204,26 @@ class ImageWindow2 extends JFrame {
 		updateSimpleLine();
 	}
 
+	private void imageDown() {
+		final JScrollBar bar = scrollPane.getVerticalScrollBar();
+		bar.setValue(bar.getValue() + bar.getBlockIncrement());
+	}
+
+	private void imageUp() {
+		final JScrollBar bar = scrollPane.getVerticalScrollBar();
+		bar.setValue(bar.getValue() - bar.getBlockIncrement());
+	}
+
+	private void imageLeft() {
+		final JScrollBar bar = scrollPane.getHorizontalScrollBar();
+		bar.setValue(bar.getValue() - bar.getBlockIncrement());
+	}
+
+	private void imageRight() {
+		final JScrollBar bar = scrollPane.getHorizontalScrollBar();
+		bar.setValue(bar.getValue() + bar.getBlockIncrement());
+	}
+
 	private void zoomFit() {
 		final boolean selected = zoomFitButt.isSelected();
 		prefs.putBoolean(KEY_ZOOM_FIT, selected);
@@ -167,7 +232,7 @@ class ImageWindow2 extends JFrame {
 		} else {
 			sizeMode = SizeMode.FULL_SIZE;
 		}
-		refreshImage();
+		refreshImage(false);
 	}
 
 	private void updateSimpleLine() {
@@ -179,7 +244,16 @@ class ImageWindow2 extends JFrame {
 		}
 		simpleLine2 = (SimpleLine2) listModel.getElementAt(index);
 		setTitle(simpleLine2.toString());
-		refreshImage();
+		refreshImage(false);
+	}
+
+	private void refreshSimpleLine() {
+		for (SimpleLine2 line : main.getCurrentDirectoryListing2()) {
+			if (line.getFile().equals(simpleLine2.getFile())) {
+				simpleLine2 = line;
+				setTitle(simpleLine2.toString());
+			}
+		}
 	}
 
 	private ScrollablePicture buildScrollablePicture() {
@@ -205,11 +279,11 @@ class ImageWindow2 extends JFrame {
 			final String msg = "Error reading file: " + ex.toString();
 			final GraphicStrings error = GraphicStrings.createDefault(Arrays.asList(msg), false);
 			final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, error.getBackcolor(),
-					null, null, 0, 0, null);
-			imageBuilder.addUDrawable(error);
+					null, null, 0, 0, null, false);
+			imageBuilder.setUDrawable(error);
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {
-				imageBuilder.writeImageTOBEMOVED(FileFormat.PNG, baos);
+				imageBuilder.writeImageTOBEMOVED(new FileFormatOption(FileFormat.PNG), baos);
 				baos.close();
 				image = ImageIO.read(new ByteArrayInputStream(baos.toByteArray()));
 			} catch (IOException e) {
@@ -218,6 +292,28 @@ class ImageWindow2 extends JFrame {
 		}
 		final ImageIcon imageIcon = new ImageIcon(image, simpleLine2.toString());
 		final ScrollablePicture scrollablePicture = new ScrollablePicture(imageIcon, 1);
+		
+		scrollablePicture.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent me) {
+				super.mousePressed(me);
+				startX = me.getX();
+				startY = me.getY();
+			}
+		});
+		scrollablePicture.addMouseMotionListener(new MouseMotionAdapter() {
+            public void mouseDragged(MouseEvent me) {
+                super.mouseDragged(me);
+                final int diffX = me.getX() - startX;
+                final int diffY = me.getY() - startY;
+
+				final JScrollBar hbar = scrollPane.getHorizontalScrollBar();
+				hbar.setValue(hbar.getValue() - diffX);
+				final JScrollBar vbar = scrollPane.getVerticalScrollBar();
+				vbar.setValue(vbar.getValue() - diffY);
+            }
+        });
+
+		
 		return scrollablePicture;
 	}
 
@@ -236,9 +332,34 @@ class ImageWindow2 extends JFrame {
 		return simpleLine2;
 	}
 
-	public void refreshImage() {
+	private int v1;
+	private int v2;
+
+	public void refreshImage(boolean external) {
+		final JScrollBar bar1 = scrollPane.getVerticalScrollBar();
+		final JScrollBar bar2 = scrollPane.getHorizontalScrollBar();
+		if (external && isError() == false) {
+			v1 = bar1.getValue();
+			v2 = bar2.getValue();
+		}
 		scrollPane.setViewportView(buildScrollablePicture());
 		force();
+		if (external) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					refreshSimpleLine();
+					if (isError() == false) {
+						bar1.setValue(v1);
+						bar2.setValue(v2);
+					}
+				}
+			});
+		}
+	}
+
+	private boolean isError() {
+		return simpleLine2.getGeneratedImage() != null && simpleLine2.getGeneratedImage().lineErrorRaw() != -1;
+
 	}
 
 	private void force() {

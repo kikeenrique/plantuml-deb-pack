@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -35,12 +35,12 @@ import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.SpriteContainerEmpty;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.golem.Tile;
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
-import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.ugraphic.Shadowable;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
@@ -50,7 +50,7 @@ import net.sourceforge.plantuml.ugraphic.URectangle;
 import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class ActivityBox implements TextBlock {
+public class ActivityBox extends AbstractTextBlock {
 
 	private static final int CORNER = 25;
 	private static final int MARGIN = 10;
@@ -65,8 +65,8 @@ public class ActivityBox implements TextBlock {
 		this.id = id;
 		this.label = label;
 		final UFont font = new UFont("Serif", Font.PLAIN, 14);
-		final FontConfiguration fc = new FontConfiguration(font, HtmlColorUtils.BLACK, HtmlColorUtils.BLUE, true);
-		tb = TextBlockUtils.create(Display.create(label), fc, HorizontalAlignment.LEFT, new SpriteContainerEmpty());
+		final FontConfiguration fc = FontConfiguration.blackBlueTrue(font);
+		tb = Display.create(label).create(fc, HorizontalAlignment.LEFT, new SpriteContainerEmpty());
 	}
 
 	public Tile getTile() {
@@ -84,14 +84,14 @@ public class ActivityBox implements TextBlock {
 	public void drawU(UGraphic ug) {
 		final Dimension2D dimTotal = calculateDimension(ug.getStringBounder());
 		// final Dimension2D dimDesc = tb.calculateDimension(ug.getStringBounder());
-		
+
 		final double widthTotal = dimTotal.getWidth();
 		final double heightTotal = dimTotal.getHeight();
 		final Shadowable rect = new URectangle(widthTotal, heightTotal, CORNER, CORNER);
 		ug = ug.apply(new UChangeColor(HtmlColorUtils.MY_RED));
 		ug = ug.apply(new UChangeBackColor(HtmlColorUtils.MY_YELLOW));
 		ug.apply(new UStroke(1.5)).draw(rect);
-		
+
 		tb.drawU(ug.apply(new UTranslate(MARGIN, MARGIN)));
 	}
 

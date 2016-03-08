@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -34,20 +34,35 @@ import java.io.OutputStream;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FileFormatOption;
+import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.activitydiagram3.ftile.EntityImageLegend;
 import net.sourceforge.plantuml.api.ImageDataSimple;
 import net.sourceforge.plantuml.core.ImageData;
+import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.cucadiagram.DisplayPositionned;
+import net.sourceforge.plantuml.graphic.HorizontalAlignment;
+import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
+import net.sourceforge.plantuml.graphic.VerticalAlignment;
+import net.sourceforge.plantuml.png.PngTitler;
 import net.sourceforge.plantuml.real.Real;
+import net.sourceforge.plantuml.real.RealOrigin;
 import net.sourceforge.plantuml.real.RealUtils;
 import net.sourceforge.plantuml.sequencediagram.Participant;
 import net.sourceforge.plantuml.sequencediagram.SequenceDiagram;
 import net.sourceforge.plantuml.sequencediagram.graphic.FileMaker;
+import net.sourceforge.plantuml.skin.Component;
+import net.sourceforge.plantuml.skin.ComponentType;
+import net.sourceforge.plantuml.skin.SimpleContext2D;
 import net.sourceforge.plantuml.skin.Skin;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UGraphic2;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
+import net.sourceforge.plantuml.ugraphic.hand.UGraphicHandwritten;
+import net.sourceforge.plantuml.utils.MathUtils;
 
 public class SequenceDiagramFileMakerTeoz implements FileMaker {
 
@@ -59,83 +74,166 @@ public class SequenceDiagramFileMakerTeoz implements FileMaker {
 		this.diagram = sequenceDiagram;
 		this.fileFormatOption = fileFormatOption;
 		this.skin = skin;
+		this.footer = getFooterOrHeader(FontParam.FOOTER);
+		this.header = getFooterOrHeader(FontParam.HEADER);
+
+		this.main = new MainTileAdapter(createMainTile());
+		this.min1 = ((MainTileAdapter) main).getMinX(stringBounder);
+
+		this.title = getTitle();
+		this.legend = getLegend();
+
+		this.heightEnglober1 = englobers.getOffsetForEnglobers(stringBounder);
+		this.heightEnglober2 = heightEnglober1 == 0 ? 0 : 10;
+
+		final double totalWidth = MathUtils.max(main.calculateDimension(stringBounder).getWidth(), title
+				.calculateDimension(stringBounder).getWidth(), footer.calculateDimension(stringBounder).getWidth(),
+				header.calculateDimension(stringBounder).getWidth(), legend.calculateDimension(stringBounder)
+						.getWidth());
+		final double totalHeight = main.calculateDimension(stringBounder).getHeight() + heightEnglober1
+				+ heightEnglober2 + title.calculateDimension(stringBounder).getHeight()
+				+ header.calculateDimension(stringBounder).getHeight()
+				+ legend.calculateDimension(stringBounder).getHeight()
+				+ footer.calculateDimension(stringBounder).getHeight();
+		this.dimTotal = new Dimension2DDouble(totalWidth, totalHeight);
 
 	}
+
+	private Englobers englobers;
+	private final StringBounder stringBounder = TextBlockUtils.getDummyStringBounder();
+
+	private final TextBlock footer;
+	private final TextBlock header;
+
+	private final TextBlock main;
+
+	private final TextBlock title;
+	private final TextBlock legend;
+	private final Dimension2D dimTotal;
+	private final Real min1;
+
+	private final LivingSpaces livingSpaces = new LivingSpaces();
+	private final double heightEnglober1;
+	private final double heightEnglober2;
 
 	public ImageData createOne(OutputStream os, int index, boolean isWithMetadata) throws IOException {
-		StringBounder stringBounder = TextBlockUtils.getDummyStringBounder();
+		final UTranslate min1translate = new UTranslate(-min1.getCurrentValue(), 0);
+		final double dpiFactor = diagram.getDpiFactor(fileFormatOption, dimTotal);
+		final UGraphic2 ug2 = (UGraphic2) fileFormatOption.createUGraphic(getSkinParam().getColorMapper(), dpiFactor,
+				dimTotal, getSkinParam().getBackgroundColor(), false).apply(min1translate);
 
-		final ISkinParam skinParam = diagram.getSkinParam();
+		UGraphic ug = getSkinParam().handwritten() ? new UGraphicHandwritten(ug2) : ug2;
+		englobers.drawEnglobers(goDownForEnglobers(ug), main.calculateDimension(stringBounder).getHeight()
+				+ this.heightEnglober1 + this.heightEnglober2 / 2, new SimpleContext2D(true));
 
-		final Real origin = RealUtils.createOrigin();
+		printAligned(ug, diagram.getFooterOrHeaderTeoz(FontParam.HEADER).getHorizontalAlignment(), header);
+		ug = goDown(ug, header);
+
+		printAligned(ug, HorizontalAlignment.CENTER, title);
+		ug = goDown(ug, title);
+
+		if (diagram.getLegend().getVerticalAlignment() == VerticalAlignment.TOP) {
+			printAligned(ug, diagram.getLegend().getHorizontalAlignment(), legend);
+			ug = goDown(ug, legend);
+		}
+
+		ug = ug.apply(new UTranslate(0, this.heightEnglober1));
+		printAligned(ug, HorizontalAlignment.CENTER, main);
+		ug = goDown(ug, main);
+		ug = ug.apply(new UTranslate(0, this.heightEnglober2));
+
+		if (diagram.getLegend().getVerticalAlignment() == VerticalAlignment.BOTTOM) {
+			printAligned(ug, diagram.getLegend().getHorizontalAlignment(), legend);
+			ug = goDown(ug, legend);
+		}
+
+		printAligned(ug, diagram.getFooterOrHeaderTeoz(FontParam.FOOTER).getHorizontalAlignment(), footer);
+
+		ug2.writeImageTOBEMOVED(os, isWithMetadata ? diagram.getMetadata() : null, diagram.getDpi(fileFormatOption));
+
+		return new ImageDataSimple(dimTotal);
+	}
+
+	private UGraphic goDownForEnglobers(UGraphic ug) {
+		ug = goDown(ug, title);
+		ug = goDown(ug, header);
+		if (diagram.getLegend().getVerticalAlignment() == VerticalAlignment.TOP) {
+			ug = goDown(ug, legend);
+		}
+		return ug;
+	}
+
+	private UGraphic goDown(UGraphic ug, TextBlock size) {
+		return ug.apply(new UTranslate(0, size.calculateDimension(stringBounder).getHeight()));
+	}
+
+	public void printAligned(UGraphic ug, HorizontalAlignment align, final TextBlock layer) {
+		double dx = 0;
+		if (align == HorizontalAlignment.RIGHT) {
+			dx = dimTotal.getWidth() - layer.calculateDimension(stringBounder).getWidth();
+		} else if (align == HorizontalAlignment.CENTER) {
+			dx = (dimTotal.getWidth() - layer.calculateDimension(stringBounder).getWidth()) / 2;
+		}
+		layer.drawU(ug.apply(new UTranslate(dx, 0)));
+	}
+
+	private MainTile createMainTile() {
+		final RealOrigin origin = RealUtils.createOrigin();
 		Real currentPos = origin.addAtLeast(0);
-		double headHeight = 0;
-		LivingSpace last = null;
-		LivingSpaces livingSpaces = new LivingSpaces();
 		for (Participant p : diagram.participants().values()) {
-			final LivingSpace livingSpace = new LivingSpace(p, diagram.getEnglober(p), skin, skinParam, currentPos,
-					diagram.events());
-			last = livingSpace;
-			((LivingSpaces) livingSpaces).put(p, livingSpace);
-			final Dimension2D headDim = livingSpace.getHeadPreferredDimension(stringBounder);
+			final LivingSpace livingSpace = new LivingSpace(p, diagram.getEnglober(p), skin, getSkinParam(),
+					currentPos, diagram.events());
+			livingSpaces.put(p, livingSpace);
 			currentPos = livingSpace.getPosD(stringBounder).addAtLeast(0);
-			headHeight = Math.max(headHeight, headDim.getHeight());
 		}
-		// livingSpaces = new LivingSpacesDeltaSimple(livingSpaces);
 
-		final MainTile mainTile = new MainTile(diagram, skin, last.getPosD(stringBounder).addAtLeast(0), livingSpaces,
-				origin);
+		final TileArguments tileArguments = new TileArguments(stringBounder, livingSpaces, skin,
+				diagram.getSkinParam(), origin);
+
+		this.englobers = new Englobers(tileArguments);
+		final MainTile mainTile = new MainTile(diagram, englobers, tileArguments);
+		this.livingSpaces.addConstraints(stringBounder);
 		mainTile.addConstraints(stringBounder);
-		origin.compile();
-
-		final double height = mainTile.getPreferredHeight(stringBounder) + 2 * headHeight;
-
-		final Real min1 = mainTile.getMinX(stringBounder);
-		final Real max1 = mainTile.getMaxX(stringBounder);
-		System.err.println("min1=" + min1.getCurrentValue());
-		System.err.println("max1=" + max1.getCurrentValue());
-
-		final Dimension2D dim = new Dimension2DDouble(max1.getCurrentValue() - min1.getCurrentValue(), height);
-		final UGraphic2 ug = (UGraphic2) fileFormatOption.createUGraphic(dim).apply(
-				new UTranslate(-min1.getCurrentValue(), 0));
-		stringBounder = ug.getStringBounder();
-
-		drawHeads(ug, livingSpaces);
-		// mainTile.beforeDrawing(ug.getStringBounder(), livingSpaces.values());
-		mainTile.drawU(ug.apply(new UTranslate(0, headHeight)));
-		drawLifeLines(ug.apply(new UTranslate(0, headHeight)), mainTile.getPreferredHeight(stringBounder), livingSpaces);
-		drawHeads(ug.apply(new UTranslate(0, mainTile.getPreferredHeight(stringBounder) + headHeight)), livingSpaces);
-
-		ug.writeImageTOBEMOVED(os, isWithMetadata ? diagram.getMetadata() : null, diagram.getDpi(fileFormatOption));
-		final Dimension2D info = new Dimension2DDouble(dim.getWidth(), dim.getHeight());
-
-		// if (fileFormatOption.getFileFormat() == FileFormat.PNG && ug instanceof UGraphicG2d) {
-		// final Set<Url> urls = ((UGraphicG2d) ug).getAllUrlsEncountered();
-		// if (urls.size() > 0) {
-		// if (scale == 0) {
-		// throw new IllegalStateException();
-		// }
-		// final CMapData cmap = CMapData.cmapString(urls, scale);
-		// return new ImageDataComplex(info, cmap, null);
-		// }
-		// }
-		return new ImageDataSimple(info);
+		this.englobers.addConstraints(stringBounder);
+		origin.compileNow();
+		tileArguments.setBordered(mainTile);
+		return mainTile;
 	}
 
-	private void drawLifeLines(final UGraphic ug, double height, LivingSpaces livingSpaces) {
-		for (LivingSpace livingSpace : livingSpaces.values()) {
-			System.err.println("drawing lines " + livingSpace);
-			final double x = livingSpace.getPosC(ug.getStringBounder()).getCurrentValue();
-			livingSpace.drawLine(ug.apply(new UTranslate(x, 0)), height);
-		}
+	public ISkinParam getSkinParam() {
+		return diagram.getSkinParam();
 	}
 
-	private void drawHeads(final UGraphic ug, LivingSpaces livingSpaces) {
-		for (LivingSpace livingSpace : livingSpaces.values()) {
-			System.err.println("drawing heads " + livingSpace);
-			final double x = livingSpace.getPosB().getCurrentValue();
-			livingSpace.drawHead(ug.apply(new UTranslate(x, 0)));
+	private TextBlock getTitle() {
+		if (DisplayPositionned.isNull(diagram.getTitle())) {
+			return new ComponentAdapter(null);
 		}
+		final Component compTitle = skin.createComponent(ComponentType.TITLE, null, getSkinParam(), diagram.getTitle()
+				.getDisplay());
+		return new ComponentAdapter(compTitle);
+	}
+
+	private TextBlock getLegend() {
+		final Display legend = diagram.getLegend().getDisplay();
+		if (Display.isNull(legend)) {
+			return TextBlockUtils.empty(0, 0);
+		}
+		return EntityImageLegend.create(legend, diagram.getSkinParam());
+	}
+
+	public TextBlock getFooterOrHeader(final FontParam param) {
+		if (DisplayPositionned.isNull(diagram.getFooterOrHeaderTeoz(param))) {
+			return new TeozLayer(null, stringBounder, param);
+		}
+		final Display display = diagram.getFooterOrHeaderTeoz(param).getDisplay();
+		final HtmlColor hyperlinkColor = getSkinParam().getHyperlinkColor();
+		final HtmlColor titleColor = getSkinParam().getFontHtmlColor(null, param);
+		final String fontFamily = getSkinParam().getFont(null, false, param).getFamily(null);
+		final int fontSize = getSkinParam().getFont(null, false, param).getSize();
+		final PngTitler pngTitler = new PngTitler(titleColor, display, fontSize, fontFamily, diagram
+				.getFooterOrHeaderTeoz(param).getHorizontalAlignment(), hyperlinkColor, getSkinParam()
+				.useUnderlineForHyperlink());
+		return new TeozLayer(pngTitler, stringBounder, param);
 	}
 
 	public int getNbPages() {

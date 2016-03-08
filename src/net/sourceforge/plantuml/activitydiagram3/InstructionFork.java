@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -42,16 +42,17 @@ public class InstructionFork implements Instruction {
 
 	private final List<InstructionList> forks = new ArrayList<InstructionList>();
 	private final Instruction parent;
+	private final LinkRendering inlinkRendering;
 
-	public InstructionFork(Instruction parent) {
+	public InstructionFork(Instruction parent, LinkRendering inlinkRendering) {
 		this.parent = parent;
+		this.inlinkRendering = inlinkRendering;
 		this.forks.add(new InstructionList());
 	}
 
 	private InstructionList getLast() {
 		return forks.get(forks.size() - 1);
 	}
-	
 
 	public void add(Instruction ins) {
 		getLast().add(ins);
@@ -78,13 +79,13 @@ public class InstructionFork implements Instruction {
 	}
 
 	public LinkRendering getInLinkRendering() {
-		return null;
+		return inlinkRendering;
 	}
 
-	public void addNote(Display note, NotePosition position) {
-		getLast().addNote(note, position);
+	public boolean addNote(Display note, NotePosition position) {
+		return getLast().addNote(note, position);
 	}
-	
+
 	public Set<Swimlane> getSwimlanes() {
 		return InstructionList.getSwimlanes2(forks);
 	}
@@ -98,5 +99,11 @@ public class InstructionFork implements Instruction {
 		return getLast().getSwimlaneOut();
 	}
 
+	public void manageOutRendering(LinkRendering nextLinkRenderer) {
+		if (nextLinkRenderer == null) {
+			return;
+		}
+		getLast().setOutRendering(nextLinkRenderer);
+	}
 
 }

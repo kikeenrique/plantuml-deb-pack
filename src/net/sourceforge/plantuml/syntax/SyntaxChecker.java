@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import net.sourceforge.plantuml.BlockUml;
 import net.sourceforge.plantuml.ErrorUml;
 import net.sourceforge.plantuml.OptionFlags;
 import net.sourceforge.plantuml.PSystemError;
@@ -72,7 +73,15 @@ public class SyntaxChecker {
 		final SourceStringReader sourceStringReader = new SourceStringReader(new Defines(), source,
 				Collections.<String> emptyList());
 
-		final Diagram system = sourceStringReader.getBlocks().get(0).getDiagram();
+		final List<BlockUml> blocks = sourceStringReader.getBlocks();
+		if (blocks.size() == 0) {
+			result.setError(true);
+			result.setErrorLinePosition(lastLineNumber(source));
+			result.addErrorText("No @enduml found");
+			result.setSuggest(Arrays.asList("Did you mean:", "@enduml"));
+			return result;
+		}
+		final Diagram system = blocks.get(0).getDiagram();
 		result.setCmapData(system.hasUrl());
 		if (system instanceof UmlDiagram) {
 			result.setUmlDiagramType(((UmlDiagram) system).getUmlDiagramType());
@@ -81,6 +90,7 @@ public class SyntaxChecker {
 			result.setError(true);
 			final PSystemError sys = (PSystemError) system;
 			result.setErrorLinePosition(sys.getHigherErrorPosition());
+			result.setLineLocation(sys.getLineLocation());
 			for (ErrorUml er : sys.getErrorsUml()) {
 				result.addErrorText(er.getError());
 			}
@@ -96,7 +106,16 @@ public class SyntaxChecker {
 		final SourceStringReader sourceStringReader = new SourceStringReader(new Defines(), source,
 				Collections.<String> emptyList());
 
-		final Diagram system = sourceStringReader.getBlocks().get(0).getDiagram();
+		final List<BlockUml> blocks = sourceStringReader.getBlocks();
+		if (blocks.size() == 0) {
+			result.setError(true);
+			result.setErrorLinePosition(lastLineNumber(source));
+			result.addErrorText("No @enduml found");
+			result.setSuggest(Arrays.asList("Did you mean:", "@enduml"));
+			return result;
+		}
+
+		final Diagram system = blocks.get(0).getDiagram();
 		result.setCmapData(system.hasUrl());
 		if (system instanceof UmlDiagram) {
 			result.setUmlDiagramType(((UmlDiagram) system).getUmlDiagramType());
@@ -105,6 +124,7 @@ public class SyntaxChecker {
 			result.setError(true);
 			final PSystemError sys = (PSystemError) system;
 			result.setErrorLinePosition(sys.getHigherErrorPosition());
+			result.setLineLocation(sys.getLineLocation());
 			for (ErrorUml er : sys.getErrorsUml()) {
 				result.addErrorText(er.getError());
 			}

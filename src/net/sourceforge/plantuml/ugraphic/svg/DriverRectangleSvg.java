@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -81,8 +81,10 @@ public class DriverRectangleSvg implements UDriver<SvgGraphics> {
 			y = r.y;
 			width = r.width;
 			height = r.height;
+			if (height <= 0) {
+				return;
+			}
 		}
-
 		svg.svgRectangle(x, y, width, height, rx / 2, ry / 2, rect.getDeltaShadow());
 	}
 }

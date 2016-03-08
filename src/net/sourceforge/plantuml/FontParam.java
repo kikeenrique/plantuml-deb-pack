@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,6 +30,8 @@ package net.sourceforge.plantuml;
 
 import java.awt.Font;
 
+import net.sourceforge.plantuml.graphic.FontConfiguration;
+
 interface FontParamConstant {
 	String FAMILY = "SansSerif";
 	String COLOR = "black";
@@ -53,6 +55,7 @@ public enum FontParam {
 	COMPONENT_STEREOTYPE(14, Font.ITALIC), //
 	NOTE(13, Font.PLAIN), //
 	PACKAGE(14, Font.PLAIN), //
+	PACKAGE_STEREOTYPE(14, Font.ITALIC), //
 	ACTOR(14, Font.PLAIN), //
 	ARTIFACT(14, Font.PLAIN), //
 	CLOUD(14, Font.PLAIN), //
@@ -66,6 +69,7 @@ public enum FontParam {
 	RECTANGLE(14, Font.PLAIN), //
 	NODE(14, Font.PLAIN), //
 	DATABASE(14, Font.PLAIN), //
+	QUEUE(14, Font.PLAIN), //
 	SEQUENCE_ARROW(13, Font.PLAIN), //
 	SEQUENCE_BOX(13, Font.BOLD), //
 	SEQUENCE_DIVIDER(13, Font.BOLD), //
@@ -79,6 +83,8 @@ public enum FontParam {
 	STATE_ATTRIBUTE(12, Font.PLAIN), //
 	LEGEND(14, Font.PLAIN), //
 	TITLE(18, Font.PLAIN), //
+	CAPTION(14, Font.PLAIN), //
+	SWIMLANE_TITLE(18, Font.PLAIN), //
 	FOOTER(10, Font.PLAIN, "#888888", FontParamConstant.FAMILY), //
 	HEADER(10, Font.PLAIN, "#888888", FontParamConstant.FAMILY), //
 	USECASE(14, Font.PLAIN), //
@@ -95,7 +101,11 @@ public enum FontParam {
 	FOLDER_STEREOTYPE(14, Font.ITALIC), //
 	FRAME_STEREOTYPE(14, Font.ITALIC), //
 	DATABASE_STEREOTYPE(14, Font.ITALIC), //
-	ACTOR_STEREOTYPE(14, Font.ITALIC); //
+	QUEUE_STEREOTYPE(14, Font.ITALIC), //
+	ACTOR_STEREOTYPE(14, Font.ITALIC), //
+	SEQUENCE_STEREOTYPE(14, Font.ITALIC), //
+	PARTITION(14, Font.PLAIN); //
+
 
 	private final int defaultSize;
 	private final int fontStyle;
@@ -136,6 +146,10 @@ public enum FontParam {
 
 	public String getDefaultFamily() {
 		return defaultFamily;
+	}
+
+	public FontConfiguration getFontConfiguration(ISkinParam skinParam) {
+		return new FontConfiguration(skinParam, this, null);
 	}
 
 }

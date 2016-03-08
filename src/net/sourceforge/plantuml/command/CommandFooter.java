@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -33,7 +33,9 @@ import java.util.List;
 import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.UmlDiagram;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.cucadiagram.DisplayPositionned;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
+import net.sourceforge.plantuml.graphic.VerticalAlignment;
 
 public class CommandFooter extends SingleLineCommand<UmlDiagram> {
 
@@ -44,11 +46,8 @@ public class CommandFooter extends SingleLineCommand<UmlDiagram> {
 	@Override
 	protected CommandExecutionResult executeArg(UmlDiagram diagram, List<String> arg) {
 		final String align = arg.get(0);
-		if (align != null) {
-			diagram.setFooterAlignment(HorizontalAlignment.valueOf(StringUtils.goUpperCase(align)));
-		}
-		diagram.setFooter(Display.getWithNewlines(arg.get(1)));
+		diagram.setFooter(new DisplayPositionned(Display.getWithNewlines(arg.get(1)), HorizontalAlignment.fromString(
+				align, HorizontalAlignment.CENTER), VerticalAlignment.BOTTOM));
 		return CommandExecutionResult.ok();
 	}
-
 }

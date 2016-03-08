@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -34,6 +34,8 @@ import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 
+import net.sourceforge.plantuml.graphic.FontConfiguration;
+import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
 
 public class UFont {
@@ -52,6 +54,11 @@ public class UFont {
 
 	public final Font getFont() {
 		return font;
+	}
+
+	public FontConfiguration toFont2(HtmlColor color, boolean useUnderlineForHyperlink, HtmlColor hyperlinkColor,
+			int tabSize) {
+		return new FontConfiguration(this, color, hyperlinkColor, useUnderlineForHyperlink, tabSize);
 	}
 
 	public UFont scaled(double scale) {
@@ -122,7 +129,6 @@ public class UFont {
 			return false;
 		}
 		return this.font.equals(((UFont) obj).font);
-
 	}
 
 	@Deprecated

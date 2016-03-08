@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,12 +28,12 @@
  */
 package net.sourceforge.plantuml.sequencediagram;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.SkinParamBackcolored;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
@@ -53,12 +53,21 @@ public abstract class AbstractMessage implements EventWithDeactivate {
 	private Url urlNote;
 	private final Url url;
 	private final String messageNumber;
+	private boolean parallel = false;
 
 	public AbstractMessage(Display label, ArrowConfiguration arrowConfiguration, String messageNumber) {
 		this.url = label.initUrl();
 		this.label = label.removeUrl(url);
 		this.arrowConfiguration = arrowConfiguration;
 		this.messageNumber = messageNumber;
+	}
+
+	public void goParallel() {
+		this.parallel = true;
+	}
+
+	public boolean isParallel() {
+		return parallel;
 	}
 
 	final public Url getUrl() {
@@ -120,13 +129,20 @@ public abstract class AbstractMessage implements EventWithDeactivate {
 		return firstIsActivate && isDeactivateOrDestroy();
 	}
 
-	public final List<LifeEvent> getLiveEvents() {
-		throw new UnsupportedOperationException();
-	}
-
 	public final Display getLabel() {
 		return label;
 	}
+	
+	public final Display getLabelNumbered() {
+		if (getMessageNumber() == null) {
+			return getLabel();
+		}
+		Display result = Display.empty();
+		result = result.add(new MessageNumber(getMessageNumber()));
+		result = result.addAll(getLabel());
+		return result;
+	}
+
 
 	public final ArrowConfiguration getArrowConfiguration() {
 		return arrowConfiguration;
@@ -154,8 +170,12 @@ public abstract class AbstractMessage implements EventWithDeactivate {
 		return notePosition;
 	}
 
-	public final HtmlColor getSpecificBackColor() {
+	private final HtmlColor getSpecificBackColor() {
 		return noteBackColor;
+	}
+
+	public SkinParamBackcolored getSkinParamNoteBackcolored(ISkinParam skinParam) {
+		return new SkinParamBackcolored(skinParam, getSpecificBackColor());
 	}
 
 	public final NotePosition getNotePosition() {

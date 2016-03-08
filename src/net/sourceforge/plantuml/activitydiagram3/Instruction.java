@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -44,6 +44,6 @@ public interface Instruction extends Swimable {
 
 	public LinkRendering getInLinkRendering();
 
-	public void addNote(Display note, NotePosition position);
+	public boolean addNote(Display note, NotePosition position);
 
 }

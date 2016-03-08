@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,7 +28,7 @@
  */
 package net.sourceforge.plantuml.cucadiagram;
 
-import java.util.List;
+import java.util.Map;
 
 import net.sourceforge.plantuml.Hideable;
 import net.sourceforge.plantuml.LineConfigurable;
@@ -36,6 +36,7 @@ import net.sourceforge.plantuml.Removeable;
 import net.sourceforge.plantuml.SpecificBackcolorable;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.graphic.USymbol;
+import net.sourceforge.plantuml.graphic.color.Colors;
 
 public interface IEntity extends SpecificBackcolorable, Hideable, Removeable, LineConfigurable {
 
@@ -63,17 +64,7 @@ public interface IEntity extends SpecificBackcolorable, Hideable, Removeable, Li
 
 	public void setStereotype(Stereotype stereotype);
 
-	public List<Member> getFieldsToDisplay();
-
-	public List<Member> getMethodsToDisplay();
-
-	public BlockMember getBody(PortionShower portionShower);
-
-	public BlockMember getMouseOver();
-
-	public void addFieldOrMethod(String s);
-
-	public void mouseOver(String s);
+	public Bodier getBodier();
 
 	public void addUrl(Url url);
 
@@ -86,5 +77,12 @@ public interface IEntity extends SpecificBackcolorable, Hideable, Removeable, Li
 	public void setHectorLayer(int layer);
 
 	public int getRawLayout();
+
+	public void putTip(String member, Display display);
+
+	public Map<String, Display> getTips();
+
+	@Deprecated
+	public void applyStroke(String s);
 
 }

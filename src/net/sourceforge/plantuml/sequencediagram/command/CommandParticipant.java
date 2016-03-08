@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -43,6 +43,7 @@ import net.sourceforge.plantuml.command.regex.RegexOr;
 import net.sourceforge.plantuml.command.regex.RegexResult;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
+import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.sequencediagram.LifeEventType;
 import net.sourceforge.plantuml.sequencediagram.Participant;
 import net.sourceforge.plantuml.sequencediagram.ParticipantType;
@@ -68,7 +69,7 @@ public abstract class CommandParticipant extends SingleLineCommand2<SequenceDiag
 			return CommandExecutionResult.ok();
 		}
 
-		Display strings = null;
+		Display strings = Display.NULL;
 		if (arg.get("FULL", 0) != null) {
 			strings = Display.getWithNewlines(arg.get("FULL", 0));
 		}
@@ -94,12 +95,12 @@ public abstract class CommandParticipant extends SingleLineCommand2<SequenceDiag
 		if (stereotype != null) {
 			final ISkinParam skinParam = diagram.getSkinParam();
 			final boolean stereotypePositionTop = skinParam.stereotypePositionTop();
-			final UFont font = skinParam.getFont(FontParam.CIRCLED_CHARACTER, null, false);
+			final UFont font = skinParam.getFont(null, false, FontParam.CIRCLED_CHARACTER);
 			participant.setStereotype(new Stereotype(stereotype, skinParam.getCircledCharacterRadius(), font, diagram
 					.getSkinParam().getIHtmlColorSet()), stereotypePositionTop);
 		}
 		participant
-				.setSpecificBackcolor(diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(arg.get("COLOR", 0)));
+				.setSpecificColorTOBEREMOVED(ColorType.BACK, diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(arg.get("COLOR", 0)));
 
 		final String urlString = arg.get("URL", 0);
 		if (urlString != null) {

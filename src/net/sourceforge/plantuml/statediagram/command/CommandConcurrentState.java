@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -37,12 +37,12 @@ import net.sourceforge.plantuml.statediagram.StateDiagram;
 public class CommandConcurrentState extends SingleLineCommand<StateDiagram> {
 
 	public CommandConcurrentState() {
-		super("(?i)^--+$");
+		super("(?i)^(--+|\\|\\|+)$");
 	}
 
 	@Override
 	protected CommandExecutionResult executeArg(StateDiagram diagram, List<String> arg) {
-		if (diagram.concurrentState()) {
+		if (diagram.concurrentState(arg.get(0).charAt(0))) {
 			return CommandExecutionResult.ok();
 		}
 		return CommandExecutionResult.error("Error 42");

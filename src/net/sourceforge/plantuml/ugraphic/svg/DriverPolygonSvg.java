@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -55,7 +55,6 @@ public class DriverPolygonSvg implements UDriver<SvgGraphics> {
 
 		final double points[] = shape.getPointArray(x, y);
 		final UClip clip = clipContainer.getClip();
-
 		if (clip != null) {
 			for (int j = 0; j < points.length; j += 2) {
 				if (clip.isInside(points[j], points[j + 1]) == false) {

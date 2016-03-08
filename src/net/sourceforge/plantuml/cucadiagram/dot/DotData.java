@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,8 +28,12 @@
  */
 package net.sourceforge.plantuml.cucadiagram.dot;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.Pragma;
@@ -40,8 +44,8 @@ import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.IGroup;
 import net.sourceforge.plantuml.cucadiagram.ILeaf;
 import net.sourceforge.plantuml.cucadiagram.Link;
+import net.sourceforge.plantuml.cucadiagram.LinkDecor;
 import net.sourceforge.plantuml.cucadiagram.PortionShower;
-import net.sourceforge.plantuml.cucadiagram.Rankdir;
 import net.sourceforge.plantuml.cucadiagram.entity.EntityFactory;
 import net.sourceforge.plantuml.svek.DotMode;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
@@ -88,9 +92,8 @@ final public class DotData implements PortionShower {
 	}
 
 	public DotData(IGroup topParent, List<Link> links, Collection<ILeaf> leafs, UmlDiagramType umlDiagramType,
-			ISkinParam skinParam, Rankdir rankdir, GroupHierarchy groupHierarchy, ColorMapper colorMapper,
-			EntityFactory entityFactory, boolean isHideEmptyDescriptionForState, DotMode dotMode,
-			String namespaceSeparator, Pragma pragma) {
+			ISkinParam skinParam, GroupHierarchy groupHierarchy, ColorMapper colorMapper, EntityFactory entityFactory,
+			boolean isHideEmptyDescriptionForState, DotMode dotMode, String namespaceSeparator, Pragma pragma) {
 		this(topParent, links, leafs, umlDiagramType, skinParam, groupHierarchy, new PortionShower() {
 			public boolean showPortion(EntityPortion portion, IEntity entity) {
 				return true;
@@ -105,10 +108,6 @@ final public class DotData implements PortionShower {
 	public ISkinParam getSkinParam() {
 		return skinParam;
 	}
-
-	// public Rankdir getRankdir() {
-	// return rankdir;
-	// }
 
 	public GroupHierarchy getGroupHierarchy() {
 		return groupHierarchy;
@@ -156,6 +155,69 @@ final public class DotData implements PortionShower {
 
 	public Pragma getPragma() {
 		return pragma;
+	}
+
+	public void removeIrrelevantSametail() {
+		final Map<String, Integer> sametails = new HashMap<String, Integer>();
+		for (Link link : links) {
+			if (link.getType().getDecor2() == LinkDecor.EXTENDS) {
+				link.setSametail(link.getEntity1().getUid());
+			}
+			final String sametail = link.getSametail();
+			if (sametail == null) {
+				continue;
+			}
+			final Integer value = sametails.get(sametail);
+			sametails.put(sametail, value == null ? 1 : value + 1);
+		}
+		final Collection<String> toremove = new HashSet<String>();
+		final int limit = skinParam.groupInheritance();
+		for (Map.Entry<String, Integer> ent : sametails.entrySet()) {
+			final String key = ent.getKey();
+			if (ent.getValue() < limit) {
+				toremove.add(key);
+			} else {
+				final List<Link> some = new ArrayList<Link>();
+				for (Link link : links) {
+					if (key.equals(link.getSametail())) {
+						some.add(link);
+					}
+				}
+				final ILeaf leaf = getLeaf(key);
+				final Neighborhood neighborhood = new Neighborhood(leaf, some, getLinksOfThisLeaf(leaf));
+				leaf.setNeighborhood(neighborhood);
+			}
+		}
+
+		for (Link link : links) {
+			final String sametail = link.getSametail();
+			if (sametail == null) {
+				continue;
+			}
+			if (toremove.contains(sametail)) {
+				link.setSametail(null);
+			}
+		}
+	}
+
+	private List<Link> getLinksOfThisLeaf(ILeaf leaf) {
+		final List<Link> result = new ArrayList<Link>();
+		for (Link link : links) {
+			if (link.contains(leaf)) {
+				result.add(link);
+			}
+		}
+		return result;
+	}
+
+	private ILeaf getLeaf(String key) {
+		for (ILeaf entity : leafs) {
+			if (entity.getUid().equals(key)) {
+				return entity;
+			}
+		}
+		return null;
+
 	}
 
 }

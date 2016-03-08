@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,7 +28,6 @@
  */
 package net.sourceforge.plantuml.svek;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -53,11 +52,10 @@ import net.sourceforge.plantuml.cucadiagram.dot.DotData;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
-import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockEmpty;
-import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.TextBlockWidth;
+import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.skin.rose.Rose;
 import net.sourceforge.plantuml.svek.image.EntityImageState;
 import net.sourceforge.plantuml.ugraphic.UFont;
@@ -101,32 +99,33 @@ public final class GroupPngMakerState {
 		return result;
 	}
 
-	public IEntityImage getImage() throws IOException, InterruptedException {
+	public IEntityImage getImage() {
 		final Display display = group.getDisplay();
 		final ISkinParam skinParam = diagram.getSkinParam();
-		final TextBlock title = TextBlockUtils.create(display, new FontConfiguration(getFont(FontParam.STATE),
-				HtmlColorUtils.BLACK, skinParam.getHyperlinkColor(), skinParam.useUnderlineForHyperlink()), HorizontalAlignment.CENTER, diagram.getSkinParam());
+		final TextBlock title = display.create(
+				new FontConfiguration(skinParam, FontParam.STATE, group.getStereotype()), HorizontalAlignment.CENTER,
+				diagram.getSkinParam());
 
-		if (group.size() == 0) {
+		if (group.size() == 0 && group.getChildren().size() == 0) {
 			return new EntityImageState(group, diagram.getSkinParam());
 		}
 		final List<Link> links = getPureInnerLinks();
 
-		boolean hasVerticalLine = false;
-		for (ILeaf leaf : group.getLeafsDirect()) {
-			if (leaf.getEntityType() == LeafType.STATE_CONCURRENT) {
-				hasVerticalLine = true;
-			}
-		}
+		// boolean hasVerticalLine = false;
+		// for (ILeaf leaf : group.getLeafsDirect()) {
+		// if (leaf.getEntityType() == LeafType.STATE_CONCURRENT) {
+		// hasVerticalLine = true;
+		// }
+		// }
 
 		final DotData dotData = new DotData(group, links, group.getLeafsDirect(), diagram.getUmlDiagramType(),
-				skinParam, group.getRankdir(), new InnerGroupHierarchy(), diagram.getColorMapper(),
-				diagram.getEntityFactory(), diagram.isHideEmptyDescriptionForState(), DotMode.NORMAL,
-				diagram.getNamespaceSeparator(), diagram.getPragma());
+				skinParam, new InnerGroupHierarchy(), diagram.getColorMapper(), diagram.getEntityFactory(),
+				diagram.isHideEmptyDescriptionForState(), DotMode.NORMAL, diagram.getNamespaceSeparator(),
+				diagram.getPragma());
 
 		final CucaDiagramFileMakerSvek2 svek2 = new CucaDiagramFileMakerSvek2(dotData, diagram.getEntityFactory(),
-				hasVerticalLine, diagram.getSource(), diagram.getPragma());
-		UStroke stroke = group.getSpecificLineStroke();
+				diagram.getSource(), diagram.getPragma());
+		UStroke stroke = group.getColors(skinParam).getSpecificLineStroke();
 		if (stroke == null) {
 			stroke = new UStroke(1.5);
 		}
@@ -135,35 +134,50 @@ public final class GroupPngMakerState {
 			// return new InnerStateConcurrent(svek2.createFile());
 			return svek2.createFile();
 		} else if (group.getGroupType() == GroupType.STATE) {
-			HtmlColor borderColor = group.getSpecificLineColor();
+			HtmlColor borderColor = group.getColors(skinParam).getColor(ColorType.LINE);
 			if (borderColor == null) {
-				borderColor = getColor(ColorParam.stateBorder, null);
+				borderColor = getColor(ColorParam.stateBorder, group.getStereotype());
 			}
 			final Stereotype stereo = group.getStereotype();
-			final HtmlColor backColor = group.getSpecificBackColor() == null ? getColor(ColorParam.stateBackground,
-					stereo) : group.getSpecificBackColor();
-			final List<Member> members = ((IEntity) group).getFieldsToDisplay();
+			final HtmlColor backColor = group.getColors(skinParam).getColor(ColorType.BACK) == null ? getColor(
+					ColorParam.stateBackground, stereo) : group.getColors(skinParam).getColor(ColorType.BACK);
+			final List<Member> members = ((IEntity) group).getBodier().getFieldsToDisplay();
 			final TextBlockWidth attribute;
 			if (members.size() == 0) {
 				attribute = new TextBlockEmpty();
 			} else {
-				attribute = new MethodsOrFieldsArea(members, FontParam.STATE_ATTRIBUTE, diagram.getSkinParam());
+				attribute = new MethodsOrFieldsArea(members, FontParam.STATE_ATTRIBUTE, diagram.getSkinParam(), group.getStereotype());
 			}
 
 			final Stereotype stereotype = group.getStereotype();
 			final boolean withSymbol = stereotype != null && stereotype.isWithOOSymbol();
 
-			return new InnerStateAutonom(svek2.createFile(), title, attribute, borderColor, backColor,
-					skinParam.shadowing(), group.getUrl99(), withSymbol, stroke);
+			final boolean containsOnlyConcurrentStates = containsOnlyConcurrentStates(dotData);
+			final IEntityImage image = containsOnlyConcurrentStates ? svek2.createFileForConcurrentState() : svek2
+					.createFile();
+			return new InnerStateAutonom(image, title, attribute, borderColor, backColor, skinParam.shadowing(),
+					group.getUrl99(), withSymbol, stroke);
 		}
 
 		throw new UnsupportedOperationException(group.getGroupType().toString());
 
 	}
 
+	private boolean containsOnlyConcurrentStates(DotData dotData) {
+		for (ILeaf leaf : dotData.getLeafs()) {
+			if (leaf instanceof IGroup == false) {
+				return false;
+			}
+			if (((IGroup) leaf).getEntityType() != LeafType.STATE_CONCURRENT) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private UFont getFont(FontParam fontParam) {
 		final ISkinParam skinParam = diagram.getSkinParam();
-		return skinParam.getFont(fontParam, null, false);
+		return skinParam.getFont(null, false, fontParam);
 	}
 
 	private final Rose rose = new Rose();

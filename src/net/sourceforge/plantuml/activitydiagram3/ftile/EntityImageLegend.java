@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -35,6 +35,7 @@ import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
@@ -44,12 +45,11 @@ import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.skin.rose.Rose;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UPolygon;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class EntityImageLegend implements TextBlock {
+public class EntityImageLegend extends AbstractTextBlock implements TextBlock {
 
 	private final int cornersize = 10;
 	private final HtmlColor noteBackgroundColor;
@@ -65,13 +65,10 @@ public class EntityImageLegend implements TextBlock {
 		final Rose rose = new Rose();
 
 		noteBackgroundColor = rose.getHtmlColor(skinParam, ColorParam.legendBackground);
-
 		borderColor = rose.getHtmlColor(skinParam, ColorParam.legendBorder);
-		final HtmlColor fontColor = rose.getFontColor(skinParam, FontParam.LEGEND);
-		final UFont fontNote = skinParam.getFont(FontParam.LEGEND, null, false);
 
-		this.textBlock = TextBlockUtils.create(note, new FontConfiguration(fontNote, fontColor,
-				skinParam.getHyperlinkColor(), skinParam.useUnderlineForHyperlink()), HorizontalAlignment.LEFT, skinParam);
+		this.textBlock = note.create(new FontConfiguration(skinParam, FontParam.LEGEND, null),
+				HorizontalAlignment.LEFT, skinParam);
 	}
 
 	public static TextBlock create(Display legend, ISkinParam skinParam) {

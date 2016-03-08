@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -37,8 +37,8 @@ import net.sourceforge.plantuml.OptionFlags;
 import net.sourceforge.plantuml.SkinParamBackcolored;
 import net.sourceforge.plantuml.SkinParamBackcoloredReference;
 import net.sourceforge.plantuml.cucadiagram.Display;
-import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.graphic.SymbolContext;
 import net.sourceforge.plantuml.sequencediagram.AbstractMessage;
 import net.sourceforge.plantuml.sequencediagram.Delay;
 import net.sourceforge.plantuml.sequencediagram.Divider;
@@ -58,7 +58,7 @@ import net.sourceforge.plantuml.sequencediagram.NoteStyle;
 import net.sourceforge.plantuml.sequencediagram.Notes;
 import net.sourceforge.plantuml.sequencediagram.Participant;
 import net.sourceforge.plantuml.sequencediagram.ParticipantEnglober;
-import net.sourceforge.plantuml.sequencediagram.ParticipantEngloberContexted;
+import net.sourceforge.plantuml.sequencediagram.Englober;
 import net.sourceforge.plantuml.sequencediagram.ParticipantType;
 import net.sourceforge.plantuml.sequencediagram.Reference;
 import net.sourceforge.plantuml.skin.Component;
@@ -144,7 +144,7 @@ class DrawableSetInitializer {
 			final LivingParticipantBox living = drawableSet.getLivingParticipantBox(p);
 			for (int i = 0; i < p.getInitialLife(); i++) {
 				living.getLifeLine().addSegmentVariation(LifeSegmentVariation.LARGER,
-						freeY2.getFreeY(getFullParticipantRange()), p.getLiveSpecificBackColor());
+						freeY2.getFreeY(getFullParticipantRange()), p.getLiveSpecificBackColors());
 			}
 		}
 
@@ -202,11 +202,13 @@ class DrawableSetInitializer {
 	}
 
 	private void takeParticipantEngloberTitleWidth3(StringBounder stringBounder) {
-		for (ParticipantEngloberContexted pe : drawableSet.getExistingParticipantEnglober()) {
+		for (Englober pe : drawableSet.getExistingParticipantEnglober()) {
 			final double preferredWidth = drawableSet.getEngloberPreferedWidth(stringBounder,
 					pe.getParticipantEnglober());
-			final ParticipantBox first = drawableSet.getLivingParticipantBox(pe.getFirst2()).getParticipantBox();
-			final ParticipantBox last = drawableSet.getLivingParticipantBox(pe.getLast2()).getParticipantBox();
+			final ParticipantBox first = drawableSet.getLivingParticipantBox(pe.getFirst2TOBEPRIVATE())
+					.getParticipantBox();
+			final ParticipantBox last = drawableSet.getLivingParticipantBox(pe.getLast2TOBEPRIVATE())
+					.getParticipantBox();
 			final double x1 = drawableSet.getX1(pe);
 			final double x2 = drawableSet.getX2(stringBounder, pe);
 			final double missing = preferredWidth - (x2 - x1);
@@ -426,7 +428,7 @@ class DrawableSetInitializer {
 				p2 = tmp;
 			}
 		}
-		final ISkinParam skinParam = new SkinParamBackcolored(drawableSet.getSkinParam(), n.getSpecificBackColor());
+		final ISkinParam skinParam = n.getSkinParamBackcolored(drawableSet.getSkinParam());
 		final ComponentType type = getNoteComponentType(n.getStyle());
 		final NoteBox noteBox = new NoteBox(freeY2.getFreeY(range), drawableSet.getSkin().createComponent(type, null,
 				skinParam, n.getStrings()), p1, p2, n.getPosition(), n.getUrl());
@@ -474,7 +476,7 @@ class DrawableSetInitializer {
 				pos = message.getPosYstartLevel() + delta1;
 			}
 			final LifeLine line1 = drawableSet.getLivingParticipantBox(lifeEvent.getParticipant()).getLifeLine();
-			line1.addSegmentVariation(LifeSegmentVariation.LARGER, pos, lifeEvent.getSpecificBackColor());
+			line1.addSegmentVariation(LifeSegmentVariation.LARGER, pos, lifeEvent.getSpecificColors());
 		} else if (lifeEvent.getType() == LifeEventType.DESTROY || lifeEvent.getType() == LifeEventType.DEACTIVATE) {
 			double delta = 0;
 			if (OptionFlags.STRICT_SELFMESSAGE_POSITION && message != null && message.isSelfMessage()) {
@@ -486,7 +488,7 @@ class DrawableSetInitializer {
 			if (message != null) {
 				pos2 = message.getPosYendLevel() - delta;
 			}
-			line.addSegmentVariation(LifeSegmentVariation.SMALLER, pos2, lifeEvent.getSpecificBackColor());
+			line.addSegmentVariation(LifeSegmentVariation.SMALLER, pos2, lifeEvent.getSpecificColors());
 		}
 
 		if (lifeEvent.getType() == LifeEventType.DESTROY) {
@@ -495,8 +497,14 @@ class DrawableSetInitializer {
 			final double delta = comp.getPreferredHeight(stringBounder) / 2;
 			final LivingParticipantBox livingParticipantBox = drawableSet.getLivingParticipantBox(lifeEvent
 					.getParticipant());
-			final LifeDestroy destroy = new LifeDestroy(lifeEvent.getMessage().getPosYendLevel() - delta,
-					livingParticipantBox.getParticipantBox(), comp);
+			double pos2 = y;
+			if (message == null) {
+				pos2 = y;
+				freeY2 = freeY2.add(comp.getPreferredHeight(stringBounder), range);
+			} else {
+				pos2 = message.getPosYendLevel() - delta;
+			}
+			final LifeDestroy destroy = new LifeDestroy(pos2, livingParticipantBox.getParticipantBox(), comp);
 			drawableSet.addEvent(lifeEvent, destroy);
 		} else {
 			drawableSet.addEvent(lifeEvent, new GraphicalElementLiveEvent(y));
@@ -576,15 +584,8 @@ class DrawableSetInitializer {
 		} else {
 			throw new IllegalArgumentException();
 		}
-		HtmlColor specificBackColor = p.getSpecificBackColor();
-		final boolean clickable = p.getUrl() != null;
-		final HtmlColor stereoBackColor = drawableSet.getSkinParam().getHtmlColor(p.getBackgroundColorParam(),
-				p.getStereotype(), clickable);
-		if (stereoBackColor != null && specificBackColor == null) {
-			specificBackColor = stereoBackColor;
-		}
 
-		final ISkinParam skinParam = new SkinParamBackcolored(drawableSet.getSkinParam(), specificBackColor, clickable);
+		final ISkinParam skinParam = p.getSkinParamBackcolored(drawableSet.getSkinParam());
 		final Display participantDisplay = p.getDisplay(skinParam.forceSequenceParticipantUnderlined());
 		final Component head = drawableSet.getSkin().createComponent(headType, null, skinParam, participantDisplay);
 		final Component tail = drawableSet.getSkin().createComponent(tailType, null, skinParam, participantDisplay);
@@ -592,7 +593,8 @@ class DrawableSetInitializer {
 				drawableSet.getSkinParam(), participantDisplay);
 		final Component delayLine = drawableSet.getSkin().createComponent(ComponentType.DELAY_LINE, null,
 				drawableSet.getSkinParam(), participantDisplay);
-		final ParticipantBox box = new ParticipantBox(head, line, tail, delayLine, this.freeX);
+		final ParticipantBox box = new ParticipantBox(head, line, tail, delayLine, this.freeX,
+				skinParam.maxAsciiMessageLength() > 0 ? 1 : 5);
 
 		final Component comp = drawableSet.getSkin().createComponent(ComponentType.ALIVE_BOX_CLOSE_CLOSE, null,
 				drawableSet.getSkinParam(), null);

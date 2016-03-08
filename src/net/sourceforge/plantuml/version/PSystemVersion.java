@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -134,15 +134,16 @@ public class PSystemVersion extends AbstractPSystem {
 	public ImageData exportDiagram(OutputStream os, int num, FileFormatOption fileFormat) throws IOException {
 		final GraphicStrings result = getGraphicStrings();
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, result.getBackcolor(),
-				getMetadata(), null, 0, 0, null);
-		imageBuilder.addUDrawable(result);
-		return imageBuilder.writeImageTOBEMOVED(fileFormat.getFileFormat(), os);
+				getMetadata(), null, 0, 0, null, false);
+		imageBuilder.setUDrawable(result);
+		return imageBuilder.writeImageTOBEMOVED(fileFormat, os);
 	}
 
 	public static PSystemVersion createShowVersion() {
 		final List<String> strings = new ArrayList<String>();
 		strings.add("<b>PlantUML version " + Version.versionString() + "</b> (" + Version.compileTimeString() + ")");
 		strings.add("(" + License.getCurrent() + " source distribution)");
+		strings.add("Loaded from " + Version.getJarPath());
 		strings.add(" ");
 
 		strings.addAll(GraphvizUtils.getTestDotStrings(true));
@@ -185,7 +186,7 @@ public class PSystemVersion extends AbstractPSystem {
 		int lim = 7;
 		if (lastversion == -1) {
 			strings.add("<b><color:red>Error</b>");
-			strings.add("<color:red>Cannot connect to http://plantuml.sourceforge.net/</b>");
+			strings.add("<color:red>Cannot connect to http://plantuml.com/</b>");
 			strings.add("Maybe you should set your proxy ?");
 			strings.add("@startuml");
 			strings.add("checkversion(proxy=myproxy.com,port=8080)");
@@ -193,7 +194,7 @@ public class PSystemVersion extends AbstractPSystem {
 			lim = 9;
 		} else if (lastversion == 0) {
 			strings.add("<b><color:red>Error</b>");
-			strings.add("Cannot retrieve last version from http://plantuml.sourceforge.net/</b>");
+			strings.add("Cannot retrieve last version from http://plantuml.com/</b>");
 		} else {
 			strings.add("<b>Last available version for download</b> : " + lastversion);
 			strings.add(" ");
@@ -218,7 +219,7 @@ public class PSystemVersion extends AbstractPSystem {
 		}
 
 		try {
-			final URL url = new URL("http://plantuml.sourceforge.net/download.html");
+			final URL url = new URL("http://plantuml.com/download.html");
 			final HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.setUseCaches(false);
 			urlConnection.connect();
@@ -256,8 +257,8 @@ public class PSystemVersion extends AbstractPSystem {
 
 	private GraphicStrings getGraphicStrings() throws IOException {
 		final UFont font = new UFont("SansSerif", Font.PLAIN, 12);
-		return new GraphicStrings(strings, font, HtmlColorUtils.BLACK, HtmlColorUtils.WHITE, UAntiAliasing.ANTI_ALIASING_ON,
-				image, GraphicPosition.BACKGROUND_CORNER_BOTTOM_RIGHT);
+		return new GraphicStrings(strings, font, HtmlColorUtils.BLACK, HtmlColorUtils.WHITE,
+				UAntiAliasing.ANTI_ALIASING_ON, image, GraphicPosition.BACKGROUND_CORNER_BOTTOM_RIGHT);
 	}
 
 	public DiagramDescription getDescription() {

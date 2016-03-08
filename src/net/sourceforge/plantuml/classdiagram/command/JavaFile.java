@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -67,7 +67,7 @@ class JavaFile {
 		String javaPackage = null;
 		String s;
 		while ((s = br.readLine()) != null) {
-			s = s.trim();
+			s = StringUtils.trin(s);
 			final Matcher matchPackage = packageDefinition.matcher(s);
 			if (matchPackage.find()) {
 				javaPackage = matchPackage.group(1);

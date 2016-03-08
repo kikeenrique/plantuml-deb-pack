@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,6 +30,7 @@ package net.sourceforge.plantuml.command;
 
 import java.util.List;
 
+import net.sourceforge.plantuml.OptionFlags;
 import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.UmlDiagram;
 
@@ -41,7 +42,12 @@ public class CommandPragma extends SingleLineCommand<UmlDiagram> {
 
 	@Override
 	protected CommandExecutionResult executeArg(UmlDiagram system, List<String> arg) {
-		system.getPragma().define(StringUtils.goLowerCase(arg.get(0)), arg.get(1));
+		final String name = StringUtils.goLowerCase(arg.get(0));
+		final String value = arg.get(1);
+		system.getPragma().define(name, value);
+		if (name.equalsIgnoreCase("graphviz_dot") && value.equalsIgnoreCase("jdot")) {
+			system.setUseJDot(true);
+		}
 		return CommandExecutionResult.ok();
 	}
 

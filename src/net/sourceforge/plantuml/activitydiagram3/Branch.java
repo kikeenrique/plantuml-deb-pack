@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -43,7 +43,6 @@ public class Branch {
 	private final Display labelTest;
 	private final Display labelPositive;
 	private final HtmlColor color;
-
 	private LinkRendering inlinkRendering;
 
 	private Ftile ftile;
@@ -53,6 +52,12 @@ public class Branch {
 	}
 
 	public Branch(Swimlane swimlane, Display labelPositive, Display labelTest, HtmlColor color) {
+		if (labelPositive == null) {
+			throw new IllegalArgumentException();
+		}
+		if (labelTest == null) {
+			throw new IllegalArgumentException();
+		}
 		this.list = new InstructionList(swimlane);
 		this.labelTest = labelTest;
 		this.labelPositive = labelPositive;
@@ -67,8 +72,8 @@ public class Branch {
 		return list.kill();
 	}
 
-	public void addNote(Display note, NotePosition position) {
-		list.addNote(note, position);
+	public boolean addNote(Display note, NotePosition position) {
+		return list.addNote(note, position);
 	}
 
 	public final void setInlinkRendering(LinkRendering inlinkRendering) {
@@ -85,7 +90,7 @@ public class Branch {
 
 	public final Display getLabelPositive() {
 		final LinkRendering in = ftile.getInLinkRendering();
-		if (in != null && in.getDisplay() != null) {
+		if (in != null && Display.isNull(in.getDisplay()) == false) {
 			return in.getDisplay();
 		}
 		return labelPositive;
@@ -113,6 +118,10 @@ public class Branch {
 
 	public boolean isEmpty() {
 		return list.isEmpty();
+	}
+
+	public Instruction getLast() {
+		return list.getLast();
 	}
 
 }

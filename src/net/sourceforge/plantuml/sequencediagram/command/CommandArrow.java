@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,6 +31,7 @@ package net.sourceforge.plantuml.sequencediagram.command;
 import java.util.StringTokenizer;
 
 import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.UrlBuilder;
 import net.sourceforge.plantuml.classdiagram.command.CommandLinkClass;
 import net.sourceforge.plantuml.command.CommandExecutionResult;
 import net.sourceforge.plantuml.command.SingleLineCommand2;
@@ -57,12 +58,13 @@ public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 	}
 
 	public static String getColorOrStylePattern() {
-		return "(?:\\[((?:#\\w+|dotted|dashed|bold|hidden)(?:,#\\w+|,dotted|,dashed|,bold|,hidden)*)\\])?";
+		return "(?:\\[((?:#\\w+|dotted|dashed|plain|bold|hidden)(?:,#\\w+|,dotted|,dashed|,plain|,bold|,hidden)*)\\])?";
 	}
 
 	static RegexConcat getRegexConcat() {
 		return new RegexConcat(
 				new RegexLeaf("^"), //
+				new RegexLeaf("PARALLEL", "(&%s*)?"), //
 				new RegexOr("PART1", //
 						new RegexLeaf("PART1CODE", "([\\p{L}0-9_.@]+)"), //
 						new RegexLeaf("PART1LONG", "[%g]([^%g]+)[%g]"), //
@@ -161,7 +163,8 @@ public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 		if (arg.get("MESSAGE", 0) == null) {
 			labels = Display.create("");
 		} else {
-			labels = Display.getWithNewlines(arg.get("MESSAGE", 0));
+			final String message = UrlBuilder.multilineTooltip(arg.get("MESSAGE", 0));
+			labels = Display.getWithNewlines(message);
 		}
 
 		ArrowConfiguration config = hasDressing1 && hasDressing2 ? ArrowConfiguration.withDirectionBoth()
@@ -200,12 +203,19 @@ public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 			diagram.activate(p2, LifeEventType.CREATE, null);
 		}
 
-		final String error = diagram.addMessage(new Message(p1, p2, labels, config, diagram.getNextMessageNumber()));
+		final Message msg = new Message(p1, p2, labels, config, diagram.getNextMessageNumber());
+		final boolean parallel = arg.get("PARALLEL", 0) != null;
+		if (parallel) {
+			msg.goParallel();
+		}
+
+		final String error = diagram.addMessage(msg);
 		if (error != null) {
 			return CommandExecutionResult.error(error);
 		}
 
-		final HtmlColor activationColor = diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(arg.get("LIFECOLOR", 0));
+		final HtmlColor activationColor = diagram.getSkinParam().getIHtmlColorSet()
+				.getColorIfValid(arg.get("LIFECOLOR", 0));
 
 		if (activationSpec != null) {
 			switch (activationSpec.charAt(0)) {

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -37,9 +37,9 @@ import net.sourceforge.plantuml.activitydiagram3.ftile.FtileFactory;
 import net.sourceforge.plantuml.activitydiagram3.ftile.FtileFactoryDelegator;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.svek.ConditionStyle;
-import net.sourceforge.plantuml.ugraphic.UFont;
 
 public class FtileFactoryDelegatorRepeat extends FtileFactoryDelegator {
 
@@ -48,10 +48,9 @@ public class FtileFactoryDelegatorRepeat extends FtileFactoryDelegator {
 	}
 
 	@Override
-	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test, Display yes, Display out, HtmlColor color) {
+	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test, Display yes, Display out, HtmlColor color,
+			LinkRendering backRepeatLinkRendering) {
 		final ConditionStyle conditionStyle = getSkinParam().getConditionStyle();
-		final UFont font = getSkinParam().getFont(
-				conditionStyle == ConditionStyle.INSIDE ? FontParam.ACTIVITY_DIAMOND : FontParam.ACTIVITY_ARROW, null, false);
 
 		final HtmlColor borderColor = getRose().getHtmlColor(getSkinParam(), ColorParam.activityBorder);
 		final HtmlColor backColor = color == null ? getRose().getHtmlColor(getSkinParam(),
@@ -61,8 +60,11 @@ public class FtileFactoryDelegatorRepeat extends FtileFactoryDelegator {
 		final LinkRendering endRepeatLinkRendering = repeat.getOutLinkRendering();
 		final HtmlColor endRepeatLinkColor = endRepeatLinkRendering == null ? null : endRepeatLinkRendering.getColor();
 
-		return FtileRepeat.create(swimlane, repeat, test, yes, out, borderColor, backColor, font, arrowColor,
-				endRepeatLinkColor, conditionStyle, this, getSkinParam().getHyperlinkColor(), getSkinParam().useUnderlineForHyperlink());
-	}
+		final FontParam fontParam = conditionStyle == ConditionStyle.INSIDE ? FontParam.ACTIVITY_DIAMOND
+				: FontParam.ACTIVITY_ARROW;
+		final FontConfiguration fc = new FontConfiguration(getSkinParam(), fontParam, null);
 
+		return FtileRepeat.create(backRepeatLinkRendering, swimlane, repeat, test, yes, out, borderColor, backColor,
+				arrowColor, endRepeatLinkColor, conditionStyle, this, fc);
+	}
 }

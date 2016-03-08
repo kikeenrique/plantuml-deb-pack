@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -33,6 +33,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
+import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
 import net.sourceforge.plantuml.ugraphic.ColorMapperIdentity;
 import net.sourceforge.plantuml.ugraphic.UAntiAliasing;
 import net.sourceforge.plantuml.ugraphic.g2d.UGraphicG2d;
@@ -41,12 +42,21 @@ public class EmptyImageBuilder {
 
 	private final BufferedImage im;
 	private final Graphics2D g2d;
+	static final private int LIMIT = GraphvizUtils.getenvImageLimit();
 
 	public EmptyImageBuilder(double width, double height, Color background) {
 		this((int) width, (int) height, background);
 	}
 
 	public EmptyImageBuilder(int width, int height, Color background) {
+		if (width > LIMIT) {
+			Log.info("Width too large " + width);
+			width = LIMIT;
+		}
+		if (height > LIMIT) {
+			Log.info("Height too large " + height);
+			height = LIMIT;
+		}
 		Log.info("Creating image " + width + "x" + height);
 		im = new BufferedImage(width, height, background == null ? BufferedImage.TYPE_INT_ARGB
 				: BufferedImage.TYPE_INT_RGB);

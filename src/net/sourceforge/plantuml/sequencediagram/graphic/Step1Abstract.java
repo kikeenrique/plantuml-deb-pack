@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -75,17 +75,6 @@ abstract class Step1Abstract {
 	}
 
 	abstract Frontier prepareMessage(ConstraintSet constraintSet, InGroupablesStack groupingStructures);
-
-	protected final Display getLabelOfMessage(AbstractMessage message) {
-		if (message.getMessageNumber() == null) {
-			return message.getLabel();
-		}
-		Display result = Display.empty();
-		result = result.add(new MessageNumber(message.getMessageNumber()));
-		result = result.addAll(message.getLabel());
-		return result;
-	}
-
 
 	protected final ArrowConfiguration getConfig() {
 		return config;

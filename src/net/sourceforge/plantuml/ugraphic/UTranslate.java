@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -29,6 +29,7 @@
 package net.sourceforge.plantuml.ugraphic;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 public class UTranslate implements UChange {
 
@@ -78,6 +79,10 @@ public class UTranslate implements UChange {
 
 	public UTranslate reverse() {
 		return new UTranslate(-dx, -dy);
+	}
+
+	public Rectangle2D apply(Rectangle2D rect) {
+		return new Rectangle2D.Double(rect.getX() + dx, rect.getY() + dy, rect.getWidth(), rect.getHeight());
 	}
 
 }

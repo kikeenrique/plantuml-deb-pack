@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,16 +31,23 @@ package net.sourceforge.plantuml.activitydiagram3.ftile;
 import java.util.List;
 
 import net.sourceforge.plantuml.ColorParam;
+import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.activitydiagram3.Branch;
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
+import net.sourceforge.plantuml.creole.CreoleMode;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
+import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.IHtmlColorSet;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.graphic.TextBlock;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 import net.sourceforge.plantuml.skin.rose.Rose;
-import net.sourceforge.plantuml.ugraphic.Sprite;
+import net.sourceforge.plantuml.ugraphic.sprite.Sprite;
 
 public class FtileFactoryDelegator implements FtileFactory {
 
@@ -59,10 +66,19 @@ public class FtileFactoryDelegator implements FtileFactory {
 		return color;
 	}
 
+	protected final TextBlock getTextBlock(Display display) {
+		if (Display.isNull(display)) {
+			return null;
+		}
+		final ISkinParam skinParam = getSkinParam();
+		final FontConfiguration fontConfiguration = new FontConfiguration(skinParam, FontParam.ACTIVITY_ARROW, null);
+		return display.create(fontConfiguration, HorizontalAlignment.LEFT, this, CreoleMode.SIMPLE_LINE);
+	}
+
 	protected Display getInLinkRenderingDisplay(Ftile tile) {
 		final LinkRendering linkRendering = tile.getInLinkRendering();
 		if (linkRendering == null) {
-			return null;
+			return Display.NULL;
 		}
 		return linkRendering.getDisplay();
 	}
@@ -76,12 +92,16 @@ public class FtileFactoryDelegator implements FtileFactory {
 		return factory.start(swimlane);
 	}
 
+	public Ftile end(Swimlane swimlane) {
+		return factory.end(swimlane);
+	}
+
 	public Ftile stop(Swimlane swimlane) {
 		return factory.stop(swimlane);
 	}
 
-	public Ftile activity(Display label, HtmlColor color, Swimlane swimlane, BoxStyle style) {
-		return factory.activity(label, color, swimlane, style);
+	public Ftile activity(Display label, Swimlane swimlane, BoxStyle style, Colors colors) {
+		return factory.activity(label, swimlane, style, colors);
 	}
 
 	public Ftile addNote(Ftile ftile, Display note, NotePosition notePosition) {
@@ -104,8 +124,9 @@ public class FtileFactoryDelegator implements FtileFactory {
 		return factory.assembly(tile1, tile2);
 	}
 
-	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test, Display yes, Display out, HtmlColor color) {
-		return factory.repeat(swimlane, repeat, test, yes, out, color);
+	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test, Display yes, Display out, HtmlColor color,
+			LinkRendering backRepeatLinkRendering) {
+		return factory.repeat(swimlane, repeat, test, yes, out, color, backRepeatLinkRendering);
 	}
 
 	public Ftile createWhile(Swimlane swimlane, Ftile whileBlock, Display test, Display yes, Display out,
@@ -113,8 +134,9 @@ public class FtileFactoryDelegator implements FtileFactory {
 		return factory.createWhile(swimlane, whileBlock, test, yes, out, afterEndwhile, color);
 	}
 
-	public Ftile createIf(Swimlane swimlane, List<Branch> thens, Branch elseBranch) {
-		return factory.createIf(swimlane, thens, elseBranch);
+	public Ftile createIf(Swimlane swimlane, List<Branch> thens, Branch elseBranch, LinkRendering afterEndwhile,
+			LinkRendering topInlinkRendering) {
+		return factory.createIf(swimlane, thens, elseBranch, afterEndwhile, topInlinkRendering);
 	}
 
 	public Ftile createFork(Swimlane swimlane, List<Ftile> all) {
@@ -125,8 +147,9 @@ public class FtileFactoryDelegator implements FtileFactory {
 		return factory.createSplit(all);
 	}
 
-	public Ftile createGroup(Ftile list, Display name, HtmlColor backColor, HtmlColor titleColor, Display headerNote) {
-		return factory.createGroup(list, name, backColor, titleColor, headerNote);
+	public Ftile createGroup(Ftile list, Display name, HtmlColor backColor, HtmlColor titleColor, Display headerNote,
+			HtmlColor borderColor) {
+		return factory.createGroup(list, name, backColor, titleColor, headerNote, borderColor);
 	}
 
 	public StringBounder getStringBounder() {
@@ -155,6 +178,26 @@ public class FtileFactoryDelegator implements FtileFactory {
 
 	public String getValue(String key) {
 		return skinParam.getValue(key);
+	}
+
+	public double getPadding() {
+		return skinParam.getPadding();
+	}
+
+	public boolean useGuillemet() {
+		return skinParam.useGuillemet();
+	}
+
+	public String getMonospacedFamily() {
+		return skinParam.getMonospacedFamily();
+	}
+
+	public int getTabSize() {
+		return skinParam.getTabSize();
+	}
+
+	public IHtmlColorSet getIHtmlColorSet() {
+		return skinParam.getIHtmlColorSet();
 	}
 
 }

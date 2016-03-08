@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -32,12 +32,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import net.sourceforge.plantuml.FontParam;
+import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.cucadiagram.entity.EntityFactory;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.USymbol;
+import net.sourceforge.plantuml.graphic.color.ColorType;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.svek.IEntityImage;
 import net.sourceforge.plantuml.svek.PackageStyle;
 import net.sourceforge.plantuml.svek.SingleStrategy;
@@ -100,17 +106,7 @@ public class GroupRoot implements IGroup {
 
 	}
 
-	public List<Member> getFieldsToDisplay() {
-		throw new UnsupportedOperationException();
-
-	}
-
-	public List<Member> getMethodsToDisplay() {
-		throw new UnsupportedOperationException();
-
-	}
-
-	public BlockMember getBody(PortionShower portionShower) {
+	public TextBlock getBody(PortionShower portionShower, FontParam fontParam, ISkinParam skinParam) {
 		throw new UnsupportedOperationException();
 
 	}
@@ -123,31 +119,7 @@ public class GroupRoot implements IGroup {
 		return null;
 	}
 
-	public BlockMember getMouseOver() {
-		throw new UnsupportedOperationException();
-	}
-
-	public void addFieldOrMethod(String s) {
-		throw new UnsupportedOperationException();
-
-	}
-
-	public void mouseOver(String s) {
-		throw new UnsupportedOperationException();
-
-	}
-
 	public void addUrl(Url url) {
-		throw new UnsupportedOperationException();
-
-	}
-
-	public HtmlColor getSpecificBackColor() {
-		throw new UnsupportedOperationException();
-
-	}
-
-	public void setSpecificBackcolor(HtmlColor specificBackcolor) {
 		throw new UnsupportedOperationException();
 
 	}
@@ -188,26 +160,6 @@ public class GroupRoot implements IGroup {
 
 	}
 
-	public boolean isAutonom() {
-		throw new UnsupportedOperationException();
-
-	}
-
-	public void setAutonom(boolean autonom) {
-		throw new UnsupportedOperationException();
-
-	}
-
-	public Rankdir getRankdir() {
-		throw new UnsupportedOperationException();
-
-	}
-
-	public void setRankdir(Rankdir rankdir) {
-		throw new UnsupportedOperationException();
-
-	}
-
 	public PackageStyle getPackageStyle() {
 		throw new UnsupportedOperationException();
 
@@ -238,22 +190,6 @@ public class GroupRoot implements IGroup {
 		return false;
 	}
 
-	public HtmlColor getSpecificLineColor() {
-		return null;
-	}
-
-	public void setSpecificLineColor(HtmlColor specificLinecolor) {
-		throw new UnsupportedOperationException();
-	}
-
-	public UStroke getSpecificLineStroke() {
-		return null;
-	}
-
-	public void setSpecificLineStroke(UStroke specificLineStoke) {
-		throw new UnsupportedOperationException();
-	}
-
 	public boolean hasUrl() {
 		return false;
 	}
@@ -266,11 +202,55 @@ public class GroupRoot implements IGroup {
 		throw new UnsupportedOperationException();
 	}
 
-	public FontParam getTitleFontParam() {
+	public int getRawLayout() {
 		throw new UnsupportedOperationException();
 	}
 
-	public int getRawLayout() {
+	public char getConcurrentSeparator() {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setConcurrentSeparator(char separator) {
+		// throw new UnsupportedOperationException();
+	}
+
+	public void putTip(String member, Display display) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Map<String, Display> getTips() {
+		throw new UnsupportedOperationException();
+	}
+
+	public Bodier getBodier() {
+		throw new UnsupportedOperationException();
+	}
+
+	public Colors getColors(ISkinParam skinParam) {
+		return Colors.empty();
+	}
+
+	public void setColors(Colors colors) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setSpecificColorTOBEREMOVED(ColorType type, HtmlColor color) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setSpecificLineStroke(UStroke specificLineStroke) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void applyStroke(String s) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void applyStroke(Colors colors) {
+		throw new UnsupportedOperationException();
+	}
+
+	public FontConfiguration getFontConfigurationForTitle(ISkinParam skinParam) {
 		throw new UnsupportedOperationException();
 	}
 

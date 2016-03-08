@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,6 +31,8 @@ package net.sourceforge.plantuml.project2;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sourceforge.plantuml.StringUtils;
+
 public class Knowledge {
 
 	private final TaskContainer taskContainer;
@@ -43,7 +45,7 @@ public class Knowledge {
 	}
 
 	public Value evaluate(String exp) {
-		exp = exp.trim();
+		exp = StringUtils.trin(exp);
 		int idx = exp.indexOf('$');
 		if (idx != -1) {
 			return evaluate(exp.substring(0, idx), exp.substring(idx + 1));

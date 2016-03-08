@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,9 +30,7 @@ package net.sourceforge.plantuml.graphic;
 
 import java.awt.geom.Dimension2D;
 
-import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
-import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UPolygon;
@@ -40,9 +38,11 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 class USymbolNode extends USymbol {
 
-	public USymbolNode() {
-		super(ColorParam.nodeBackground, ColorParam.nodeBorder, FontParam.NODE, FontParam.NODE_STEREOTYPE);
+	@Override
+	public SkinParameter getSkinParameter() {
+		return SkinParameter.NODE;
 	}
+
 
 	private void drawNode(UGraphic ug, double width, double height, boolean shadowing) {
 		final UPolygon shape = new UPolygon();
@@ -68,8 +68,8 @@ class USymbolNode extends USymbol {
 		return new Margin(10 + 5, 20 + 5, 15 + 5, 5 + 5);
 	}
 
-	public TextBlock asSmall(final TextBlock label, final TextBlock stereotype, final SymbolContext symbolContext) {
-		return new TextBlock() {
+	public TextBlock asSmall(TextBlock name, final TextBlock label, final TextBlock stereotype, final SymbolContext symbolContext) {
+		return new AbstractTextBlock() {
 
 			public void drawU(UGraphic ug) {
 				final Dimension2D dim = calculateDimension(ug.getStringBounder());
@@ -90,14 +90,14 @@ class USymbolNode extends USymbol {
 
 	public TextBlock asBig(final TextBlock title, final TextBlock stereotype, final double width, final double height,
 			final SymbolContext symbolContext) {
-		return new TextBlock() {
+		return new AbstractTextBlock() {
 
 			public void drawU(UGraphic ug) {
 				final Dimension2D dim = calculateDimension(ug.getStringBounder());
 				ug = symbolContext.apply(ug);
 				drawNode(ug, dim.getWidth(), dim.getHeight(), symbolContext.isShadowing());
 				ug = ug.apply(new UTranslate(-4, 11));
-				
+
 				final Dimension2D dimStereo = stereotype.calculateDimension(ug.getStringBounder());
 				final double posStereo = (width - dimStereo.getWidth()) / 2;
 				stereotype.drawU(ug.apply(new UTranslate(posStereo, 2)));
@@ -112,7 +112,7 @@ class USymbolNode extends USymbol {
 			}
 		};
 	}
-	
+
 	@Override
 	public int suppHeightBecauseOfShape() {
 		return 5;
@@ -122,6 +122,5 @@ class USymbolNode extends USymbol {
 	public int suppWidthBecauseOfShape() {
 		return 60;
 	}
-
 
 }

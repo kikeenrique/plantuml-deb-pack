@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -39,31 +39,55 @@ public class SymbolContext {
 	private final HtmlColor foreColor;
 	private final UStroke stroke;
 	private final boolean shadowing;
+	private final double deltaShadow;
 
-	private SymbolContext(HtmlColor backColor, HtmlColor foreColor, UStroke stroke, boolean shadowing) {
+	private SymbolContext(HtmlColor backColor, HtmlColor foreColor, UStroke stroke, boolean shadowing,
+			double deltaShadow) {
 		this.backColor = backColor;
 		this.foreColor = foreColor;
 		this.stroke = stroke;
 		this.shadowing = shadowing;
-//		if (backColor instanceof HtmlColorTransparent) {
-//			throw new UnsupportedOperationException();
-//		}
+		this.deltaShadow = deltaShadow;
+		// if (backColor instanceof HtmlColorTransparent) {
+		// throw new UnsupportedOperationException();
+		// }
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " backColor=" + backColor + " foreColor=" + foreColor;
 	}
 
 	final public UGraphic apply(UGraphic ug) {
-		return ug.apply(new UChangeColor(foreColor)).apply(new UChangeBackColor(backColor)).apply(stroke);
+		return applyStroke(applyColors(ug));
+	}
+
+	public UGraphic applyColors(UGraphic ug) {
+		return ug.apply(new UChangeColor(foreColor)).apply(new UChangeBackColor(backColor));
+	}
+
+	public UGraphic applyStroke(UGraphic ug) {
+		return ug.apply(stroke);
 	}
 
 	public SymbolContext(HtmlColor backColor, HtmlColor foreColor) {
-		this(backColor, foreColor, new UStroke(), false);
+		this(backColor, foreColor, new UStroke(), false, 0);
 	}
 
 	public SymbolContext withShadow(boolean newShadow) {
-		return new SymbolContext(backColor, foreColor, stroke, newShadow);
+		return new SymbolContext(backColor, foreColor, stroke, newShadow, deltaShadow);
+	}
+
+	public SymbolContext withDeltaShadow(double deltaShadow) {
+		return new SymbolContext(backColor, foreColor, stroke, shadowing, deltaShadow);
 	}
 
 	public SymbolContext withStroke(UStroke newStroke) {
-		return new SymbolContext(backColor, foreColor, newStroke, shadowing);
+		return new SymbolContext(backColor, foreColor, newStroke, shadowing, deltaShadow);
+	}
+
+	public SymbolContext withBackColor(HtmlColor backColor) {
+		return new SymbolContext(backColor, foreColor, stroke, shadowing, deltaShadow);
 	}
 
 	public HtmlColor getBackColor() {
@@ -79,7 +103,11 @@ public class SymbolContext {
 	}
 
 	public boolean isShadowing() {
-		return shadowing;
+		return shadowing || deltaShadow > 0;
+	}
+
+	public double getDeltaShadow() {
+		return deltaShadow;
 	}
 
 }

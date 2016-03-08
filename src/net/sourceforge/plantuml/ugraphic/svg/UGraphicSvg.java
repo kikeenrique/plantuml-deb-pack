@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -58,6 +58,7 @@ public class UGraphicSvg extends AbstractUGraphic<SvgGraphics> implements ClipCo
 
 	private final StringBounder stringBounder;
 	private final boolean textAsPath2;
+	private final String target;
 
 	@Override
 	protected AbstractCommonUGraphic copyUGraphic() {
@@ -68,19 +69,20 @@ public class UGraphicSvg extends AbstractUGraphic<SvgGraphics> implements ClipCo
 		super(other);
 		this.stringBounder = other.stringBounder;
 		this.textAsPath2 = other.textAsPath2;
+		this.target = other.target;
 		register();
 	}
 
-	public UGraphicSvg(ColorMapper colorMapper, String backcolor, boolean textAsPath, double scale) {
-		this(colorMapper, new SvgGraphics(backcolor, scale), textAsPath);
+	public UGraphicSvg(ColorMapper colorMapper, String backcolor, boolean textAsPath, double scale, String linkTarget) {
+		this(colorMapper, new SvgGraphics(backcolor, scale), textAsPath, linkTarget);
 	}
 
-	public UGraphicSvg(ColorMapper colorMapper, boolean textAsPath, double scale) {
-		this(colorMapper, new SvgGraphics(scale), textAsPath);
+	public UGraphicSvg(ColorMapper colorMapper, boolean textAsPath, double scale, String linkTarget) {
+		this(colorMapper, new SvgGraphics(scale), textAsPath, linkTarget);
 	}
 
-	public UGraphicSvg(ColorMapper mapper, HtmlColorGradient gr, boolean textAsPath, double scale) {
-		this(mapper, new SvgGraphics(scale), textAsPath);
+	public UGraphicSvg(ColorMapper mapper, HtmlColorGradient gr, boolean textAsPath, double scale, String linkTarget) {
+		this(mapper, new SvgGraphics(scale), textAsPath, linkTarget);
 
 		final SvgGraphics svg = getGraphicObject();
 		svg.paintBackcolorGradient(mapper, gr);
@@ -101,10 +103,11 @@ public class UGraphicSvg extends AbstractUGraphic<SvgGraphics> implements ClipCo
 		getGraphicObject().setHidden(false);
 	}
 
-	private UGraphicSvg(ColorMapper colorMapper, SvgGraphics svg, boolean textAsPath) {
+	private UGraphicSvg(ColorMapper colorMapper, SvgGraphics svg, boolean textAsPath, String linkTarget) {
 		super(colorMapper, svg);
-		stringBounder = TextBlockUtils.getDummyStringBounder();
+		this.stringBounder = TextBlockUtils.getDummyStringBounder();
 		this.textAsPath2 = textAsPath;
+		this.target = linkTarget;
 		register();
 	}
 
@@ -117,8 +120,8 @@ public class UGraphicSvg extends AbstractUGraphic<SvgGraphics> implements ClipCo
 		}
 		registerDriver(ULine.class, new DriverLineSvg(this));
 		registerDriver(UPolygon.class, new DriverPolygonSvg(this));
-		registerDriver(UEllipse.class, new DriverEllipseSvg());
-		registerDriver(UImage.class, new DriverImagePng());
+		registerDriver(UEllipse.class, new DriverEllipseSvg(this));
+		registerDriver(UImage.class, new DriverImagePng(this));
 		registerDriver(UImageSvg.class, new DriverImageSvgSvg());
 		registerDriver(UPath.class, new DriverPathSvg(this));
 		registerDriver(DotPath.class, new DriverDotPathSvg());
@@ -142,7 +145,7 @@ public class UGraphicSvg extends AbstractUGraphic<SvgGraphics> implements ClipCo
 	}
 
 	public void startUrl(Url url) {
-		getGraphicObject().openLink(url.getUrl(), url.getTooltip());
+		getGraphicObject().openLink(url.getUrl(), url.getTooltip(), target);
 	}
 
 	public void closeAction() {

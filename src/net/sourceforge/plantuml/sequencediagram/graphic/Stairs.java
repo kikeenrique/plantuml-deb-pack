@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -42,7 +42,14 @@ public class Stairs {
 
 	@Override
 	public String toString() {
-		return super.toString() + " " + ys.size();
+		final List<Double> copy = new ArrayList<Double>(ys);
+		Collections.sort(copy);
+		final StringBuilder sb = new StringBuilder("[");
+		for (Double y : copy) {
+			sb.append(y + "=" + getValue(y) + " ");
+		}
+		sb.append("]");
+		return sb.toString();
 	}
 
 	public void addStep(double y, int value) {
@@ -62,7 +69,7 @@ public class Stairs {
 		values.add(value);
 		cache.clear();
 	}
-	
+
 	public int getMaxValue() {
 		int max = Integer.MIN_VALUE;
 		for (Integer v : values) {

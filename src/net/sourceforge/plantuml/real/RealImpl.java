@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,14 +28,12 @@
  */
 package net.sourceforge.plantuml.real;
 
-class RealImpl extends RealMoveable {
+class RealImpl extends RealMoveable implements RealOrigin {
 
-	private final RealLine line;
 	private double currentValue;
 
 	public RealImpl(String name, RealLine line, double currentValue) {
-		super(name);
-		this.line = line;
+		super(line, name);
 		this.currentValue = currentValue;
 	}
 
@@ -43,26 +41,22 @@ class RealImpl extends RealMoveable {
 		this.currentValue += delta;
 	}
 
-	public double getCurrentValue() {
+	@Override
+	double getCurrentValueInternal() {
 		return currentValue;
 	}
 
 	public Real addAtLeast(double delta) {
-		final RealImpl result = new RealImpl(getName() + ".addAtLeast" + delta, line, this.currentValue + delta);
-		line.addForce(new PositiveForce(this, result, delta));
+		final RealImpl result = new RealImpl(getName() + ".addAtLeast" + delta, getLine(), this.currentValue + delta);
+		getLine().addForce(new PositiveForce(this, result, delta));
 		return result;
 	}
 
 	public void ensureBiggerThan(Real other) {
-		line.addForce(new PositiveForce(other, this, 0));
+		getLine().addForce(new PositiveForce(other, this, 0));
 	}
 
-	public void compile() {
-		line.compile();
+	public void compileNow() {
+		getLine().compile();
 	}
-
-	RealLine getLine() {
-		return line;
-	}
-
 }

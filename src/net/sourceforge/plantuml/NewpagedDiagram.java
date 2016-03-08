@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,8 +31,10 @@ package net.sourceforge.plantuml;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import net.sourceforge.plantuml.command.BlocLines;
 import net.sourceforge.plantuml.command.Command;
 import net.sourceforge.plantuml.command.CommandExecutionResult;
 import net.sourceforge.plantuml.core.Diagram;
@@ -42,19 +44,9 @@ import net.sourceforge.plantuml.core.ImageData;
 
 public class NewpagedDiagram extends AbstractPSystem {
 
-	// public static NewpagedDiagram newpage(AbstractPSystem diagram, AbstractPSystem empty) {
-	// System.err.println("executing newpage A=" + diagram);
-	// if (diagram instanceof NewpagedDiagram) {
-	// final NewpagedDiagram other = (NewpagedDiagram) diagram;
-	// other.diagrams.add(empty);
-	// return other;
-	// }
-	// return new NewpagedDiagram(diagram, empty);
-	// }
-
 	private final List<Diagram> diagrams = new ArrayList<Diagram>();
 
-	public NewpagedDiagram(Diagram diag1, Diagram diag2) {
+	public NewpagedDiagram(AbstractPSystem diag1, AbstractPSystem diag2) {
 		if (diag1 instanceof NewpagedDiagram) {
 			throw new IllegalArgumentException();
 		}
@@ -70,7 +62,11 @@ public class NewpagedDiagram extends AbstractPSystem {
 		return super.toString() + " SIZE=" + diagrams.size() + " " + diagrams;
 	}
 
-	public CommandExecutionResult executeCommand(Command cmd, List<String> lines) {
+	public Diagram getLastDiagram() {
+		return diagrams.get(diagrams.size() - 1);
+	}
+
+	public CommandExecutionResult executeCommand(Command cmd, BlocLines lines) {
 		final int nb = diagrams.size();
 		final CommandExecutionResult tmp = cmd.execute(diagrams.get(nb - 1), lines);
 		if (tmp.getNewDiagram() instanceof NewpagedDiagram) {
@@ -134,6 +130,10 @@ public class NewpagedDiagram extends AbstractPSystem {
 		for (Diagram diagram : diagrams) {
 			((AbstractPSystem) diagram).makeDiagramReady();
 		}
+	}
+
+	public final List<Diagram> getDiagrams() {
+		return Collections.unmodifiableList(diagrams);
 	}
 
 }

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -32,13 +32,12 @@ import java.awt.geom.Dimension2D;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.ISkinSimple;
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
-import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
-import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
@@ -50,14 +49,14 @@ abstract class AbstractElementText extends AbstractElement {
 	private final int charLength;
 
 	public AbstractElementText(String text, UFont font, boolean manageLength, ISkinSimple spriteContainer) {
-		config = new FontConfiguration(font, HtmlColorUtils.BLACK, HtmlColorUtils.BLUE, true);
+		config = FontConfiguration.blackBlueTrue(font);
 		if (manageLength) {
 			this.charLength = getCharNumber(text);
-			text = text.trim();
+			text = StringUtils.trin(text);
 		} else {
 			this.charLength = 0;
 		}
-		this.block = TextBlockUtils.create(Display.create(text), config, HorizontalAlignment.LEFT, spriteContainer);
+		this.block = Display.create(text).create(config, HorizontalAlignment.LEFT, spriteContainer);
 	}
 
 	private int getCharNumber(String text) {
@@ -90,7 +89,7 @@ abstract class AbstractElementText extends AbstractElement {
 		// double max = 0;
 		// for (int i = 32; i < 127; i++) {
 		// final char c = (char) i;
-		// final double w = TextBlockUtils.create(Arrays.asList("" + c), config, HorizontalAlignment.LEFT)
+		// final double w = Display.create(Arrays.asList("" + c), config, HorizontalAlignment.LEFT)
 		// .calculateDimension(stringBounder).getWidth();
 		// if (w > max) {
 		// Log.println("c="+c+" "+max);

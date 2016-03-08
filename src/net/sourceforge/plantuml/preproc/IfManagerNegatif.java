@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,6 +31,8 @@ package net.sourceforge.plantuml.preproc;
 import java.io.IOException;
 import java.util.regex.Matcher;
 
+import net.sourceforge.plantuml.CharSequence2;
+
 class IfManagerNegatif extends IfManager {
 
 	private boolean skippingDone = false;
@@ -40,11 +42,11 @@ class IfManagerNegatif extends IfManager {
 	}
 
 	@Override
-	protected String readLineInternal() throws IOException {
+	protected CharSequence2 readLineInternal() throws IOException {
 		if (skippingDone == false) {
 			skippingDone = true;
 			do {
-				final String s = readLine();
+				final CharSequence2 s = readLine();
 				if (s == null) {
 					return null;
 				}
@@ -59,7 +61,7 @@ class IfManagerNegatif extends IfManager {
 			} while (true);
 		}
 
-		final String s = super.readLineInternal();
+		final CharSequence2 s = super.readLineInternal();
 		if (s == null) {
 			return null;
 		}

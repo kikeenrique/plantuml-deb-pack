@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -44,6 +44,9 @@ import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.LineParam;
+import net.sourceforge.plantuml.SkinParamUtils;
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.UmlDiagramType;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.cucadiagram.EntityPosition;
@@ -53,7 +56,6 @@ import net.sourceforge.plantuml.cucadiagram.IGroup;
 import net.sourceforge.plantuml.cucadiagram.Member;
 import net.sourceforge.plantuml.cucadiagram.MethodsOrFieldsArea;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
-import net.sourceforge.plantuml.cucadiagram.dot.DotData;
 import net.sourceforge.plantuml.cucadiagram.dot.GraphvizVersion;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorTransparent;
@@ -62,6 +64,7 @@ import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockEmpty;
 import net.sourceforge.plantuml.graphic.TextBlockWidth;
 import net.sourceforge.plantuml.graphic.USymbol;
+import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.posimo.Moveable;
 import net.sourceforge.plantuml.skin.rose.Rose;
 import net.sourceforge.plantuml.svek.image.EntityImageState;
@@ -72,7 +75,6 @@ import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.URectangle;
 import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
-import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.utils.UniqueSequence;
 
 public class Cluster implements Moveable {
@@ -134,7 +136,7 @@ public class Cluster implements Moveable {
 		}
 		this.color = colorSequence.getValue();
 		this.colorTitle = colorSequence.getValue();
-		this.skinParam = skinParam;
+		this.skinParam = group.getColors(skinParam).mute(skinParam);
 	}
 
 	@Override
@@ -284,16 +286,18 @@ public class Cluster implements Moveable {
 		this.yTitle = y;
 	}
 
-	private static HtmlColor getColor(ColorParam colorParam, ISkinParam skinParam) {
-		return new Rose().getHtmlColor(skinParam, colorParam);
+	private static HtmlColor getColor(ColorParam colorParam, ISkinParam skinParam, Stereotype stereotype) {
+		return SkinParamUtils.getColor(skinParam, colorParam, stereotype);
 	}
 
-	public void drawU(UGraphic ug, DotData dotData, UStroke stroke) {
+	public void drawU(UGraphic ug, UStroke stroke, final UmlDiagramType umlDiagramType, final ISkinParam skinParam2) {
+
+		final Stereotype stereotype = group.getStereotype();
 		HtmlColor borderColor;
-		if (dotData.getUmlDiagramType() == UmlDiagramType.STATE) {
-			borderColor = getColor(ColorParam.stateBorder, dotData.getSkinParam());
+		if (umlDiagramType == UmlDiagramType.STATE) {
+			borderColor = getColor(ColorParam.stateBorder, skinParam, stereotype);
 		} else {
-			borderColor = getColor(ColorParam.packageBorder, dotData.getSkinParam());
+			borderColor = getColor(ColorParam.packageBorder, skinParam, stereotype);
 		}
 
 		final Url url = group.getUrl99();
@@ -302,48 +306,47 @@ public class Cluster implements Moveable {
 		}
 		try {
 			if (hasEntryOrExitPoint()) {
-				manageEntryExitPoint(dotData, ug.getStringBounder());
+				manageEntryExitPoint(ug.getStringBounder());
 			}
-			if (skinParam.useSwimlanes()) {
-				drawSwinLinesState(ug, borderColor, dotData);
+			if (skinParam.useSwimlanes(umlDiagramType)) {
+				drawSwinLinesState(ug, borderColor);
 				return;
 			}
-			final boolean isState = dotData.getUmlDiagramType() == UmlDiagramType.STATE;
+			final boolean isState = umlDiagramType == UmlDiagramType.STATE;
 			if (isState) {
-				if (group.getSpecificLineStroke() != null) {
-					stroke = group.getSpecificLineStroke();
+				if (group.getColors(skinParam).getSpecificLineStroke() != null) {
+					stroke = group.getColors(skinParam).getSpecificLineStroke();
 				}
-				if (group.getSpecificLineColor() != null) {
-					borderColor = group.getSpecificLineColor();
+				if (group.getColors(skinParam).getColor(ColorType.LINE) != null) {
+					borderColor = group.getColors(skinParam).getColor(ColorType.LINE);
 				}
-				drawUState(ug, borderColor, dotData, stroke);
+				drawUState(ug, borderColor, skinParam2, stroke);
 				return;
 			}
 			PackageStyle style = group.getPackageStyle();
 			if (style == null) {
-				style = dotData.getSkinParam().getPackageStyle();
+				style = skinParam2.getPackageStyle();
 			}
 			if (border != null) {
-				final HtmlColor tmp = dotData.getSkinParam().getHtmlColor(border, null, false);
+				final HtmlColor tmp = skinParam2.getHtmlColor(border, group.getStereotype(), false);
 				if (tmp != null) {
 					borderColor = tmp;
 				}
 			}
 
 			if (ztitle != null || zstereo != null) {
-				final HtmlColor stateBack = getStateBackColor(getBackColor(), dotData.getSkinParam(),
-						group.getStereotype());
+				final HtmlColor back = getBackColor(getBackColor(), skinParam2, group.getStereotype());
 				final ClusterDecoration decoration = new ClusterDecoration(style, group.getUSymbol(), ztitle, zstereo,
-						stateBack, minX, minY, maxX, maxY);
-				decoration.drawU(ug, borderColor, dotData.getSkinParam().shadowing());
+						minX, minY, maxX, maxY, getStroke(skinParam2, group.getStereotype()));
+				decoration.drawU(ug, back, borderColor, skinParam2.shadowing());
 				return;
 			}
 			final URectangle rect = new URectangle(maxX - minX, maxY - minY);
-			if (dotData.getSkinParam().shadowing()) {
+			if (skinParam2.shadowing()) {
 				rect.setDeltaShadow(3.0);
 			}
-			final HtmlColor stateBack = getStateBackColor(getBackColor(), dotData.getSkinParam(), group.getStereotype());
-			ug = ug.apply(new UChangeBackColor(stateBack)).apply(new UChangeColor(borderColor));
+			final HtmlColor backColor = getBackColor(getBackColor(), skinParam2, group.getStereotype());
+			ug = ug.apply(new UChangeBackColor(backColor)).apply(new UChangeColor(borderColor));
 			ug.apply(new UStroke(2)).apply(new UTranslate(minX, minY)).draw(rect);
 
 		} finally {
@@ -354,7 +357,15 @@ public class Cluster implements Moveable {
 
 	}
 
-	private void manageEntryExitPoint(DotData dotData, StringBounder stringBounder) {
+	private UStroke getStroke(ISkinParam skinParam, Stereotype stereo) {
+		UStroke stroke = skinParam.getThickness(LineParam.packageBorder, stereo);
+		if (stroke == null) {
+			stroke = new UStroke(2.0);
+		}
+		return stroke;
+	}
+
+	public void manageEntryExitPoint(StringBounder stringBounder) {
 		final Collection<ClusterPosition> insides = new ArrayList<ClusterPosition>();
 		final List<Point2D> points = new ArrayList<Point2D>();
 		for (Shape sh : shapes) {
@@ -382,7 +393,7 @@ public class Cluster implements Moveable {
 		xTitle = minX + ((maxX - minX - widthTitle) / 2);
 	}
 
-	private void drawSwinLinesState(UGraphic ug, HtmlColor borderColor, DotData dotData) {
+	private void drawSwinLinesState(UGraphic ug, HtmlColor borderColor) {
 		if (ztitle != null) {
 			ztitle.drawU(ug.apply(new UTranslate(xTitle, 0)));
 		}
@@ -393,11 +404,11 @@ public class Cluster implements Moveable {
 
 	}
 
-	private HtmlColor getColor(DotData dotData, ColorParam colorParam, Stereotype stereo) {
-		return new Rose().getHtmlColor(dotData.getSkinParam(), colorParam, stereo);
+	private HtmlColor getColor(ISkinParam skinParam, ColorParam colorParam, Stereotype stereo) {
+		return new Rose().getHtmlColor(skinParam, colorParam, stereo);
 	}
 
-	private void drawUState(UGraphic ug, HtmlColor borderColor, DotData dotData, UStroke stroke) {
+	private void drawUState(UGraphic ug, HtmlColor borderColor, ISkinParam skinParam2, UStroke stroke) {
 		final Dimension2D total = new Dimension2DDouble(maxX - minX, maxY - minY);
 		final double suppY;
 		if (ztitle == null) {
@@ -409,14 +420,14 @@ public class Cluster implements Moveable {
 
 		HtmlColor stateBack = getBackColor();
 		if (stateBack == null) {
-			stateBack = getColor(dotData, ColorParam.stateBackground, group.getStereotype());
+			stateBack = getColor(skinParam2, ColorParam.stateBackground, group.getStereotype());
 		}
-		final HtmlColor background = getColor(dotData, ColorParam.background, null);
-		final TextBlockWidth attribute = getTextBlockAttribute(dotData);
+		final HtmlColor background = getColor(skinParam2, ColorParam.background, null);
+		final TextBlockWidth attribute = getTextBlockAttribute(skinParam2);
 		final double attributeHeight = attribute.calculateDimension(ug.getStringBounder()).getHeight();
 		final RoundedContainer r = new RoundedContainer(total, suppY, attributeHeight
 				+ (attributeHeight > 0 ? IEntityImage.MARGIN : 0), borderColor, stateBack, background, stroke);
-		r.drawU(ug.apply(new UTranslate(minX, minY)), dotData.getSkinParam().shadowing());
+		r.drawU(ug.apply(new UTranslate(minX, minY)), skinParam2.shadowing());
 
 		if (ztitle != null) {
 			ztitle.drawU(ug.apply(new UTranslate(xTitle, yTitle)));
@@ -435,13 +446,13 @@ public class Cluster implements Moveable {
 
 	}
 
-	private TextBlockWidth getTextBlockAttribute(DotData dotData) {
+	private TextBlockWidth getTextBlockAttribute(ISkinParam skinParam) {
 		final TextBlockWidth attribute;
-		final List<Member> members = group.getFieldsToDisplay();
+		final List<Member> members = group.getBodier().getFieldsToDisplay();
 		if (members.size() == 0) {
 			attribute = new TextBlockEmpty();
 		} else {
-			attribute = new MethodsOrFieldsArea(members, FontParam.STATE_ATTRIBUTE, dotData.getSkinParam());
+			attribute = new MethodsOrFieldsArea(members, FontParam.STATE_ATTRIBUTE, skinParam, group.getStereotype());
 		}
 		return attribute;
 	}
@@ -529,7 +540,7 @@ public class Cluster implements Moveable {
 	}
 
 	public boolean printCluster2(StringBuilder sb, Collection<Line> lines, StringBounder stringBounder,
-			DotMode dotMode, GraphvizVersion graphvizVersion) {
+			DotMode dotMode, GraphvizVersion graphvizVersion, UmlDiagramType type) {
 		// Log.println("Cluster::printCluster " + this);
 
 		boolean added = false;
@@ -543,7 +554,7 @@ public class Cluster implements Moveable {
 		}
 
 		for (Cluster child : getChildren()) {
-			child.printInternal(sb, lines, stringBounder, dotMode, graphvizVersion);
+			child.printInternal(sb, lines, stringBounder, dotMode, graphvizVersion, type);
 		}
 
 		return added;
@@ -605,50 +616,53 @@ public class Cluster implements Moveable {
 
 	public final static String CENTER_ID = "za";
 
-	private boolean protection0() {
-		if (skinParam.useSwimlanes()) {
+	private boolean protection0(UmlDiagramType type) {
+		if (skinParam.useSwimlanes(type)) {
 			return false;
 		}
 		return true;
 	}
 
-	private boolean protection1() {
-		if (skinParam.useSwimlanes()) {
+	private boolean protection1(UmlDiagramType type) {
+		if (group.getUSymbol() == USymbol.NODE) {
+			return true;
+		}
+		if (skinParam.useSwimlanes(type)) {
 			return false;
 		}
 		return true;
 	}
 
-	public String getMinPoint() {
-		if (skinParam.useSwimlanes()) {
+	public String getMinPoint(UmlDiagramType type) {
+		if (skinParam.useSwimlanes(type)) {
 			return "minPoint" + color;
 		}
 		return null;
 	}
 
-	public String getMaxPoint() {
-		if (skinParam.useSwimlanes()) {
+	public String getMaxPoint(UmlDiagramType type) {
+		if (skinParam.useSwimlanes(type)) {
 			return "maxPoint" + color;
 		}
 		return null;
 	}
 
-	private String getSourceInPoint() {
-		if (skinParam.useSwimlanes()) {
+	private String getSourceInPoint(UmlDiagramType type) {
+		if (skinParam.useSwimlanes(type)) {
 			return "sourceIn" + color;
 		}
 		return null;
 	}
 
-	private String getSinkInPoint() {
-		if (skinParam.useSwimlanes()) {
+	private String getSinkInPoint(UmlDiagramType type) {
+		if (skinParam.useSwimlanes(type)) {
 			return "sinkIn" + color;
 		}
 		return null;
 	}
 
 	private void printInternal(StringBuilder sb, Collection<Line> lines, StringBounder stringBounder, DotMode dotMode,
-			GraphvizVersion graphvizVersion) {
+			GraphvizVersion graphvizVersion, UmlDiagramType type) {
 		final boolean thereALinkFromOrToGroup2 = isThereALinkFromOrToGroup(lines);
 		boolean thereALinkFromOrToGroup1 = thereALinkFromOrToGroup2;
 		final boolean useProtectionWhenThereALinkFromOrToGroup = graphvizVersion
@@ -668,8 +682,8 @@ public class Cluster implements Moveable {
 				}
 			}
 		}
-		boolean protection0 = protection0();
-		boolean protection1 = protection1();
+		boolean protection0 = protection0(type);
+		boolean protection1 = protection1(type);
 		if (hasEntryOrExitPoint || useProtectionWhenThereALinkFromOrToGroup == false) {
 			protection0 = false;
 			protection1 = false;
@@ -714,23 +728,23 @@ public class Cluster implements Moveable {
 		if (protection1) {
 			subgraphCluster(sb, "p1");
 		}
-		if (skinParam.useSwimlanes()) {
+		if (skinParam.useSwimlanes(type)) {
 			sb.append("{rank = source; ");
-			sb.append(getSourceInPoint());
+			sb.append(getSourceInPoint(type));
 			sb.append(" [shape=point,width=.01,label=\"\"];");
-			sb.append(getMinPoint() + "->" + getSourceInPoint() + "  [weight=999];");
+			sb.append(getMinPoint(type) + "->" + getSourceInPoint(type) + "  [weight=999];");
 			sb.append("}");
 			SvekUtils.println(sb);
 			sb.append("{rank = sink; ");
-			sb.append(getSinkInPoint());
+			sb.append(getSinkInPoint(type));
 			sb.append(" [shape=point,width=.01,label=\"\"];");
 			sb.append("}");
-			sb.append(getSinkInPoint() + "->" + getMaxPoint() + "  [weight=999];");
+			sb.append(getSinkInPoint(type) + "->" + getMaxPoint(type) + "  [weight=999];");
 			SvekUtils.println(sb);
 		}
 		SvekUtils.println(sb);
 		printCluster1(sb, lines);
-		final boolean added = printCluster2(sb, lines, stringBounder, dotMode, graphvizVersion);
+		final boolean added = printCluster2(sb, lines, stringBounder, dotMode, graphvizVersion, type);
 		if (hasEntryOrExitPoint && added == false) {
 			final String empty = "empty" + color;
 			sb.append(empty + " [shape=point,width=.01,label=\"\"];");
@@ -774,7 +788,7 @@ public class Cluster implements Moveable {
 		if (EntityUtils.groupRoot(group)) {
 			return null;
 		}
-		final HtmlColor result = group.getSpecificBackColor();
+		final HtmlColor result = group.getColors(skinParam).getColor(ColorType.BACK);
 		if (result != null) {
 			return result;
 		}
@@ -798,17 +812,33 @@ public class Cluster implements Moveable {
 		return group == ent;
 	}
 
-	public static HtmlColor getStateBackColor(HtmlColor stateBack, ISkinParam skinParam, Stereotype stereotype) {
-		if (stateBack == null) {
-			stateBack = skinParam.getHtmlColor(ColorParam.packageBackground, stereotype, false);
+	public static HtmlColor getBackColor(HtmlColor backColor, ISkinParam skinParam, Stereotype stereotype) {
+		if (backColor == null) {
+			backColor = skinParam.getHtmlColor(ColorParam.packageBackground, stereotype, false);
 		}
-		if (stateBack == null) {
-			stateBack = skinParam.getHtmlColor(ColorParam.background, stereotype, false);
+		if (backColor == null) {
+			backColor = skinParam.getHtmlColor(ColorParam.background, stereotype, false);
 		}
-		if (stateBack == null /* || stateBack instanceof HtmlColorTransparent */) {
-			stateBack = new HtmlColorTransparent();
+		if (backColor == null /* || stateBack instanceof HtmlColorTransparent */) {
+			backColor = new HtmlColorTransparent();
 		}
-		return stateBack;
+		return backColor;
+	}
+
+	public double checkFolderPosition(Point2D pt, StringBounder stringBounder) {
+		if (getClusterPosition().isPointJustUpper(pt)) {
+			if (ztitle == null) {
+				return 0;
+			}
+			final Dimension2D dimTitle = ztitle.calculateDimension(stringBounder);
+
+			if (pt.getX() < getClusterPosition().getMinX() + dimTitle.getWidth()) {
+				return 0;
+			}
+
+			return getClusterPosition().getMinY() - pt.getY() + dimTitle.getHeight();
+		}
+		return 0;
 	}
 
 	// public Point2D projection(double x, double y) {

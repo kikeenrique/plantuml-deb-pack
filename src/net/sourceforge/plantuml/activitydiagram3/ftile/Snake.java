@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -38,7 +38,10 @@ import java.util.List;
 import net.sourceforge.plantuml.Direction;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.graphic.StringBounderUtils;
 import net.sourceforge.plantuml.graphic.TextBlock;
+import net.sourceforge.plantuml.graphic.TextBlockUtils;
+import net.sourceforge.plantuml.ugraphic.CompressionTransform;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
@@ -56,6 +59,19 @@ public class Snake implements UShape {
 	private TextBlock textBlock;
 	private boolean mergeable = true;
 	private Direction emphasizeDirection;
+
+	public Snake transformX(CompressionTransform compressionTransform) {
+		final Snake result = new Snake(color, endDecoration);
+		result.textBlock = this.textBlock;
+		result.mergeable = this.mergeable;
+		result.emphasizeDirection = this.emphasizeDirection;
+		for (Point2D.Double pt : points) {
+			final double x = compressionTransform.transform(pt.x);
+			final double y = pt.y;
+			result.addPoint(x, y);
+		}
+		return result;
+	}
 
 	public Snake(HtmlColor color, UPolygon endDecoration) {
 		this.endDecoration = endDecoration;
@@ -131,9 +147,12 @@ public class Snake implements UShape {
 		}
 		if (textBlock != null) {
 			final Point2D position = getTextBlockPosition(ug.getStringBounder());
-			// double max = getMaxX(ug.getStringBounder());
-			// ug.apply(new UChangeBackColor(HtmlColorUtils.LIGHT_GRAY)).apply(new UTranslate(0,
-			// position.getY())).draw(new URectangle(max, 10));
+			// final double max = getMaxX(ug.getStringBounder());
+			// ug.apply(new UChangeBackColor(HtmlColorUtils.LIGHT_GRAY))
+			// .apply(new UTranslate(position.getX(), position.getY()))
+			// .draw(new URectangle(textBlock.calculateDimension(ug.getStringBounder())));
+			// ug.apply(new UChangeBackColor(HtmlColorUtils.RED)).apply(new UTranslate(0, position.getY() + 10))
+			// .draw(new URectangle(max, 10));
 			textBlock.drawU(ug.apply(new UTranslate(position)));
 		}
 	}
@@ -190,6 +209,13 @@ public class Snake implements UShape {
 		if (mergeable == false || other.mergeable == false) {
 			return null;
 		}
+		if (TextBlockUtils.isEmpty(other.textBlock) == false) {
+			return null;
+			// System.err.println("merge other.textBlock="+other.textBlock+" "+other.textBlock.calculateDimension(TextBlockUtils.getDummyStringBounder()));
+		}
+		// if (other.textBlock != null) {
+		// return null;
+		// }
 		if (same(this.getLast(), other.getFirst())) {
 			final UPolygon oneOf = endDecoration == null ? other.endDecoration : endDecoration;
 			final Snake result = new Snake(color, oneOf);
@@ -218,6 +244,7 @@ public class Snake implements UShape {
 			change = change || removePattern4();
 			change = change || removePattern5();
 			change = change || removePattern6();
+			change = change || removePattern7();
 		} while (change);
 	}
 
@@ -251,6 +278,22 @@ public class Snake implements UShape {
 					|| Arrays.asList(Direction.DOWN, Direction.RIGHT, Direction.DOWN, Direction.LEFT).equals(patternAt)) {
 				final Point2D.Double newPoint = new Point2D.Double(points.get(i + 1).x, points.get(i + 3).y);
 				points.remove(i + 3);
+				points.remove(i + 2);
+				points.remove(i + 1);
+				points.add(i + 1, newPoint);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean removePattern7() {
+		if (points.size() > 4) {
+			final int i = 0;
+			final List<Direction> patternAt = getPatternAt(i);
+			if (Arrays.asList(Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.DOWN).equals(patternAt)
+					&& points.get(i + 3).x > points.get(i).x) {
+				final Point2D.Double newPoint = new Point2D.Double(points.get(i + 3).x, points.get(i).y);
 				points.remove(i + 2);
 				points.remove(i + 1);
 				points.add(i + 1, newPoint);
@@ -319,7 +362,7 @@ public class Snake implements UShape {
 			if (Arrays.asList(Direction.DOWN, Direction.RIGHT, Direction.DOWN, Direction.LEFT).equals(patternAt)) {
 				final Point2D.Double p1 = points.get(i + 1);
 				final Point2D.Double p4 = points.get(i + 4);
-				if (p4.x < p1.x) {
+				if (p4.x + 4 < p1.x) {
 					final Point2D.Double newPoint = new Point2D.Double(points.get(i + 1).x, points.get(i + 3).y);
 					points.remove(i + 3);
 					points.remove(i + 2);

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,20 +28,25 @@
  */
 package net.sourceforge.plantuml.command;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.sourceforge.plantuml.AbstractPSystem;
 
 public class CommandExecutionResult {
 
 	private final String error;
 	private final AbstractPSystem newDiagram;
+	private final List<String> debugLines;
 
-	private CommandExecutionResult(String error, AbstractPSystem newDiagram) {
+	private CommandExecutionResult(String error, AbstractPSystem newDiagram, List<String> debugLines) {
 		this.error = error;
 		this.newDiagram = newDiagram;
+		this.debugLines = debugLines;
 	}
 
 	public CommandExecutionResult withDiagram(AbstractPSystem newDiagram) {
-		return new CommandExecutionResult(error, newDiagram);
+		return new CommandExecutionResult(error, newDiagram, null);
 	}
 
 	@Override
@@ -50,15 +55,37 @@ public class CommandExecutionResult {
 	}
 
 	public static CommandExecutionResult newDiagram(AbstractPSystem result) {
-		return new CommandExecutionResult(null, result);
+		return new CommandExecutionResult(null, result, null);
 	}
 
 	public static CommandExecutionResult ok() {
-		return new CommandExecutionResult(null, null);
+		return new CommandExecutionResult(null, null, null);
 	}
 
 	public static CommandExecutionResult error(String error) {
-		return new CommandExecutionResult(error, null);
+		return new CommandExecutionResult(error, null, null);
+	}
+
+	public static CommandExecutionResult error(String error, Throwable t) {
+		return new CommandExecutionResult(error, null, getStackTrace(t));
+	}
+
+	public static List<String> getStackTrace(Throwable exception) {
+		final List<String> result = new ArrayList<String>();
+		result.add(exception.toString());
+		for (StackTraceElement ste : exception.getStackTrace()) {
+			result.add("  " + ste.toString());
+		}
+		if (exception.getCause() != null) {
+			final Throwable cause = exception.getCause();
+			result.add("  ");
+			result.add("Caused by " + cause.toString());
+			for (StackTraceElement ste : cause.getStackTrace()) {
+				result.add("  " + ste.toString());
+			}
+
+		}
+		return result;
 	}
 
 	public boolean isOk() {
@@ -74,6 +101,10 @@ public class CommandExecutionResult {
 
 	public AbstractPSystem getNewDiagram() {
 		return newDiagram;
+	}
+
+	public List<String> getDebugLines() {
+		return debugLines;
 	}
 
 }

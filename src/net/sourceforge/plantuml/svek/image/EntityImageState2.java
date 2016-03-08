@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -46,6 +46,7 @@ import net.sourceforge.plantuml.graphic.SymbolContext;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.USymbol;
+import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.svek.AbstractEntityImage;
 import net.sourceforge.plantuml.svek.ShapeType;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
@@ -65,13 +66,13 @@ public class EntityImageState2 extends AbstractEntityImage {
 		final Stereotype stereotype = entity.getStereotype();
 
 		Display list = Display.empty();
-		for (Member att : entity.getFieldsToDisplay()) {
+		for (Member att : entity.getBodier().getFieldsToDisplay()) {
 			list = list.addAll(Display.getWithNewlines(att.getDisplay(true)));
 		}
 
 		final USymbol symbol = USymbol.FRAME;
 
-		HtmlColor backcolor = getEntity().getSpecificBackColor();
+		HtmlColor backcolor = getEntity().getColors(getSkinParam()).getColor(ColorType.BACK);
 		if (backcolor == null) {
 			backcolor = SkinParamUtils.getColor(getSkinParam(), symbol.getColorParamBack(), getStereo());
 		}
@@ -85,9 +86,9 @@ public class EntityImageState2 extends AbstractEntityImage {
 		TextBlock stereo = TextBlockUtils.empty(0, 0);
 
 		final TextBlock desc = new BodyEnhanced(entity.getDisplay(), symbol.getFontParam(), skinParam,
-				HorizontalAlignment.CENTER, stereotype, symbol.manageHorizontalLine(), false);
+				HorizontalAlignment.CENTER, stereotype, symbol.manageHorizontalLine(), false, false);
 
-		asSmall = symbol.asSmall(desc, stereo, ctx);
+		asSmall = symbol.asSmall(null, desc, stereo, ctx);
 
 	}
 

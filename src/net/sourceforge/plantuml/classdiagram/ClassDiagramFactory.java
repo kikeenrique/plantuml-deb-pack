@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.plantuml.AbstractPSystem;
+import net.sourceforge.plantuml.NewpagedDiagram;
 import net.sourceforge.plantuml.UmlDiagramType;
 import net.sourceforge.plantuml.classdiagram.command.CommandAddMethod;
 import net.sourceforge.plantuml.classdiagram.command.CommandAllowMixing;
@@ -41,11 +42,11 @@ import net.sourceforge.plantuml.classdiagram.command.CommandCreateElementFull2;
 import net.sourceforge.plantuml.classdiagram.command.CommandCreateElementFull2.Mode;
 import net.sourceforge.plantuml.classdiagram.command.CommandDiamondAssociation;
 import net.sourceforge.plantuml.classdiagram.command.CommandHideShowSpecificClass;
+import net.sourceforge.plantuml.classdiagram.command.CommandHideShowSpecificStereotype;
 import net.sourceforge.plantuml.classdiagram.command.CommandImport;
 import net.sourceforge.plantuml.classdiagram.command.CommandLayoutNewLine;
 import net.sourceforge.plantuml.classdiagram.command.CommandLinkClass;
 import net.sourceforge.plantuml.classdiagram.command.CommandLinkLollipop;
-import net.sourceforge.plantuml.classdiagram.command.CommandMouseOver;
 import net.sourceforge.plantuml.classdiagram.command.CommandNamespaceSeparator;
 import net.sourceforge.plantuml.classdiagram.command.CommandStereotype;
 import net.sourceforge.plantuml.classdiagram.command.CommandUrl;
@@ -61,8 +62,13 @@ import net.sourceforge.plantuml.command.UmlDiagramFactory;
 import net.sourceforge.plantuml.command.note.FactoryNoteCommand;
 import net.sourceforge.plantuml.command.note.FactoryNoteOnEntityCommand;
 import net.sourceforge.plantuml.command.note.FactoryNoteOnLinkCommand;
+import net.sourceforge.plantuml.command.note.FactoryTipOnEntityCommand;
 import net.sourceforge.plantuml.command.regex.RegexLeaf;
+import net.sourceforge.plantuml.core.Diagram;
 import net.sourceforge.plantuml.cucadiagram.Link;
+import net.sourceforge.plantuml.descdiagram.command.CommandNewpage;
+import net.sourceforge.plantuml.objectdiagram.command.CommandCreateEntityObject;
+import net.sourceforge.plantuml.objectdiagram.command.CommandCreateEntityObjectMultilines;
 
 public class ClassDiagramFactory extends UmlDiagramFactory {
 
@@ -79,10 +85,14 @@ public class ClassDiagramFactory extends UmlDiagramFactory {
 		addCommonCommands(cmds);
 
 		cmds.add(new CommandRankDir());
+		cmds.add(new CommandNewpage(this));
+		cmds.add(new CommandHideShowSpecificStereotype());
 		cmds.add(new CommandPage());
 		cmds.add(new CommandAddMethod());
 
 		cmds.add(new CommandCreateClass());
+		cmds.add(new CommandCreateEntityObject());
+
 		cmds.add(new CommandAllowMixing());
 		cmds.add(new CommandLayoutNewLine());
 
@@ -102,21 +112,29 @@ public class ClassDiagramFactory extends UmlDiagramFactory {
 		cmds.add(new CommandLinkLollipop(UmlDiagramType.CLASS));
 
 		cmds.add(new CommandImport());
+
+		final FactoryTipOnEntityCommand factoryTipOnEntityCommand = new FactoryTipOnEntityCommand(new RegexLeaf(
+				"ENTITY", "(" + CommandCreateClass.CODE_NO_DOTDOT + "|[%g][^%g]+[%g])::([^%s]+)"));
+		cmds.add(factoryTipOnEntityCommand.createMultiLine(true));
+		cmds.add(factoryTipOnEntityCommand.createMultiLine(false));
+
 		final FactoryNoteOnEntityCommand factoryNoteOnEntityCommand = new FactoryNoteOnEntityCommand(new RegexLeaf(
 				"ENTITY", "(" + CommandCreateClass.CODE + "|[%g][^%g]+[%g])"));
 		cmds.add(factoryNoteOnEntityCommand.createSingleLine());
 		cmds.add(new CommandUrl());
 
-		cmds.add(factoryNoteOnEntityCommand.createMultiLine());
-		cmds.add(factoryNoteCommand.createMultiLine());
+		cmds.add(factoryNoteOnEntityCommand.createMultiLine(true));
+		cmds.add(factoryNoteOnEntityCommand.createMultiLine(false));
+		cmds.add(factoryNoteCommand.createMultiLine(false));
+
 		cmds.add(new CommandCreateClassMultilines());
+		cmds.add(new CommandCreateEntityObjectMultilines());
 
 		final FactoryNoteOnLinkCommand factoryNoteOnLinkCommand = new FactoryNoteOnLinkCommand();
 		cmds.add(factoryNoteOnLinkCommand.createSingleLine());
-		cmds.add(factoryNoteOnLinkCommand.createMultiLine());
+		cmds.add(factoryNoteOnLinkCommand.createMultiLine(false));
 
 		cmds.add(new CommandDiamondAssociation());
-		cmds.add(new CommandMouseOver());
 
 		cmds.add(new CommandHideShowSpecificClass());
 
@@ -127,8 +145,18 @@ public class ClassDiagramFactory extends UmlDiagramFactory {
 
 	@Override
 	public String checkFinalError(AbstractPSystem sys) {
-		final ClassDiagram system = (ClassDiagram) sys;
+		if (sys instanceof NewpagedDiagram) {
+			for (Diagram p : ((NewpagedDiagram) sys).getDiagrams()) {
+				checkFinal((ClassDiagram) p);
+			}
+		} else {
+			final ClassDiagram system = (ClassDiagram) sys;
+			checkFinal(system);
+		}
+		return super.checkFinalError(sys);
+	}
 
+	private void checkFinal(final ClassDiagram system) {
 		for (Link link : system.getLinks()) {
 			final int len = link.getLength();
 			if (len == 1) {
@@ -139,23 +167,7 @@ public class ClassDiagramFactory extends UmlDiagramFactory {
 				}
 			}
 		}
-
 		system.applySingleStrategy();
-
-		// for (IGroup g : system.getGroups(true)) {
-		// final List<ILeaf> standalones = new ArrayList<ILeaf>();
-		// for (ILeaf ent : g.getLeafsDirect()) {
-		// if (system.isStandalone(ent)) {
-		// standalones.add(ent);
-		// }
-		// }
-		// if (standalones.size() < 3) {
-		// continue;
-		// }
-		// final Magma magma = new Magma(system, standalones);
-		// magma.putInSquare();
-		// }
-		return super.checkFinalError(system);
 	}
 
 }

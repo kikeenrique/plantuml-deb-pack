@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -50,10 +50,11 @@ import javax.script.ScriptException;
 import net.sourceforge.plantuml.anim.Animation;
 import net.sourceforge.plantuml.anim.AnimationDecoder;
 import net.sourceforge.plantuml.api.ImageDataSimple;
+import net.sourceforge.plantuml.command.CommandExecutionResult;
 import net.sourceforge.plantuml.core.Diagram;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.core.UmlSource;
-import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.cucadiagram.DisplayPositionned;
 import net.sourceforge.plantuml.cucadiagram.UnparsableGraphvizException;
 import net.sourceforge.plantuml.flashcode.FlashCodeFactory;
 import net.sourceforge.plantuml.flashcode.FlashCodeUtils;
@@ -64,46 +65,54 @@ import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.QuoteUtils;
 import net.sourceforge.plantuml.graphic.UDrawable;
+import net.sourceforge.plantuml.graphic.VerticalAlignment;
 import net.sourceforge.plantuml.mjpeg.MJPEGGenerator;
 import net.sourceforge.plantuml.pdf.PdfConverter;
 import net.sourceforge.plantuml.svek.EmptySvgException;
 import net.sourceforge.plantuml.svek.GraphvizCrash;
 import net.sourceforge.plantuml.ugraphic.ColorMapperIdentity;
 import net.sourceforge.plantuml.ugraphic.ImageBuilder;
-import net.sourceforge.plantuml.ugraphic.Sprite;
 import net.sourceforge.plantuml.ugraphic.UAntiAliasing;
 import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UImage;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
+import net.sourceforge.plantuml.ugraphic.sprite.Sprite;
 import net.sourceforge.plantuml.version.Version;
 
-public abstract class UmlDiagram extends AbstractPSystem implements Diagram {
+public abstract class UmlDiagram extends AbstractPSystem implements Diagram, Annotated {
 
 	private boolean rotation;
 	private boolean hideUnlinkedData;
 
 	private int minwidth = Integer.MAX_VALUE;
 
-	private Display title;
-	private Display header;
-	private Display footer;
-	private Display legend = null;
-	private HorizontalAlignment legendAlignment = HorizontalAlignment.CENTER;
+	private DisplayPositionned title = DisplayPositionned.none(HorizontalAlignment.CENTER, VerticalAlignment.TOP);
+	private DisplayPositionned caption = DisplayPositionned.none(HorizontalAlignment.CENTER, VerticalAlignment.BOTTOM);
+	private DisplayPositionned header = DisplayPositionned.none(HorizontalAlignment.RIGHT, VerticalAlignment.TOP);
+	private DisplayPositionned footer = DisplayPositionned.none(HorizontalAlignment.CENTER, VerticalAlignment.BOTTOM);
+	private DisplayPositionned legend = DisplayPositionned.none(HorizontalAlignment.CENTER, VerticalAlignment.BOTTOM);
 
-	private HorizontalAlignment headerAlignment = HorizontalAlignment.RIGHT;
-	private HorizontalAlignment footerAlignment = HorizontalAlignment.CENTER;
 	private final Pragma pragma = new Pragma();
 	private Scale scale;
 	private Animation animation;
 
-	private final SkinParam skinParam = new SkinParam(getUmlDiagramType());
+	private final SkinParam skinParam = new SkinParam();
 
-	final public void setTitle(Display strings) {
-		this.title = strings;
+	final public void setTitle(DisplayPositionned title) {
+		this.title = title;
 	}
 
-	final public Display getTitle() {
+	final public void setCaption(DisplayPositionned caption) {
+		this.caption = caption;
+	}
+
+	final public DisplayPositionned getCaption() {
+		return caption;
+	}
+
+	@Override
+	final public DisplayPositionned getTitle() {
 		return title;
 	}
 
@@ -131,36 +140,30 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram {
 		skinParam.setParam(StringUtils.goLowerCase(key), value);
 	}
 
-	public final Display getHeader() {
+	public final DisplayPositionned getHeader() {
 		return header;
 	}
 
-	public final void setHeader(Display header) {
+	public final void setHeader(DisplayPositionned header) {
 		this.header = header;
 	}
 
-	public final Display getFooter() {
+	public final DisplayPositionned getFooter() {
 		return footer;
 	}
 
-	public final void setFooter(Display footer) {
+	public final void setFooter(DisplayPositionned footer) {
 		this.footer = footer;
 	}
 
-	public final HorizontalAlignment getHeaderAlignment() {
-		return headerAlignment;
-	}
-
-	public final void setHeaderAlignment(HorizontalAlignment headerAlignment) {
-		this.headerAlignment = headerAlignment;
-	}
-
-	public final HorizontalAlignment getFooterAlignment() {
-		return footerAlignment;
-	}
-
-	public final void setFooterAlignment(HorizontalAlignment footerAlignment) {
-		this.footerAlignment = footerAlignment;
+	public final DisplayPositionned getFooterOrHeaderTeoz(FontParam param) {
+		if (param == FontParam.FOOTER) {
+			return getFooter();
+		}
+		if (param == FontParam.HEADER) {
+			return getHeader();
+		}
+		throw new IllegalArgumentException();
 	}
 
 	abstract public UmlDiagramType getUmlDiagramType();
@@ -177,7 +180,7 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram {
 		return scale;
 	}
 
-	final public void setAnimation(List<String> animationData) {
+	final public void setAnimation(Iterable<CharSequence> animationData) {
 		try {
 			final AnimationDecoder animationDecoder = new AnimationDecoder(animationData);
 			this.animation = Animation.create(animationDecoder.decode());
@@ -223,36 +226,27 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram {
 			return imageData;
 		} catch (UnparsableGraphvizException e) {
 			e.printStackTrace();
-			exportDiagramError(os, e.getCause(), fileFormatOption, e.getGraphvizVersion(), e.getDebugData());
+			exportDiagramError(os, e.getCause(), fileFormatOption, e.getGraphvizVersion());
 		} catch (Exception e) {
 			e.printStackTrace();
-			exportDiagramError(os, e, fileFormatOption, null, null);
+			exportDiagramError(os, e, fileFormatOption, null);
 		}
 		return new ImageDataSimple();
-
 	}
 
-	private void exportDiagramError(OutputStream os, Throwable exception, FileFormatOption fileFormat,
-			String graphvizVersion, String svg) throws IOException {
+	public void exportDiagramError(OutputStream os, Throwable exception, FileFormatOption fileFormat,
+			String graphvizVersion) throws IOException {
+		exportDiagramError(os, exception, fileFormat, getMetadata(), getFlashData(),
+				getFailureText1(exception, graphvizVersion));
+	}
+
+	public static void exportDiagramError(OutputStream os, Throwable exception, FileFormatOption fileFormat,
+			String metadata, String flash, List<String> strings) throws IOException {
 		final UFont font = new UFont("SansSerif", Font.PLAIN, 12);
-		final List<String> strings = getFailureText(exception, graphvizVersion);
-
-		final String flash = getFlashData();
-		for (StackTraceElement ste : exception.getStackTrace()) {
-			strings.add("  " + ste.toString());
-		}
-		if (exception.getCause() != null) {
-			final Throwable cause = exception.getCause();
-			strings.add("  ");
-			strings.add("Caused by " + cause.toString());
-			for (StackTraceElement ste : cause.getStackTrace()) {
-				strings.add("  " + ste.toString());
-			}
-
-		}
+		strings.addAll(CommandExecutionResult.getStackTrace(exception));
 
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, HtmlColorUtils.WHITE,
-				getMetadata(), null, 0, 0, null);
+				metadata, null, 0, 0, null, false);
 
 		final FlashCodeUtils utils = FlashCodeFactory.getFlashCodeUtils();
 		final BufferedImage im = utils.exportFlashcode(flash);
@@ -265,9 +259,9 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram {
 				GraphicPosition.BACKGROUND_CORNER_TOP_RIGHT);
 
 		if (im == null) {
-			imageBuilder.addUDrawable(graphicStrings);
+			imageBuilder.setUDrawable(graphicStrings);
 		} else {
-			imageBuilder.addUDrawable(new UDrawable() {
+			imageBuilder.setUDrawable(new UDrawable() {
 				public void drawU(UGraphic ug) {
 					graphicStrings.drawU(ug);
 					final double height = graphicStrings.calculateDimension(ug.getStringBounder()).getHeight();
@@ -276,20 +270,17 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram {
 				}
 			});
 		}
-		imageBuilder.writeImageTOBEMOVED(fileFormat.getFileFormat(), os);
+		imageBuilder.writeImageTOBEMOVED(fileFormat, os);
 	}
 
-	private String getFlashData() {
-		// for (Map.Entry<Object, Object> ent : System.getProperties().entrySet()) {
-		// System.err.println("p1=" + ent.getKey() + " " + ent.getValue());
-		// }
+	public String getFlashData() {
 		final StringBuilder result = new StringBuilder();
 		final UmlSource source = getSource();
 		result.append(source.getPlainString());
 		return result.toString();
 	}
 
-	private List<String> getFailureText(Throwable exception, String graphvizVersion) {
+	static private List<String> getFailureText1(Throwable exception, String graphvizVersion) {
 		final List<String> strings = new ArrayList<String>();
 		strings.add("An error has occured : " + exception);
 		final String quote = QuoteUtils.getSomeQuote();
@@ -313,7 +304,20 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram {
 		strings.add("You should send this diagram and this image to <b>plantuml@gmail.com</b> to solve this issue.");
 		strings.add("You can try to turn arround this issue by simplifing your diagram.");
 		strings.add(" ");
-		strings.add(exception.toString());
+		return strings;
+	}
+
+	public static List<String> getFailureText2(Throwable exception) {
+		final List<String> strings = new ArrayList<String>();
+		strings.add("An error has occured : " + exception);
+		final String quote = QuoteUtils.getSomeQuote();
+		strings.add("<i>" + quote);
+		strings.add(" ");
+		strings.add("PlantUML (" + Version.versionString() + ") has crashed.");
+		strings.add(" ");
+		strings.add("You should send this diagram and this image to <b>plantuml@gmail.com</b> to solve this issue.");
+		strings.add("You can try to turn arround this issue by simplifing your diagram.");
+		strings.add(" ");
 		return strings;
 	}
 
@@ -402,16 +406,21 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram {
 		skinParam.addSprite(name, sprite);
 	}
 
-	public final Display getLegend() {
+	public final DisplayPositionned getLegend() {
 		return legend;
 	}
 
-	public final HorizontalAlignment getLegendAlignment() {
-		return legendAlignment;
+	public final void setLegend(DisplayPositionned legend) {
+		this.legend = legend;
 	}
 
-	public final void setLegend(Display legend, HorizontalAlignment horizontalAlignment) {
-		this.legend = legend;
-		this.legendAlignment = horizontalAlignment;
+	private boolean useJDot;
+
+	public void setUseJDot(boolean useJDot) {
+		this.useJDot = useJDot;
+	}
+
+	public boolean isUseJDot() {
+		return useJDot;
 	}
 }

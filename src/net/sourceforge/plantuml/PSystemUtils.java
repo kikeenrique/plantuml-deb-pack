@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -50,6 +50,10 @@ public class PSystemUtils {
 
 	public static List<File> exportDiagrams(Diagram system, File suggestedFile, FileFormatOption fileFormatOption)
 			throws IOException {
+		if (system instanceof UmlDiagram) {
+			final ISkinParam skinParam = ((UmlDiagram) system).getSkinParam();
+			fileFormatOption = fileFormatOption.withSvgLinkTarget(skinParam.getSvgLinkTarget());
+		}
 		if (system instanceof NewpagedDiagram) {
 			return exportDiagramsNewpaged((NewpagedDiagram) system, suggestedFile, fileFormatOption);
 		}

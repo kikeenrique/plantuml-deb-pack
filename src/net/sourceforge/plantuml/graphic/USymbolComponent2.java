@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,20 +30,19 @@ package net.sourceforge.plantuml.graphic;
 
 import java.awt.geom.Dimension2D;
 
-import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
-import net.sourceforge.plantuml.FontParam;
+import net.sourceforge.plantuml.graphic.USymbol.Margin;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.URectangle;
 import net.sourceforge.plantuml.ugraphic.UShape;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 class USymbolComponent2 extends USymbol {
-	
-	public USymbolComponent2() {
-		super(ColorParam.componentBackground, ColorParam.componentBorder, FontParam.COMPONENT, FontParam.COMPONENT_STEREOTYPE);
-	}
 
+	@Override
+	public SkinParameter getSkinParameter() {
+		return SkinParameter.COMPONENT2;
+	}
 
 	private void drawNode(UGraphic ug, double widthTotal, double heightTotal, boolean shadowing) {
 
@@ -68,33 +67,43 @@ class USymbolComponent2 extends USymbol {
 		return new Margin(10 + 5, 20 + 5, 15 + 5, 5 + 5);
 	}
 
-	public TextBlock asSmall(final TextBlock label, TextBlock stereotype, final SymbolContext symbolContext) {
-		return new TextBlock() {
+	public TextBlock asSmall(TextBlock name, final TextBlock label, final TextBlock stereotype,
+			final SymbolContext symbolContext) {
+		return new AbstractTextBlock() {
 
 			public void drawU(UGraphic ug) {
 				final Dimension2D dim = calculateDimension(ug.getStringBounder());
 				ug = symbolContext.apply(ug);
 				drawNode(ug, dim.getWidth(), dim.getHeight(), symbolContext.isShadowing());
 				final Margin margin = getMargin();
-				label.drawU(ug.apply(new UTranslate(margin.getX1(), margin.getY1())));
+
+				final TextBlock tb = TextBlockUtils.mergeTB(stereotype, label, HorizontalAlignment.CENTER);
+				tb.drawU(ug.apply(new UTranslate(margin.getX1(), margin.getY1())));
+				// label.drawU(ug.apply(new UTranslate(margin.getX1(), margin.getY1())));
 			}
 
 			public Dimension2D calculateDimension(StringBounder stringBounder) {
-				final Dimension2D dim = label.calculateDimension(stringBounder);
-				return getMargin().addDimension(dim);
+				final Dimension2D dimLabel = label.calculateDimension(stringBounder);
+				final Dimension2D dimStereo = stereotype.calculateDimension(stringBounder);
+				return getMargin().addDimension(Dimension2DDouble.mergeTB(dimStereo, dimLabel));
 			}
 		};
 	}
 
-	public TextBlock asBig(final TextBlock title, TextBlock stereotype, final double width, final double height,
+	public TextBlock asBig(final TextBlock title, final TextBlock stereotype, final double width, final double height,
 			final SymbolContext symbolContext) {
-		return new TextBlock() {
+		return new AbstractTextBlock() {
 
 			public void drawU(UGraphic ug) {
 				final Dimension2D dim = calculateDimension(ug.getStringBounder());
 				ug = symbolContext.apply(ug);
 				drawNode(ug, dim.getWidth(), dim.getHeight(), symbolContext.isShadowing());
-				title.drawU(ug.apply(new UTranslate(3, 13)));
+				final Dimension2D dimStereo = stereotype.calculateDimension(ug.getStringBounder());
+				final double posStereo = (width - dimStereo.getWidth()) / 2;
+				stereotype.drawU(ug.apply(new UTranslate(posStereo, 13)));
+				final Dimension2D dimTitle = title.calculateDimension(ug.getStringBounder());
+				final double posTitle = (width - dimTitle.getWidth()) / 2;
+				title.drawU(ug.apply(new UTranslate(posTitle, 13 + dimStereo.getHeight())));
 			}
 
 			public Dimension2D calculateDimension(StringBounder stringBounder) {

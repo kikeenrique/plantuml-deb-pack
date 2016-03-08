@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -67,7 +67,8 @@ public class GraphvizVersionFinder {
 			}
 
 			public boolean useProtectionWhenThereALinkFromOrToGroup() {
-				return v < 238;
+				// return v < 238;
+				return true;
 			}
 
 		};
@@ -91,7 +92,7 @@ public class GraphvizVersionFinder {
 			}
 			sb.append(p.getError());
 		}
-		return sb.toString().replace('\n', ' ').trim();
+		return StringUtils.trin(sb.toString().replace('\n', ' '));
 	}
 
 	private String[] getCommandLine() {

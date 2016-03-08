@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,12 +31,13 @@ package net.sourceforge.plantuml.ugraphic;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.svek.image.ContainingEllipse;
 import net.sourceforge.plantuml.svek.image.Footprint;
 
-public class TextBlockInEllipse implements TextBlock {
+public class TextBlockInEllipse extends AbstractTextBlock implements TextBlock {
 
 	private final TextBlock text;
 	private final ContainingEllipse ellipse;

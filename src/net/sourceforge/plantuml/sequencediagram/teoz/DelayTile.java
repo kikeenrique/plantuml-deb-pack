@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -32,26 +32,32 @@ import java.awt.geom.Dimension2D;
 
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.real.Real;
+import net.sourceforge.plantuml.real.RealUtils;
 import net.sourceforge.plantuml.sequencediagram.Delay;
 import net.sourceforge.plantuml.sequencediagram.Event;
 import net.sourceforge.plantuml.skin.Area;
 import net.sourceforge.plantuml.skin.Component;
 import net.sourceforge.plantuml.skin.ComponentType;
-import net.sourceforge.plantuml.skin.SimpleContext2D;
+import net.sourceforge.plantuml.skin.Context2D;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class DelayTile implements Tile {
+public class DelayTile implements Tile, TileWithCallbackY {
 
 	private final Delay delay;
 	private final TileArguments tileArguments;
-	private Real first;
-	private Real last;
-	
+	// private Real first;
+	// private Real last;
+	private Real middle;
+	private double y;
+
 	public Event getEvent() {
 		return delay;
 	}
 
+	public void callbackY(double y) {
+		this.y = y;
+	}
 
 	public DelayTile(Delay delay, TileArguments tileArguments) {
 		this.delay = delay;
@@ -59,14 +65,13 @@ public class DelayTile implements Tile {
 	}
 
 	private void init(StringBounder stringBounder) {
-		if (first != null) {
+		if (middle != null) {
 			return;
 		}
-		this.first = tileArguments.getFirstLivingSpace().getPosC(stringBounder);
+		final Real first = tileArguments.getFirstLivingSpace().getPosC(stringBounder);
 		final Component comp = getComponent(stringBounder);
-		final Dimension2D dim = comp.getPreferredDimension(stringBounder);
-		this.last = tileArguments.getLastLivingSpace().getPosC(stringBounder).addAtLeast(0);
-		this.last.ensureBiggerThan(this.first.addFixed(dim.getWidth()));
+		final Real last = tileArguments.getLastLivingSpace().getPosC(stringBounder);
+		this.middle = RealUtils.middle(first, last);
 
 	}
 
@@ -76,15 +81,22 @@ public class DelayTile implements Tile {
 		return comp;
 	}
 
+	private double getPreferredWidth(StringBounder stringBounder) {
+		final Component comp = getComponent(stringBounder);
+		final Dimension2D dim = comp.getPreferredDimension(stringBounder);
+		return dim.getWidth();
+	}
+
 	public void drawU(UGraphic ug) {
 		final StringBounder stringBounder = ug.getStringBounder();
 		init(stringBounder);
 		final Component comp = getComponent(stringBounder);
 		final Dimension2D dim = comp.getPreferredDimension(stringBounder);
-		final Area area = new Area(last.getCurrentValue() - first.getCurrentValue(), dim.getHeight());
+		final Area area = new Area(getPreferredWidth(stringBounder), dim.getHeight());
+		tileArguments.getLivingSpaces().delayOn(y, dim.getHeight());
 
-		ug = ug.apply(new UTranslate(first.getCurrentValue(), 0));
-		comp.drawU(ug, area, new SimpleContext2D(false));
+		ug = ug.apply(new UTranslate(getMinX(stringBounder).getCurrentValue(), 0));
+		comp.drawU(ug, area, (Context2D) ug);
 	}
 
 	public double getPreferredHeight(StringBounder stringBounder) {
@@ -98,22 +110,22 @@ public class DelayTile implements Tile {
 
 	public Real getMinX(StringBounder stringBounder) {
 		init(stringBounder);
-		return this.first;
+		return this.middle.addFixed(-getPreferredWidth(stringBounder) / 2);
 	}
 
 	public Real getMaxX(StringBounder stringBounder) {
 		init(stringBounder);
-		return this.last;
+		return this.middle.addFixed(getPreferredWidth(stringBounder) / 2);
 	}
 
-//	private double startingY;
-//
-//	public void setStartingY(double startingY) {
-//		this.startingY = startingY;
-//	}
-//
-//	public double getStartingY() {
-//		return startingY;
-//	}
+	// private double startingY;
+	//
+	// public void setStartingY(double startingY) {
+	// this.startingY = startingY;
+	// }
+	//
+	// public double getStartingY() {
+	// return startingY;
+	// }
 
 }

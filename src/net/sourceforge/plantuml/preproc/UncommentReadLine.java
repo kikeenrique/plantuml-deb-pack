@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -32,7 +32,10 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.CharSequence2;
+import net.sourceforge.plantuml.CharSequence2Impl;
 import net.sourceforge.plantuml.command.regex.MyPattern;
+import net.sourceforge.plantuml.utils.StartUtils;
 
 public class UncommentReadLine implements ReadLine {
 
@@ -44,12 +47,12 @@ public class UncommentReadLine implements ReadLine {
 
 	public UncommentReadLine(ReadLine source) {
 		this.raw = source;
-		this.start = MyPattern.cmpile("(?i)((?:\\W|\\<[^<>]*\\>)*)@start");
-		this.unpause = MyPattern.cmpile("(?i)((?:\\W|\\<[^<>]*\\>)*)@unpause");
+		this.start = MyPattern.cmpile(StartUtils.START_PATTERN);
+		this.unpause = MyPattern.cmpile(StartUtils.PAUSE_PATTERN);
 	}
 
-	public String readLine() throws IOException {
-		final String result = raw.readLine();
+	public CharSequence2 readLine() throws IOException {
+		final CharSequence2 result = raw.readLine();
 
 		if (result == null) {
 			return null;
@@ -65,11 +68,11 @@ public class UncommentReadLine implements ReadLine {
 				headerToRemove = m2.group(1);
 			}
 		}
-		if (headerToRemove != null && headerToRemove.startsWith(result)) {
-			return "";
+		if (headerToRemove != null && headerToRemove.startsWith(result.toString2())) {
+			return new CharSequence2Impl("", result.getLocation());
 		}
-		if (headerToRemove != null && result.startsWith(headerToRemove)) {
-			return result.substring(headerToRemove.length());
+		if (headerToRemove != null && result.toString2().startsWith(headerToRemove)) {
+			return result.subSequence(headerToRemove.length(), result.length());
 		}
 		return result;
 	}

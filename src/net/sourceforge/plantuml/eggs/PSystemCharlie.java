@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -55,19 +55,19 @@ public class PSystemCharlie extends AbstractPSystem {
 
 	public ImageData exportDiagram(OutputStream os, int num, FileFormatOption fileFormat) throws IOException {
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, HtmlColorUtils.BLACK,
-				getMetadata(), null, 0, 0, null);
-		imageBuilder.addUDrawable(new UDrawable() {
+				getMetadata(), null, 0, 0, null, false);
+		imageBuilder.setUDrawable(new UDrawable() {
 
 			public void drawU(UGraphic ug) {
 				final UImage im = new UImage(image);
 				ug.draw(im);
 			}
 		});
-		return imageBuilder.writeImageTOBEMOVED(fileFormat.getFileFormat(), os);
+		return imageBuilder.writeImageTOBEMOVED(fileFormat, os);
 	}
 
 	public DiagramDescription getDescription() {
-		return new DiagramDescriptionImpl("(Version)", getClass());
+		return new DiagramDescriptionImpl("(Je Suis Charlie)", getClass());
 	}
 
 }

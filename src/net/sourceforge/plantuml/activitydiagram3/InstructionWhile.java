@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -30,14 +30,16 @@ package net.sourceforge.plantuml.activitydiagram3;
 
 import java.util.Set;
 
+import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Ftile;
 import net.sourceforge.plantuml.activitydiagram3.ftile.FtileFactory;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
+import net.sourceforge.plantuml.activitydiagram3.ftile.vcompact.FtileWithNoteOpale;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 
-public class InstructionWhile implements Instruction {
+public class InstructionWhile implements Instruction, InstructionCollection {
 
 	private final InstructionList repeatList = new InstructionList();
 	private final Instruction parent;
@@ -45,30 +47,47 @@ public class InstructionWhile implements Instruction {
 	private final HtmlColor color;
 
 	private final Display test;
-	private final Display yes;
-	private Display out;
+	private Display yes;
+	private Display out = Display.NULL;
 	private LinkRendering endInlinkRendering;
 	private LinkRendering afterEndwhile;
 	private final Swimlane swimlane;
+	private final ISkinParam skinParam;
+
+	public void overwriteYes(Display yes) {
+		this.yes = yes;
+	}
 
 	public InstructionWhile(Swimlane swimlane, Instruction parent, Display test, LinkRendering nextLinkRenderer,
-			Display yes, HtmlColor color) {
+			Display yes, HtmlColor color, ISkinParam skinParam) {
+		if (test == null) {
+			throw new IllegalArgumentException();
+		}
+		if (yes == null) {
+			throw new IllegalArgumentException();
+		}
 		this.parent = parent;
 		this.test = test;
 		this.nextLinkRenderer = nextLinkRenderer;
 		this.yes = yes;
 		this.swimlane = swimlane;
 		this.color = color;
+		this.skinParam = skinParam;
 	}
 
 	public void add(Instruction ins) {
 		repeatList.add(ins);
 	}
 
+	private Display note;
+	private NotePosition position;
+
 	public Ftile createFtile(FtileFactory factory) {
 		Ftile tmp = factory.decorateOut(repeatList.createFtile(factory), endInlinkRendering);
 		tmp = factory.createWhile(swimlane, tmp, test, yes, out, afterEndwhile, color);
-		// tmp = factory.decorateOut(tmp, afterEndwhile);
+		if (note != null) {
+			tmp = new FtileWithNoteOpale(tmp, note, position, skinParam, false);
+		}
 		return tmp;
 	}
 
@@ -87,14 +106,23 @@ public class InstructionWhile implements Instruction {
 	public void endwhile(LinkRendering nextLinkRenderer, Display out) {
 		this.endInlinkRendering = nextLinkRenderer;
 		this.out = out;
+		if (out == null) {
+			throw new IllegalArgumentException();
+		}
 	}
 
 	public void afterEndwhile(LinkRendering linkRenderer) {
 		this.afterEndwhile = linkRenderer;
 	}
 
-	public void addNote(Display note, NotePosition position) {
-		repeatList.addNote(note, position);
+	public boolean addNote(Display note, NotePosition position) {
+		if (repeatList.isEmpty()) {
+			this.note = note;
+			this.position = position;
+			return true;
+		} else {
+			return repeatList.addNote(note, position);
+		}
 	}
 
 	public Set<Swimlane> getSwimlanes() {
@@ -108,5 +136,10 @@ public class InstructionWhile implements Instruction {
 	public Swimlane getSwimlaneOut() {
 		return getSwimlaneIn();
 	}
+
+	public Instruction getLast() {
+		return repeatList.getLast();
+	}
+
 
 }

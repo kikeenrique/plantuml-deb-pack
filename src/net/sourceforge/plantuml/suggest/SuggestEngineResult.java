@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -27,6 +27,8 @@
  * Original Author:  Arnaud Roques
  */
 package net.sourceforge.plantuml.suggest;
+
+import net.sourceforge.plantuml.StringUtils;
 
 
 public class SuggestEngineResult {
@@ -72,7 +74,7 @@ public class SuggestEngineResult {
 	}
 
 	public SuggestEngineResult(String suggestedLine) {
-		if (suggestedLine.trim().length() == 0) {
+		if (StringUtils.trin(suggestedLine).length() == 0) {
 			throw new IllegalArgumentException();
 		}
 		this.status = SuggestEngineStatus.ONE_SUGGESTION;

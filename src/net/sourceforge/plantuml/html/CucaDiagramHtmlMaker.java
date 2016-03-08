@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -122,19 +122,19 @@ public final class CucaDiagramHtmlMaker {
 		if (stereotype != null) {
 			pw.println("<hr>");
 			pw.println("<h3>Stereotype</h3>");
-			for (String s : stereotype.getLabels()) {
+			for (String s : stereotype.getLabels(diagram.getSkinParam().useGuillemet())) {
 				pw.println(s);
 				pw.println("<br>");
 			}
 		}
 
 		pw.println("<hr>");
-		if (entity.getFieldsToDisplay().size() == 0) {
+		if (entity.getBodier().getFieldsToDisplay().size() == 0) {
 			pw.println("<h2>No fields</h2>");
 		} else {
 			pw.println("<h2>Fields:</h2>");
 			pw.println("<ul>");
-			for (Member m : entity.getFieldsToDisplay()) {
+			for (Member m : entity.getBodier().getFieldsToDisplay()) {
 				pw.println("<li>");
 				pw.println(StringUtils.unicodeForHtml(m.getDisplay(true)));
 				pw.println("</li>");
@@ -143,12 +143,12 @@ public final class CucaDiagramHtmlMaker {
 		}
 
 		pw.println("<hr>");
-		if (entity.getMethodsToDisplay().size() == 0) {
+		if (entity.getBodier().getMethodsToDisplay().size() == 0) {
 			pw.println("<h2>No methods</h2>");
 		} else {
 			pw.println("<h2>Methods:</h2>");
 			pw.println("<ul>");
-			for (Member m : entity.getMethodsToDisplay()) {
+			for (Member m : entity.getBodier().getMethodsToDisplay()) {
 				pw.println("<li>");
 				pw.println(StringUtils.unicodeForHtml(m.getDisplay(true)));
 				pw.println("</li>");

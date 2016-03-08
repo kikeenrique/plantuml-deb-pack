@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,19 +31,17 @@ package net.sourceforge.plantuml.cucadiagram.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.Url;
-import net.sourceforge.plantuml.cucadiagram.BlockMember;
-import net.sourceforge.plantuml.cucadiagram.BlockMemberImpl;
 import net.sourceforge.plantuml.cucadiagram.Bodier;
-import net.sourceforge.plantuml.cucadiagram.BodyEnhanced;
 import net.sourceforge.plantuml.cucadiagram.Code;
 import net.sourceforge.plantuml.cucadiagram.Display;
-import net.sourceforge.plantuml.cucadiagram.EntityPortion;
 import net.sourceforge.plantuml.cucadiagram.EntityPosition;
 import net.sourceforge.plantuml.cucadiagram.EntityUtils;
 import net.sourceforge.plantuml.cucadiagram.GroupRoot;
@@ -53,19 +51,18 @@ import net.sourceforge.plantuml.cucadiagram.ILeaf;
 import net.sourceforge.plantuml.cucadiagram.LeafType;
 import net.sourceforge.plantuml.cucadiagram.Link;
 import net.sourceforge.plantuml.cucadiagram.LongCode;
-import net.sourceforge.plantuml.cucadiagram.Member;
-import net.sourceforge.plantuml.cucadiagram.PortionShower;
-import net.sourceforge.plantuml.cucadiagram.Rankdir;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
+import net.sourceforge.plantuml.cucadiagram.dot.Neighborhood;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
-import net.sourceforge.plantuml.graphic.TextBlock;
-import net.sourceforge.plantuml.graphic.TextBlockVertical2;
 import net.sourceforge.plantuml.graphic.USymbol;
+import net.sourceforge.plantuml.graphic.color.ColorType;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.svek.IEntityImage;
 import net.sourceforge.plantuml.svek.PackageStyle;
 import net.sourceforge.plantuml.svek.SingleStrategy;
-import net.sourceforge.plantuml.ugraphic.UStroke;
+import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.utils.UniqueSequence;
 
 final class EntityImpl implements ILeaf, IGroup {
@@ -89,28 +86,20 @@ final class EntityImpl implements ILeaf, IGroup {
 
 	private boolean top;
 
-	private final List<String> mouseOver = new ArrayList<String>();
-
 	// Group
 	private Code namespace2;
 
 	private GroupType groupType;
 
-	private boolean autonom = true;
-	private Rankdir rankdir = Rankdir.TOP_TO_BOTTOM;
-
 	// Other
-
-	private HtmlColor specificBackcolor;
 	private boolean nearDecoration = false;
 	private int xposition;
 	private IEntityImage svekImage;
 
 	private boolean removed = false;
-	private HtmlColor specificLineColor;
-	private UStroke specificStroke;
 	private USymbol symbol;
 	private final int rawLayout;
+	private char concurrentSeparator;
 
 	// Back to Entity
 	public final boolean isTop() {
@@ -172,9 +161,12 @@ final class EntityImpl implements ILeaf, IGroup {
 				throw new IllegalArgumentException("type=" + leafType);
 			}
 			if (newType != LeafType.ANNOTATION && newType != LeafType.ABSTRACT_CLASS && newType != LeafType.CLASS
-					&& newType != LeafType.ENUM && newType != LeafType.INTERFACE) {
+					&& newType != LeafType.ENUM && newType != LeafType.INTERFACE && newType != LeafType.OBJECT) {
 				throw new IllegalArgumentException("newtype=" + newType);
 			}
+		}
+		if (leafType == LeafType.CLASS && newType == LeafType.OBJECT) {
+			bodier.muteClassToObject();
 		}
 		this.leafType = newType;
 		this.symbol = newSymbol;
@@ -216,20 +208,12 @@ final class EntityImpl implements ILeaf, IGroup {
 		return code + " " + display + "(" + leafType + ") " + xposition + " " + getUid();
 	}
 
-	public HtmlColor getSpecificBackColor() {
-		return specificBackcolor;
-	}
-
-	public void setSpecificBackcolor(HtmlColor color) {
-		this.specificBackcolor = color;
-	}
-
 	public final Url getUrl99() {
 		return url;
 	}
 
 	public boolean hasUrl() {
-		if (display != null && display.hasUrl()) {
+		if (Display.isNull(display) == false && display.hasUrl()) {
 			return true;
 		}
 		if (bodier.hasUrl()) {
@@ -282,72 +266,8 @@ final class EntityImpl implements ILeaf, IGroup {
 		return generic;
 	}
 
-	public BlockMember getBody(final PortionShower portionShower) {
-		checkNotGroup();
-		final boolean showMethods = portionShower.showPortion(EntityPortion.METHOD, EntityImpl.this);
-		final boolean showFields = portionShower.showPortion(EntityPortion.FIELD, EntityImpl.this);
-		if (getEntityType().isLikeClass() && bodier.isBodyEnhanced()) {
-			if (showMethods && showFields) {
-				return bodier.getBodyEnhanced();
-			}
-			return new BlockMember() {
-				public TextBlock asTextBlock(FontParam fontParam, ISkinParam skinParam) {
-					return null;
-				}
-			};
-		}
-		return new BlockMember() {
-			public TextBlock asTextBlock(FontParam fontParam, ISkinParam skinParam) {
-				if (getEntityType().isLikeClass()) {
-
-					if (showFields && showMethods) {
-						return new TextBlockVertical2(new BlockMemberImpl(getFieldsToDisplay()).asTextBlock(fontParam,
-								skinParam),
-								new BlockMemberImpl(getMethodsToDisplay()).asTextBlock(fontParam, skinParam),
-								HorizontalAlignment.LEFT);
-					} else if (showFields) {
-						return new BlockMemberImpl(getFieldsToDisplay()).asTextBlock(fontParam, skinParam);
-					} else if (showMethods) {
-						return new BlockMemberImpl(getMethodsToDisplay()).asTextBlock(fontParam, skinParam);
-					}
-					return null;
-				}
-				if (getEntityType() == LeafType.OBJECT) {
-					return new BlockMemberImpl(getFieldsToDisplay()).asTextBlock(fontParam, skinParam);
-				}
-				throw new UnsupportedOperationException();
-			}
-		};
-	}
-
-	public BlockMember getMouseOver() {
-		if (mouseOver.size() == 0) {
-			return null;
-		}
-		return new BlockMember() {
-			public TextBlock asTextBlock(FontParam fontParam, ISkinParam skinParam) {
-				return new BodyEnhanced(mouseOver, fontParam, skinParam, leafType.manageModifier());
-			}
-		};
-	}
-
-	public void mouseOver(String s) {
-		mouseOver.add(s);
-	}
-
-	public List<Member> getFieldsToDisplay() {
-		// checkNotGroup();
-		return bodier.getFieldsToDisplay();
-	}
-
-	public List<Member> getMethodsToDisplay() {
-		// checkNotGroup();
-		return bodier.getMethodsToDisplay();
-	}
-
-	public void addFieldOrMethod(String s) {
-		// checkNotGroup();
-		bodier.addFieldOrMethod(s);
+	public Bodier getBodier() {
+		return bodier;
 	}
 
 	public EntityPosition getEntityPosition() {
@@ -362,7 +282,7 @@ final class EntityImpl implements ILeaf, IGroup {
 		if (stereotype == null) {
 			return EntityPosition.NORMAL;
 		}
-		final String label = stereotype.getLabel();
+		final String label = stereotype.getLabel(false);
 		if ("<<entrypoint>>".equalsIgnoreCase(label)) {
 			return EntityPosition.ENTRY_POINT;
 		}
@@ -468,26 +388,6 @@ final class EntityImpl implements ILeaf, IGroup {
 		return namespace2;
 	}
 
-	public boolean isAutonom() {
-		checkGroup();
-		return autonom;
-	}
-
-	public void setAutonom(boolean autonom) {
-		this.autonom = autonom;
-
-	}
-
-	public Rankdir getRankdir() {
-		checkGroup();
-		return rankdir;
-	}
-
-	public void setRankdir(Rankdir rankdir) {
-		checkGroup();
-		this.rankdir = rankdir;
-	}
-
 	public PackageStyle getPackageStyle() {
 		checkGroup();
 		if (stereotype == null) {
@@ -546,7 +446,7 @@ final class EntityImpl implements ILeaf, IGroup {
 	}
 
 	public boolean isHidden() {
-		if (entityFactory.isHidden(leafType)) {
+		if (entityFactory.isHidden(this)) {
 			return true;
 		}
 		if (stereotype != null) {
@@ -556,6 +456,9 @@ final class EntityImpl implements ILeaf, IGroup {
 	}
 
 	public USymbol getUSymbol() {
+		if (symbol != null && stereotype != null && stereotype.getSprite() != null) {
+			return symbol.withStereoAlignment(HorizontalAlignment.RIGHT);
+		}
 		return symbol;
 	}
 
@@ -591,22 +494,6 @@ final class EntityImpl implements ILeaf, IGroup {
 		this.removed = removed;
 	}
 
-	public HtmlColor getSpecificLineColor() {
-		return specificLineColor;
-	}
-
-	public void setSpecificLineColor(HtmlColor specificLinecolor) {
-		this.specificLineColor = specificLinecolor;
-	}
-
-	public UStroke getSpecificLineStroke() {
-		return specificStroke;
-	}
-
-	public void setSpecificLineStroke(UStroke specificLineStroke) {
-		this.specificStroke = specificLineStroke;
-	}
-
 	private int layer;
 
 	public int getHectorLayer() {
@@ -624,15 +511,83 @@ final class EntityImpl implements ILeaf, IGroup {
 		return longCode;
 	}
 
-	public FontParam getTitleFontParam() {
+	private FontParam getTitleFontParam() {
 		if (symbol != null) {
 			return symbol.getFontParam();
 		}
 		return getGroupType() == GroupType.STATE ? FontParam.STATE : FontParam.PACKAGE;
 	}
 
+	public FontConfiguration getFontConfigurationForTitle(final ISkinParam skinParam) {
+		final FontParam fontParam = getTitleFontParam();
+		final HtmlColor fontHtmlColor = skinParam.getFontHtmlColor(getStereotype(), fontParam, FontParam.PACKAGE);
+		final UFont font = skinParam.getFont(getStereotype(), true, fontParam, FontParam.PACKAGE);
+		final FontConfiguration fontConfiguration = new FontConfiguration(font, fontHtmlColor,
+				skinParam.getHyperlinkColor(), skinParam.useUnderlineForHyperlink(), skinParam.getTabSize());
+		return fontConfiguration;
+	}
+
 	public final int getRawLayout() {
 		return rawLayout;
+	}
+
+	public char getConcurrentSeparator() {
+		return concurrentSeparator;
+	}
+
+	public void setConcurrentSeparator(char separator) {
+		this.concurrentSeparator = separator;
+	}
+
+	private Neighborhood neighborhood;
+
+	public void setNeighborhood(Neighborhood neighborhood) {
+		this.neighborhood = neighborhood;
+	}
+
+	public Neighborhood getNeighborhood() {
+		return neighborhood;
+	}
+
+	private final Map<String, Display> tips = new LinkedHashMap<String, Display>();
+
+	public void putTip(String member, Display display) {
+		tips.put(member, display);
+	}
+
+	public Map<String, Display> getTips() {
+		return Collections.unmodifiableMap(tips);
+	}
+
+	private Colors colors = Colors.empty();
+
+	public Colors getColors(ISkinParam skinParam) {
+		return colors;
+	}
+
+	public void setColors(Colors colors) {
+		this.colors = colors;
+	}
+
+	public void setSpecificColorTOBEREMOVED(ColorType type, HtmlColor color) {
+		if (color != null) {
+			this.colors = colors.add(type, color);
+		}
+	}
+
+	// public void setSpecificLineStroke(UStroke specificLineStroke) {
+	// colors = colors.addSpecificLineStroke(specificLineStroke);
+	// }
+
+	@Deprecated
+	public void applyStroke(String s) {
+		throw new UnsupportedOperationException();
+		// if (s == null) {
+		// return;
+		// }
+		// final LinkStyle style = LinkStyle.valueOf(StringUtils.goUpperCase(s));
+		// colors = colors.addSpecificLineStroke(style);
+		// // setSpecificLineStroke(LinkStyle.getStroke(style));
 	}
 
 }

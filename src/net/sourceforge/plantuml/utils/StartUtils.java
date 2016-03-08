@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,36 +31,39 @@ package net.sourceforge.plantuml.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.CharSequence2;
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.command.regex.MyPattern;
 
 public class StartUtils {
 
-	public static boolean isArobaseStartDiagram(String s) {
-		s = s.trim();
-		return s.startsWith("@start");
+	public static final String PAUSE_PATTERN = "(?i)((?:\\W|\\<[^<>]*\\>)*)@unpause";
+	public static final String START_PATTERN = "(?i)((?:[^\\w~]|\\<[^<>]*\\>)*)@start";
+	
+
+	public static boolean isArobaseStartDiagram(CharSequence s) {
+		return StringUtils.trinNoTrace(s).startsWith("@start");
 	}
 
-	public static boolean isArobaseEndDiagram(String s) {
-		s = s.trim();
-		return s.startsWith("@end");
+	public static boolean isArobaseEndDiagram(CharSequence s) {
+		return StringUtils.trinNoTrace(s).startsWith("@end");
 	}
 
-	public static boolean isArobasePauseDiagram(String s) {
-		s = s.trim();
-		return s.startsWith("@pause");
+	public static boolean isArobasePauseDiagram(CharSequence s) {
+		return StringUtils.trinNoTrace(s).startsWith("@pause");
 	}
 
-	public static boolean isArobaseUnpauseDiagram(String s) {
-		s = s.trim();
-		return s.startsWith("@unpause");
+	public static boolean isArobaseUnpauseDiagram(CharSequence s) {
+		return StringUtils.trinNoTrace(s).startsWith("@unpause");
 	}
 
 	private static final Pattern append = MyPattern.cmpile("^\\W*@append");
 
-	public static String getPossibleAppend(String s) {
+	public static CharSequence2 getPossibleAppend(CharSequence2 s) {
 		final Matcher m = append.matcher(s);
 		if (m.find()) {
-			return s.substring(m.group(0).length()).trim();
+			return s.subSequence(m.group(0).length(), s.length()).trin();
+			//return StringUtils.trin(s.toString().substring(m.group(0).length()));
 		}
 		return null;
 	}

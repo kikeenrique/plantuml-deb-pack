@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -37,6 +37,7 @@ import java.util.StringTokenizer;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.Log;
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -46,7 +47,6 @@ import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UText;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 import net.sourceforge.plantuml.utils.CharHidder;
-import net.sourceforge.plantuml.StringUtils;
 
 public class AtomText implements Atom {
 
@@ -112,8 +112,9 @@ public class AtomText implements Atom {
 	private AtomText(String text, FontConfiguration style, Url url, DelayedDouble marginLeft, DelayedDouble marginRight) {
 		this.marginLeft = marginLeft;
 		this.marginRight = marginRight;
-		//this.text = StringUtils.showComparatorCharacters(StringUtils.manageBackslash(text));
-		this.text = StringUtils.showComparatorCharacters(CharHidder.unhide(text));
+		// this.text = StringUtils.showComparatorCharacters(StringUtils.manageBackslash(text));
+		this.text = StringUtils.manageTildeArobaseStart(StringUtils.manageUnicodeNotationUplus(StringUtils
+				.manageAmpDiese(StringUtils.showComparatorCharacters(CharHidder.unhide(text)))));
 		this.fontConfiguration = style;
 		this.url = url;
 	}
@@ -152,7 +153,15 @@ public class AtomText implements Atom {
 	}
 
 	private double getTabSize(StringBounder stringBounder) {
-		return stringBounder.calculateDimension(fontConfiguration.getFont(), "        ").getWidth();
+		return stringBounder.calculateDimension(fontConfiguration.getFont(), tabString()).getWidth();
+	}
+
+	private String tabString() {
+		final int nb = fontConfiguration.getTabSize();
+		if (nb >= 1 && nb < 7) {
+			return "        ".substring(0, nb);
+		}
+		return "        ";
 	}
 
 	public void drawU(UGraphic ug) {
@@ -241,4 +250,5 @@ public class AtomText implements Atom {
 	public final String getText() {
 		return text;
 	}
+
 }

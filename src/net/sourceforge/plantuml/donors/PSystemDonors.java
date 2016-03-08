@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -53,19 +53,14 @@ import net.sourceforge.plantuml.version.PSystemVersion;
 
 public class PSystemDonors extends AbstractPSystem {
 
-	public static final String DONORS = "UDfTKS5oWa0ClUShEFCNZ7JeKAkEzjHRb2YfI-8i2rFu-iQsi6XE-oPvB-zbCvV-5tdOKI2VP19K64_mGMaiRM2j4VeMiecAHoXyRD401pfY6nWbsMWja4cbFYcKmaZtv_bi4zCu2gnniKW2v3m1Tf15QUtXq4KB0nISFfOeb9FBheL3e5jDagnKRvOld_PG2s_D4rKzhDIn97ljMeAoU-gdNsf19d1ZU5-uncO9RLNcw1kbidEkQZRL2_h1akxds7A1pT9z667hk3T2pgUhEPyxBF3IpjAoC95I3_dOSF13iiPQAuJoVlJF6ar-CPUIYzzbTHtiJ8B1vioV-Ih_pDFr8PLK3_2NoIRaZBRrWKTuZUrAuGTNtvOw";
-
-	// public ImageData exportDiagram(OutputStream os, int num, FileFormatOption
-	// fileFormat) throws IOException {
-	// return getGraphicStrings().exportDiagram(os, fileFormat);
-	// }
+	public static final String DONORS = "UDfTKa5osp0ClECLF6lIHoXMwevi9nqxwI4tM48isZIXafHJwMszzME5tCgaZ1Cnm0AxuEOc-n_au3i5SYgtWQt62bufYy5dM7DCdOTyWk8UbYwMg8STxT47ZLOzSsCXjpKxjMGA0utFZm_fcDhHmXgJHJP0eQT46yZZQBx0heiKUbZgR1wMePnOTXvsWTg6h5emjwAlcFQGXzNv3ieE5coqLLlkF47PtTMp8ukGAMarR1BMU4vJMPKR-eMsbdCk6YrJ3-XwKRgzoRO7U4xPXm5UZBu8eD3LIPZVAjh2ax-DjWc9Z2vG36STNA_Ms72DK8v7VszGnYTz6PduNHAdNivaCKYVy1DUvJ_oT9gfilKilIAr3382Ut513_0jbck6ZQuQCkeHjUbJ1MP8oNX_Jwqaj5zAh7vsv5NHxHtArvee_mSV0rMDMZdq62aTI1oRVE3dQ3HfKIk-wDGtL-UyHVqQOPjuULmnqtaKT9kuZ4_ZeHxPeKNJFgXt2iYjXwteHLUhbHv_6huQTkFvDtz-6tFrGFI7IRmgxbhVtELmElveWcQkoCDVlhxmVW00";
 
 	public ImageData exportDiagram(OutputStream os, int num, FileFormatOption fileFormat) throws IOException {
 		final GraphicStrings result = getGraphicStrings();
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, result.getBackcolor(),
-				getMetadata(), null, 0, 0, null);
-		imageBuilder.addUDrawable(result);
-		return imageBuilder.writeImageTOBEMOVED(fileFormat.getFileFormat(), os);
+				getMetadata(), null, 0, 0, null, false);
+		imageBuilder.setUDrawable(result);
+		return imageBuilder.writeImageTOBEMOVED(fileFormat, os);
 	}
 
 	private GraphicStrings getGraphicStrings() throws IOException {

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -31,14 +31,16 @@ package net.sourceforge.plantuml.svek;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
+import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 
-public abstract class AbstractEntityImage implements IEntityImage {
+public abstract class AbstractEntityImage extends AbstractTextBlock implements IEntityImage {
 
 	private final IEntity entity;
 	private final ISkinParam skinParam;
 
 	public AbstractEntityImage(IEntity entity, ISkinParam skinParam) {
+		// System.err.println("Creating abstractEntityImage "+getClass());
 		if (entity == null) {
 			throw new IllegalArgumentException("entity null");
 		}

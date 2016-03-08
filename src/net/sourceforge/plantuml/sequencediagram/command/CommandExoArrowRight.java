@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -54,10 +54,10 @@ public class CommandExoArrowRight extends CommandExoArrowAny {
 								new RegexLeaf("ARROW_DRESSING1", "(>>?|//?|\\\\\\\\?)")), //
 						new RegexConcat( //
 								new RegexLeaf("ARROW_DRESSING2", "(<<?|//?|\\\\\\\\?)"), //
-								new RegexLeaf("ARROW_BODYB1", "(-*)"), //
+								new RegexLeaf("ARROW_BODYB2", "(-*)"), //
 								new RegexLeaf("ARROW_STYLE2", CommandArrow.getColorOrStylePattern()), //
 								new RegexLeaf("ARROW_BODYA2", "(-+)"))), //
-				new RegexLeaf("SHORT", "([ox]?[?\\]])?"), //
+				new RegexLeaf("SHORT", "([ox]?[?\\]\\[])?"), //
 				new RegexLeaf("[%s]*"), //
 				new RegexLeaf("LABEL", "(?::[%s]*(.*))?"), //
 				new RegexLeaf("$"));
@@ -65,8 +65,18 @@ public class CommandExoArrowRight extends CommandExoArrowAny {
 
 	@Override
 	MessageExoType getMessageExoType(RegexResult arg2) {
+		final String start = arg2.get("SHORT", 0);
 		final String dressing1 = arg2.get("ARROW_DRESSING1", 0);
 		final String dressing2 = arg2.get("ARROW_DRESSING2", 0);
+		if (start != null && start.contains("[")) {
+			if (dressing1 != null) {
+				return MessageExoType.TO_LEFT;
+			}
+			if (dressing2 != null) {
+				return MessageExoType.FROM_LEFT;
+			}
+			throw new IllegalArgumentException();
+		}
 		if (dressing1 != null) {
 			return MessageExoType.TO_RIGHT;
 		}

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -32,16 +32,17 @@ import java.awt.geom.Dimension2D;
 
 import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.graphic.SymbolContext;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.skin.AbstractTextualComponent;
 import net.sourceforge.plantuml.skin.Area;
 import net.sourceforge.plantuml.svek.EntityDomain;
 import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
-import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 public class ComponentRoseEntity extends AbstractTextualComponent {
@@ -49,11 +50,12 @@ public class ComponentRoseEntity extends AbstractTextualComponent {
 	private final TextBlock stickman;
 	private final boolean head;
 
-	public ComponentRoseEntity(HtmlColor yellow, HtmlColor red, HtmlColor fontColor, HtmlColor hyperlinkColor, boolean useUnderlineForHyperlink, UFont font,
-			Display stringsToDisplay, boolean head, ISkinSimple spriteContainer, double deltaShadow, UStroke stroke) {
-		super(stringsToDisplay, fontColor, hyperlinkColor, useUnderlineForHyperlink, font, HorizontalAlignment.CENTER, 3, 3, 0, spriteContainer, 0, false);
+	public ComponentRoseEntity(SymbolContext biColor, FontConfiguration font, Display stringsToDisplay, boolean head,
+			ISkinSimple spriteContainer, UFont fontForStereotype, HtmlColor htmlColorForStereotype) {
+		super(stringsToDisplay, font, HorizontalAlignment.CENTER, 3, 3, 0, spriteContainer, 0, false,
+				fontForStereotype, htmlColorForStereotype);
 		this.head = head;
-		this.stickman = new EntityDomain(yellow, red, deltaShadow, stroke.getThickness());
+		this.stickman = new EntityDomain(biColor);
 	}
 
 	@Override

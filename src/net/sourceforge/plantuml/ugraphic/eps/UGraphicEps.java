@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -88,8 +88,8 @@ public class UGraphicEps extends AbstractUGraphic<EpsGraphics> implements ClipCo
 		registerDriver(UText.class, new DriverTextEps(this, strategy));
 		registerDriver(ULine.class, new DriverLineEps(this));
 		registerDriver(UPolygon.class, new DriverPolygonEps(this));
-		registerDriver(UEllipse.class, new DriverEllipseEps());
-		registerDriver(UImage.class, new DriverImageEps());
+		registerDriver(UEllipse.class, new DriverEllipseEps(this));
+		registerDriver(UImage.class, new DriverImageEps(this));
 		registerDriver(UPath.class, new DriverPathEps());
 		registerDriver(DotPath.class, new DriverDotPathEps());
 		registerDriver(UCenteredCharacter.class, new DriverCenteredCharacterEps());
@@ -120,13 +120,6 @@ public class UGraphicEps extends AbstractUGraphic<EpsGraphics> implements ClipCo
 		final UGraphicEps ug = new UGraphicEps(colorMapper, epsStrategy);
 		udrawable.drawU(ug);
 		return ug.getEPSCode();
-	}
-
-	static public void copyEpsToFile(ColorMapper colorMapper, UDrawable udrawable, File f) throws IOException {
-		final PrintWriter pw = new PrintWriter(f);
-		final EpsStrategy epsStrategy = EpsStrategy.getDefault2();
-		pw.print(UGraphicEps.getEpsString(colorMapper, epsStrategy, udrawable));
-		pw.close();
 	}
 
 	public void startUrl(Url url) {

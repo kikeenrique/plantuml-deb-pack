@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -47,6 +47,11 @@ public class RegexLeaf implements IRegex {
 	public RegexLeaf(String name, String regex) {
 		this.pattern = MyPattern.cmpile(regex, Pattern.CASE_INSENSITIVE);
 		this.name = name;
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " " + name + " " + pattern;
 	}
 
 	public String getName() {

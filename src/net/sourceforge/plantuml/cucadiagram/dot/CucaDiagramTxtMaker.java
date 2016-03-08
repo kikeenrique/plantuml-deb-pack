@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -118,15 +118,15 @@ public final class CucaDiagramTxtMaker {
 		int y = 2;
 		ug.getCharArea().drawHLine('-', y, 1, w - 1);
 		y++;
-		for (Member att : ent.getFieldsToDisplay()) {
-			final List<String> disp = StringUtils.getWithNewlines2(att.getDisplay(true));
+		for (Member att : ent.getBodier().getFieldsToDisplay()) {
+			final List<String> disp = StringUtils.getWithNewlines(att.getDisplay(true));
 			ug.getCharArea().drawStringsLR(disp, 1, y);
 			y += StringUtils.getHeight(disp);
 		}
 		ug.getCharArea().drawHLine('-', y, 1, w - 1);
 		y++;
-		for (Member att : ent.getMethodsToDisplay()) {
-			final List<String> disp = StringUtils.getWithNewlines2(att.getDisplay(true));
+		for (Member att : ent.getBodier().getMethodsToDisplay()) {
+			final List<String> disp = StringUtils.getWithNewlines(att.getDisplay(true));
 			ug.getCharArea().drawStringsLR(disp, 1, y);
 			y += StringUtils.getHeight(disp);
 		}
@@ -143,10 +143,10 @@ public final class CucaDiagramTxtMaker {
 
 	private int getHeight(IEntity entity) {
 		int result = StringUtils.getHeight(entity.getDisplay());
-		for (Member att : entity.getMethodsToDisplay()) {
+		for (Member att : entity.getBodier().getMethodsToDisplay()) {
 			result += StringUtils.getHeight(Display.getWithNewlines(att.getDisplay(true)));
 		}
-		for (Member att : entity.getFieldsToDisplay()) {
+		for (Member att : entity.getBodier().getFieldsToDisplay()) {
 			result += StringUtils.getHeight(Display.getWithNewlines(att.getDisplay(true)));
 		}
 		return result + 4;
@@ -154,13 +154,13 @@ public final class CucaDiagramTxtMaker {
 
 	private int getWidth(IEntity entity) {
 		int result = StringUtils.getWidth(entity.getDisplay());
-		for (Member att : entity.getMethodsToDisplay()) {
+		for (Member att : entity.getBodier().getMethodsToDisplay()) {
 			final int w = StringUtils.getWidth(Display.getWithNewlines(att.getDisplay(true)));
 			if (w > result) {
 				result = w;
 			}
 		}
-		for (Member att : entity.getFieldsToDisplay()) {
+		for (Member att : entity.getBodier().getFieldsToDisplay()) {
 			final int w = StringUtils.getWidth(Display.getWithNewlines(att.getDisplay(true)));
 			if (w > result) {
 				result = w;

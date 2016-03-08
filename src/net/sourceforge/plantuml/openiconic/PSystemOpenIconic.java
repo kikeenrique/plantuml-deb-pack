@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -55,9 +55,9 @@ public class PSystemOpenIconic extends AbstractPSystem {
 		// final Dimension2D dim = new Dimension2DDouble(100, 100);
 
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0,
-				null, null, null, 5, 5, null);
-		imageBuilder.addUDrawable(icon.asTextBlock(HtmlColorUtils.BLACK, factor));
-		return imageBuilder.writeImageTOBEMOVED(fileFormat.getFileFormat(), os);
+				null, null, null, 5, 5, null, false);
+		imageBuilder.setUDrawable(icon.asTextBlock(HtmlColorUtils.BLACK, factor));
+		return imageBuilder.writeImageTOBEMOVED(fileFormat, os);
 
 //		UGraphic2 ug = fileFormat.createUGraphic(dim);
 //		ug = (UGraphic2) ug.apply(new UTranslate(10, 10));

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -35,7 +35,6 @@ import java.util.List;
 
 import net.sourceforge.plantuml.Log;
 import net.sourceforge.plantuml.OptionFlags;
-import net.sourceforge.plantuml.api.Performance;
 import net.sourceforge.plantuml.StringUtils;
 
 abstract class AbstractGraphviz implements Graphviz {
@@ -84,12 +83,10 @@ abstract class AbstractGraphviz implements Graphviz {
 		final String cmd[] = getCommandLine();
 		ProcessRunner p = null;
 		ProcessState state = null;
-		long startTime2 = -1;
 		try {
 			Log.info("Starting Graphviz process " + Arrays.asList(cmd));
 			Log.info("DotString size: " + dotString.length());
 			p = new ProcessRunner(cmd);
-			startTime2 = System.currentTimeMillis();
 			state = p.run(dotString.getBytes(), os);
 			// if (state == ProcessState.TERMINATED_OK) {
 			// result = true;
@@ -103,10 +100,6 @@ abstract class AbstractGraphviz implements Graphviz {
 			Log.error("Try java -jar plantuml.jar -testdot to figure out the issue");
 			Log.error("");
 		} finally {
-			if (startTime2 != -1) {
-				final long duration = System.currentTimeMillis() - startTime2;
-				Performance.updateDotTime2(duration);
-			}
 			Log.info("Ending Graphviz process");
 		}
 		if (OptionFlags.getInstance().isCheckDotError() && p != null && p.getError().length() > 0) {
@@ -124,7 +117,7 @@ abstract class AbstractGraphviz implements Graphviz {
 		return state;
 	}
 
-	private boolean illegalDotExe() {
+	public boolean illegalDotExe() {
 		return dotExe == null || dotExe.isFile() == false || dotExe.canRead() == false;
 	}
 
@@ -149,7 +142,7 @@ abstract class AbstractGraphviz implements Graphviz {
 			}
 			sb.append(p.getError());
 		}
-		return sb.toString().replace('\n', ' ').trim();
+		return StringUtils.trin(sb.toString().replace('\n', ' '));
 	}
 
 	final String[] getCommandLine() {

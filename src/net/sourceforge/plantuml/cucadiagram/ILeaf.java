@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -28,6 +28,7 @@
  */
 package net.sourceforge.plantuml.cucadiagram;
 
+import net.sourceforge.plantuml.cucadiagram.dot.Neighborhood;
 import net.sourceforge.plantuml.graphic.USymbol;
 import net.sourceforge.plantuml.svek.IEntityImage;
 
@@ -58,7 +59,11 @@ public interface ILeaf extends IEntity {
 	public void setGeneric(String generic);
 
 	public void setSvekImage(IEntityImage svekImage);
-	
+
 	public void setRemoved(boolean removed);
+
+	public void setNeighborhood(Neighborhood neighborhood);
+
+	public Neighborhood getNeighborhood();
 
 }

@@ -2,9 +2,9 @@
  * PlantUML : a free UML diagram generator
  * ========================================================================
  *
- * (C) Copyright 2009-2014, Arnaud Roques
+ * (C) Copyright 2009-2017, Arnaud Roques
  *
- * Project Info:  http://plantuml.sourceforge.net
+ * Project Info:  http://plantuml.com
  * 
  * This file is part of PlantUML.
  *
@@ -40,11 +40,10 @@ import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorSet;
-import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
-import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.USymbolInterface;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.utils.UniqueSequence;
 
@@ -62,7 +61,7 @@ public class Link implements Hideable, Removeable {
 
 	private Display note;
 	private Position notePosition;
-	private HtmlColor noteColor;
+	private Colors noteColors;
 
 	private boolean invis = false;
 	private double weight = 1.0;
@@ -77,6 +76,7 @@ public class Link implements Hideable, Removeable {
 
 	private boolean opale;
 	private boolean horizontalSolitary;
+	private String sametail;
 
 	private Url url;
 
@@ -104,8 +104,8 @@ public class Link implements Hideable, Removeable {
 		this.cl1 = cl1;
 		this.cl2 = cl2;
 		this.type = type;
-		if (label == null) {
-			this.label = null;
+		if (Display.isNull(label)) {
+			this.label = Display.NULL;
 		} else if (doWeHaveToRemoveUrlAtStart(label)) {
 			this.url = label.initUrl();
 			this.label = label.removeUrl(url);
@@ -124,6 +124,9 @@ public class Link implements Hideable, Removeable {
 		if (qualifier2 != null) {
 			((ILeaf) cl2).setNearDecoration(true);
 		}
+		// if (type.getDecor2() == LinkDecor.EXTENDS) {
+		// setSametail(cl1.getUid());
+		// }
 	}
 
 	private static boolean doWeHaveToRemoveUrlAtStart(Display label) {
@@ -160,6 +163,10 @@ public class Link implements Hideable, Removeable {
 
 	public void goHidden() {
 		this.hidden = true;
+	}
+
+	public void goNorank() {
+		setConstraint(false);
 	}
 
 	public void goBold() {
@@ -218,6 +225,9 @@ public class Link implements Hideable, Removeable {
 		if (opale) {
 			return new LinkType(LinkDecor.NONE, LinkDecor.NONE);
 		}
+		if (getSametail() != null) {
+			return new LinkType(LinkDecor.NONE, LinkDecor.NONE);
+		}
 		LinkType result = type;
 		if (OptionFlags.USE_INTERFACE_EYE1) {
 			if (isLollipopInterfaceEye(cl1)) {
@@ -226,6 +236,25 @@ public class Link implements Hideable, Removeable {
 			if (isLollipopInterfaceEye(cl2)) {
 				type = type.withLollipopInterfaceEye2();
 			}
+		}
+		return result;
+	}
+
+	private boolean isReallyGroup(IEntity ent) {
+		if (ent.isGroup() == false) {
+			return false;
+		}
+		final IGroup group = (IGroup) ent;
+		return group.getChildren().size() + group.getLeafsDirect().size() > 0;
+	}
+
+	public LinkType getTypePatchCluster() {
+		LinkType result = getType();
+		if (isReallyGroup(getEntity1())) {
+			result = result.withoutDecors2();
+		}
+		if (isReallyGroup(getEntity2())) {
+			result = result.withoutDecors1();
 		}
 		return result;
 	}
@@ -282,25 +311,25 @@ public class Link implements Hideable, Removeable {
 		return note;
 	}
 
-	public final HtmlColor getNoteColor() {
-		return noteColor;
+	public final Colors getNoteColors() {
+		return noteColors;
 	}
 
 	public final Position getNotePosition() {
 		return notePosition;
 	}
 
-	public final void addNote(Display note, Position position, HtmlColor noteColor) {
+	public final void addNote(Display note, Position position, Colors colors) {
 		this.note = note;
 		this.notePosition = position;
-		this.noteColor = noteColor;
+		this.noteColors = colors;
 	}
 
-	public final void addNote(String n, Position position, HtmlColor noteColor) {
-		this.note = Display.getWithNewlines(n);
-		this.notePosition = position;
-		this.noteColor = noteColor;
-	}
+	// public final void addNote(String n, Position position, Colors colors) {
+	// this.note = Display.getWithNewlines(n);
+	// this.notePosition = position;
+	// this.noteColors = colors;
+	// }
 
 	public boolean isAutoLinkOfAGroup() {
 		if (getEntity1().isGroup() == false) {
@@ -354,8 +383,8 @@ public class Link implements Hideable, Removeable {
 	private double getQualifierMargin(StringBounder stringBounder, UFont fontQualif, String qualif,
 			ISkinSimple spriteContainer) {
 		if (qualif != null) {
-			final TextBlock b = TextBlockUtils.create(Display.create(qualif), new FontConfiguration(fontQualif,
-					HtmlColorUtils.BLACK, HtmlColorUtils.BLUE, true), HorizontalAlignment.LEFT, spriteContainer);
+			final TextBlock b = Display.create(qualif).create(FontConfiguration.blackBlueTrue(fontQualif),
+					HorizontalAlignment.LEFT, spriteContainer);
 			final Dimension2D dim = b.calculateDimension(stringBounder);
 			return Math.max(dim.getWidth(), dim.getHeight());
 		}
@@ -464,10 +493,28 @@ public class Link implements Hideable, Removeable {
 	}
 
 	public boolean hasUrl() {
-		if (label != null && label.hasUrl()) {
+		if (Display.isNull(label) == false && label.hasUrl()) {
 			return true;
 		}
 		return getUrl() != null;
+	}
+
+	public String getSametail() {
+		return sametail;
+	}
+
+	public void setSametail(String sametail) {
+		this.sametail = sametail;
+	}
+
+	private Colors colors;
+
+	public void setColors(Colors colors) {
+		this.colors = colors;
+	}
+
+	public final Colors getColors() {
+		return colors;
 	}
 
 }
