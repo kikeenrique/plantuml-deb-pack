@@ -59,9 +59,9 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
+import net.sourceforge.plantuml.sequencediagram.NoteType;
 import net.sourceforge.plantuml.skin.rose.Rose;
 import net.sourceforge.plantuml.svek.image.Opale;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
@@ -87,22 +87,20 @@ public class FtileWithNoteOpale extends AbstractFtile implements Stencil {
 		return tile.getSwimlaneOut();
 	}
 
-	public FtileWithNoteOpale(Ftile tile, Display note, NotePosition notePosition, ISkinParam skinParam,
+	public FtileWithNoteOpale(Ftile tile, Display note, NotePosition notePosition, NoteType type, ISkinParam skinParam,
 			boolean withLink) {
 		super(tile.shadowing());
 		this.tile = tile;
 		this.notePosition = notePosition;
-		// this.arrowColor = arrowColor;
+		if (type == NoteType.FLOATING_NOTE) {
+			withLink = false;
+		}
 
 		final Rose rose = new Rose();
-		// final HtmlColor fontColor = rose.getFontColor(skinParam, FontParam.NOTE);
-		// final UFont fontNote = skinParam.getFont(FontParam.NOTE, null, false);
 
 		final HtmlColor noteBackgroundColor = rose.getHtmlColor(skinParam, ColorParam.noteBackground);
 		final HtmlColor borderColor = rose.getHtmlColor(skinParam, ColorParam.noteBorder);
 
-		// final FontConfiguration fc = new FontConfiguration(fontNote, fontColor, skinParam.getHyperlinkColor(),
-		// skinParam.useUnderlineForHyperlink());
 		final FontConfiguration fc = new FontConfiguration(skinParam, FontParam.NOTE, null);
 
 		final Sheet sheet = new CreoleParser(fc, HorizontalAlignment.LEFT, skinParam, CreoleMode.FULL)

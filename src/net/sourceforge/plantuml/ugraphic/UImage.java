@@ -28,7 +28,7 @@
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19271 $
+ * Revision $Revision: 19570 $
  *
  */
 package net.sourceforge.plantuml.ugraphic;
@@ -69,11 +69,11 @@ public class UImage implements UShape {
 	}
 
 	public double getWidth() {
-		return image.getWidth();
+		return image.getWidth()-1;
 	}
 
 	public double getHeight() {
-		return image.getHeight();
+		return image.getHeight()-1;
 	}
 
 }

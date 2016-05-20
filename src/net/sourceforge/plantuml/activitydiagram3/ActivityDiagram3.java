@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import net.sourceforge.plantuml.AnnotatedWorker;
-import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.ISkinParam;
@@ -54,12 +53,15 @@ import net.sourceforge.plantuml.core.DiagramDescriptionImpl;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.HtmlColorAndStyle;
+import net.sourceforge.plantuml.graphic.Rainbow;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockCompressed;
 import net.sourceforge.plantuml.graphic.TextBlockRecentred;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
+import net.sourceforge.plantuml.sequencediagram.NoteType;
 import net.sourceforge.plantuml.skin.rose.Rose;
 import net.sourceforge.plantuml.ugraphic.ImageBuilder;
 
@@ -108,7 +110,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 		final InstructionSimple ins = new InstructionSimple(activity, nextLinkRenderer(),
 				swinlanes.getCurrentSwimlane(), style, url, colors);
 		current().add(ins);
-		setNextLinkRendererInternal(null);
+		setNextLinkRendererInternal(LinkRendering.none());
 		manageHasUrl(activity);
 		if (url != null) {
 			hasUrl = true;
@@ -118,14 +120,14 @@ public class ActivityDiagram3 extends UmlDiagram {
 	public CommandExecutionResult addGoto(String name) {
 		final InstructionGoto ins = new InstructionGoto(swinlanes.getCurrentSwimlane(), name);
 		current().add(ins);
-		setNextLinkRendererInternal(null);
+		setNextLinkRendererInternal(LinkRendering.none());
 		return CommandExecutionResult.ok();
 	}
 
 	public CommandExecutionResult addLabel(String name) {
 		final InstructionLabel ins = new InstructionLabel(swinlanes.getCurrentSwimlane(), name);
 		current().add(ins);
-		setNextLinkRendererInternal(null);
+		setNextLinkRendererInternal(LinkRendering.none());
 		return CommandExecutionResult.ok();
 	}
 
@@ -200,7 +202,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 	public void fork() {
 		final InstructionFork instructionFork = new InstructionFork(current(), nextLinkRenderer());
 		current().add(instructionFork);
-		setNextLinkRendererInternal(null);
+		setNextLinkRendererInternal(LinkRendering.none());
 		setCurrent(instructionFork);
 	}
 
@@ -208,7 +210,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 		if (current() instanceof InstructionFork) {
 			final InstructionFork currentFork = (InstructionFork) current();
 			currentFork.manageOutRendering(nextLinkRenderer());
-			setNextLinkRendererInternal(null);
+			setNextLinkRendererInternal(LinkRendering.none());
 			currentFork.forkAgain();
 			return CommandExecutionResult.ok();
 		}
@@ -219,7 +221,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 		if (current() instanceof InstructionFork) {
 			final InstructionFork currentFork = (InstructionFork) current();
 			currentFork.manageOutRendering(nextLinkRenderer());
-			setNextLinkRendererInternal(null);
+			setNextLinkRendererInternal(LinkRendering.none());
 			setCurrent(currentFork.getParent());
 			return CommandExecutionResult.ok();
 		}
@@ -228,7 +230,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 
 	public void split() {
 		final InstructionSplit instructionSplit = new InstructionSplit(current(), nextLinkRenderer());
-		setNextLinkRendererInternal(null);
+		setNextLinkRendererInternal(LinkRendering.none());
 		current().add(instructionSplit);
 		setCurrent(instructionSplit);
 	}
@@ -236,7 +238,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 	public CommandExecutionResult splitAgain() {
 		if (current() instanceof InstructionSplit) {
 			((InstructionSplit) current()).splitAgain(nextLinkRenderer());
-			setNextLinkRendererInternal(null);
+			setNextLinkRendererInternal(LinkRendering.none());
 			return CommandExecutionResult.ok();
 		}
 		return CommandExecutionResult.error("Cannot find split");
@@ -245,7 +247,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 	public CommandExecutionResult endSplit() {
 		if (current() instanceof InstructionSplit) {
 			((InstructionSplit) current()).endSplit(nextLinkRenderer());
-			setNextLinkRendererInternal(null);
+			setNextLinkRendererInternal(LinkRendering.none());
 			setCurrent(((InstructionSplit) current()).getParent());
 			return CommandExecutionResult.ok();
 		}
@@ -257,7 +259,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 		final InstructionIf instructionIf = new InstructionIf(swinlanes.getCurrentSwimlane(), current(), test,
 				whenThen, nextLinkRenderer(), color, getSkinParam());
 		current().add(instructionIf);
-		setNextLinkRendererInternal(null);
+		setNextLinkRendererInternal(LinkRendering.none());
 		setCurrent(instructionIf);
 	}
 
@@ -267,7 +269,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 			if (ok == false) {
 				return CommandExecutionResult.error("You cannot put an elseIf here");
 			}
-			setNextLinkRendererInternal(null);
+			setNextLinkRendererInternal(LinkRendering.none());
 			return CommandExecutionResult.ok();
 		}
 		return CommandExecutionResult.error("Cannot find if");
@@ -279,7 +281,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 			if (result == false) {
 				return CommandExecutionResult.error("Cannot find if");
 			}
-			setNextLinkRendererInternal(null);
+			setNextLinkRendererInternal(LinkRendering.none());
 			return CommandExecutionResult.ok();
 		}
 		return CommandExecutionResult.error("Cannot find if");
@@ -289,7 +291,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 		// System.err.println("Activity3::endif");
 		if (current() instanceof InstructionIf) {
 			((InstructionIf) current()).endif(nextLinkRenderer());
-			setNextLinkRendererInternal(null);
+			setNextLinkRendererInternal(LinkRendering.none());
 			setCurrent(((InstructionIf) current()).getParent());
 			return CommandExecutionResult.ok();
 		}
@@ -302,7 +304,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 				nextLinkRenderer(), color);
 		current().add(instructionRepeat);
 		setCurrent(instructionRepeat);
-		setNextLinkRendererInternal(null);
+		setNextLinkRendererInternal(LinkRendering.none());
 
 	}
 
@@ -311,11 +313,10 @@ public class ActivityDiagram3 extends UmlDiagram {
 		manageSwimlaneStrategy();
 		if (current() instanceof InstructionRepeat) {
 			final InstructionRepeat instructionRepeat = (InstructionRepeat) current();
-			final LinkRendering back = new LinkRendering(linkColor);
-			back.setDisplay(linkLabel);
+			final LinkRendering back = new LinkRendering(HtmlColorAndStyle.fromColor(linkColor)).withDisplay(linkLabel);
 			instructionRepeat.setTest(label, yes, out, nextLinkRenderer(), back);
 			setCurrent(instructionRepeat.getParent());
-			this.setNextLinkRendererInternal(null);
+			this.setNextLinkRendererInternal(LinkRendering.none());
 			return CommandExecutionResult.ok();
 		}
 		return CommandExecutionResult.error("Cannot find repeat");
@@ -333,7 +334,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 	public CommandExecutionResult endwhile(Display out) {
 		if (current() instanceof InstructionWhile) {
 			((InstructionWhile) current()).endwhile(nextLinkRenderer(), out);
-			setNextLinkRendererInternal(null);
+			setNextLinkRendererInternal(LinkRendering.none());
 			setCurrent(((InstructionWhile) current()).getParent());
 			return CommandExecutionResult.ok();
 		}
@@ -364,11 +365,17 @@ public class ActivityDiagram3 extends UmlDiagram {
 	}
 
 	private void setNextLinkRendererInternal(LinkRendering link) {
+		if (link == null) {
+			throw new IllegalArgumentException();
+		}
 		// System.err.println("setNextLinkRendererInternal=" + link);
 		swinlanes.setNextLinkRenderer(link);
 	}
 
 	private void setNextLink(LinkRendering linkRenderer) {
+		if (linkRenderer == null) {
+			throw new IllegalArgumentException();
+		}
 		// System.err.println("setNextLink=" + linkRenderer);
 		if (current() instanceof InstructionCollection) {
 			final Instruction last = ((InstructionCollection) current()).getLast();
@@ -381,22 +388,16 @@ public class ActivityDiagram3 extends UmlDiagram {
 		this.setNextLinkRendererInternal(linkRenderer);
 	}
 
-	private final Rose rose = new Rose();
-
 	public void setLabelNextArrow(Display label) {
 		if (current() instanceof InstructionWhile && ((InstructionWhile) current()).getLast() == null) {
 			((InstructionWhile) current()).overwriteYes(label);
 			return;
 		}
 
-		if (nextLinkRenderer() == null) {
-			final HtmlColor arrowColor = rose.getHtmlColor(getSkinParam(), ColorParam.activityArrow);
-			this.setNextLink(new LinkRendering(arrowColor));
-		}
-		nextLinkRenderer().setDisplay(label);
+		setNextLinkRendererInternal(nextLinkRenderer().withDisplay(label));
 	}
 
-	public void setColorNextArrow(HtmlColor color) {
+	public void setColorNextArrow(Rainbow color) {
 		if (color == null) {
 			return;
 		}
@@ -404,8 +405,8 @@ public class ActivityDiagram3 extends UmlDiagram {
 		setNextLink(link);
 	}
 
-	public CommandExecutionResult addNote(Display note, NotePosition position) {
-		final boolean ok = current().addNote(note, position);
+	public CommandExecutionResult addNote(Display note, NotePosition position, NoteType type) {
+		final boolean ok = current().addNote(note, position, type);
 		if (ok == false) {
 			return CommandExecutionResult.error("Cannot add note here");
 		}

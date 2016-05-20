@@ -41,6 +41,7 @@ import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.creole.Stencil;
 
 public abstract class USymbol {
 
@@ -56,8 +57,10 @@ public abstract class USymbol {
 	public final static USymbol PACKAGE = record("PACKAGE", SkinParameter.PACKAGE, new USymbolFolder(
 			SkinParameter.PACKAGE));
 	public final static USymbol FOLDER = record("FOLDER", SkinParameter.FOLDER, new USymbolFolder(SkinParameter.FOLDER));
-	public final static USymbol RECTANGLE = record("RECTANGLE", SkinParameter.CARD, new USymbolRect(SkinParameter.CARD, HorizontalAlignment.CENTER));
-	public final static USymbol AGENT = record("AGENT", SkinParameter.AGENT, new USymbolRect(SkinParameter.AGENT, HorizontalAlignment.CENTER));
+	public final static USymbol RECTANGLE = record("RECTANGLE", SkinParameter.CARD, new USymbolRect(SkinParameter.CARD,
+			HorizontalAlignment.CENTER));
+	public final static USymbol AGENT = record("AGENT", SkinParameter.AGENT, new USymbolRect(SkinParameter.AGENT,
+			HorizontalAlignment.CENTER));
 	public final static USymbol ACTOR = record("ACTOR", SkinParameter.ACTOR, new USymbolActor());
 	public final static USymbol USECASE = null;
 	public final static USymbol COMPONENT1 = record("COMPONENT1", SkinParameter.COMPONENT1, new USymbolComponent1());
@@ -68,9 +71,10 @@ public abstract class USymbol {
 	public final static USymbol CONTROL = record("CONTROL", SkinParameter.CONTROL, new USymbolControl(2));
 	public final static USymbol INTERFACE = record("INTERFACE", SkinParameter.INTERFACE, new USymbolInterface());
 	public final static USymbol QUEUE = record("QUEUE", SkinParameter.QUEUE, new USymbolQueue());
+	public final static USymbol TOGETHER = record("TOGETHER", SkinParameter.QUEUE, new USymbolTogether());
 
 	abstract public SkinParameter getSkinParameter();
-	
+
 	public USymbol withStereoAlignment(HorizontalAlignment alignment) {
 		return this;
 	}
@@ -93,6 +97,9 @@ public abstract class USymbol {
 	}
 
 	public static USymbol getFromString(String s) {
+		if (s == null) {
+			return null;
+		}
 		final USymbol result = all.get(StringUtils.goUpperCase(s.replaceAll("\\W", "")));
 		if (result == null) {
 			if (s.equalsIgnoreCase("component")) {
@@ -157,6 +164,18 @@ public abstract class USymbol {
 
 	public int suppWidthBecauseOfShape() {
 		return 0;
+	}
+
+	final Stencil getRectangleStencil(final Dimension2D dim) {
+		return new Stencil() {
+			public double getStartingX(StringBounder stringBounder, double y) {
+				return 0;
+			}
+
+			public double getEndingX(StringBounder stringBounder, double y) {
+				return dim.getWidth();
+			}
+		};
 	}
 
 }

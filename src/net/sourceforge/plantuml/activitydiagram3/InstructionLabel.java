@@ -62,11 +62,7 @@ public class InstructionLabel extends MonoSwimable implements Instruction {
 	}
 
 	public LinkRendering getInLinkRendering() {
-		return null;
-	}
-
-	public boolean addNote(Display note, NotePosition position) {
-		throw new UnsupportedOperationException();
+		return LinkRendering.none();
 	}
 
 }

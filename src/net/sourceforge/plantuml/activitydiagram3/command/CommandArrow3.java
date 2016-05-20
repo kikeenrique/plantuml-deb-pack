@@ -41,9 +41,11 @@ import net.sourceforge.plantuml.command.regex.RegexLeaf;
 import net.sourceforge.plantuml.command.regex.RegexOr;
 import net.sourceforge.plantuml.command.regex.RegexResult;
 import net.sourceforge.plantuml.cucadiagram.Display;
-import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.Rainbow;
 
 public class CommandArrow3 extends SingleLineCommand2<ActivityDiagram3> {
+
+	public static final String STYLE_COLORS = "-\\[((?:#\\w+|dotted|dashed|plain|bold|hidden)(?:,#\\w+|,dotted|,dashed|,plain|,bold|,hidden)*(?:;(?:#\\w+|dotted|dashed|plain|bold|hidden)(?:,#\\w+|,dotted|,dashed|,plain|,bold|,hidden)*)*)\\]->";
 
 	public CommandArrow3() {
 		super(getRegexConcat());
@@ -53,7 +55,7 @@ public class CommandArrow3 extends SingleLineCommand2<ActivityDiagram3> {
 		return new RegexConcat(new RegexLeaf("^"), //
 				new RegexOr(//
 						new RegexLeaf("->"), //
-						new RegexLeaf("COLOR", "-\\[(#\\w+)\\]->")), //
+						new RegexLeaf("COLOR", STYLE_COLORS)), //
 				new RegexLeaf("[%s]*"), //
 				new RegexOr(//
 						new RegexLeaf("LABEL", "(.*);"), //
@@ -64,8 +66,12 @@ public class CommandArrow3 extends SingleLineCommand2<ActivityDiagram3> {
 	@Override
 	protected CommandExecutionResult executeArg(ActivityDiagram3 diagram, RegexResult arg) {
 
-		final HtmlColor color = diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(arg.get("COLOR", 0));
-		diagram.setColorNextArrow(color);
+		final String colorString = arg.get("COLOR", 0);
+		if (colorString != null) {
+			Rainbow rainbow = Rainbow.build(diagram.getSkinParam(), colorString, diagram.getSkinParam()
+					.colorArrowSeparationSpace());
+			diagram.setColorNextArrow(rainbow);
+		}
 		final String label = arg.get("LABEL", 0);
 		if (label != null && label.length() > 0) {
 			diagram.setLabelNextArrow(Display.getWithNewlines(label));

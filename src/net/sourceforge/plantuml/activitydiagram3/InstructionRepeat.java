@@ -42,6 +42,7 @@ import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
+import net.sourceforge.plantuml.sequencediagram.NoteType;
 
 public class InstructionRepeat implements Instruction {
 
@@ -56,13 +57,16 @@ public class InstructionRepeat implements Instruction {
 	private Display yes = Display.NULL;
 	private Display out = Display.NULL;
 	private boolean testCalled = false;
-	private LinkRendering endRepeatLinkRendering;
-	private LinkRendering backRepeatLinkRendering;
+	private LinkRendering endRepeatLinkRendering = LinkRendering.none();
+	private LinkRendering backRepeatLinkRendering = LinkRendering.none();
 
 	public InstructionRepeat(Swimlane swimlane, Instruction parent, LinkRendering nextLinkRenderer, HtmlColor color) {
 		this.parent = parent;
 		this.swimlane = swimlane;
 		this.nextLinkRenderer = nextLinkRenderer;
+		if (nextLinkRenderer == null) {
+			throw new IllegalArgumentException();
+		}
 		this.color = color;
 	}
 
@@ -71,7 +75,7 @@ public class InstructionRepeat implements Instruction {
 	}
 
 	public Ftile createFtile(FtileFactory factory) {
-		final Ftile result = factory.repeat(swimlane,
+		final Ftile result = factory.repeat(swimlane, repeatList.getSwimlaneOut(),
 				factory.decorateOut(repeatList.createFtile(factory), endRepeatLinkRendering), test, yes, out, color,
 				backRepeatLinkRendering);
 		if (killed) {
@@ -115,8 +119,8 @@ public class InstructionRepeat implements Instruction {
 		return nextLinkRenderer;
 	}
 
-	public boolean addNote(Display note, NotePosition position) {
-		return repeatList.addNote(note, position);
+	public boolean addNote(Display note, NotePosition position, NoteType type) {
+		return repeatList.addNote(note, position, type);
 	}
 
 	public Set<Swimlane> getSwimlanes() {

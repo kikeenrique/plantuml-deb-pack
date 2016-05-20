@@ -28,7 +28,7 @@
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 19254 $
+ * Revision $Revision: 19636 $
  *
  */
 package net.sourceforge.plantuml;
@@ -75,7 +75,8 @@ public class OptionPrint {
 		System.out.println("    -tpdf\t\tTo generate images using PDF format");
 		System.out.println("    -tvdx\t\tTo generate images using VDX format");
 		System.out.println("    -txmi\t\tTo generate XMI file for class diagram");
-		System.out.println("    -thtml\t\tTo generate HTML files for class diagram");
+		System.out.println("    -tscxml\t\tTo generate SCXML file for state diagram");
+		System.out.println("    -thtml\t\tTo generate HTML file for class diagram");
 		System.out.println("    -ttxt\t\tTo generate images with ASCII art");
 		System.out.println("    -tutxt\t\tTo generate images with ASCII art using Unicode characters");
 		System.out.println("    -tlatex\t\tTo generate images using LaTeX/Tikz format");
@@ -92,7 +93,7 @@ public class OptionPrint {
 		System.out.println("    -checkversion\tTo check if a newer version is available for download");
 		System.out.println("    -v[erbose]\t\tTo have log information");
 		System.out.println("    -quiet\t\tTo NOT print error message into the console");
-		System.out.println("    -keepfiles\t\tTo NOT delete temporary files after process");
+		System.out.println("    -debugsvek\t\tTo generate intermediate svek files");
 		System.out.println("    -h[elp]\t\tTo display this help message");
 		System.out.println("    -testdot\t\tTo test the installation of graphviz");
 		System.out.println("    -graphvizdot \"exe\"\tTo specify dot executable");

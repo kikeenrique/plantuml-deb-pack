@@ -45,8 +45,9 @@ import net.sourceforge.plantuml.command.regex.RegexConcat;
 import net.sourceforge.plantuml.command.regex.RegexLeaf;
 import net.sourceforge.plantuml.command.regex.RegexOr;
 import net.sourceforge.plantuml.command.regex.RegexResult;
-import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.HtmlColorAndStyle;
+import net.sourceforge.plantuml.graphic.Rainbow;
 
 public class CommandArrowLong3 extends CommandMultilines2<ActivityDiagram3> {
 
@@ -63,7 +64,7 @@ public class CommandArrowLong3 extends CommandMultilines2<ActivityDiagram3> {
 		return new RegexConcat(new RegexLeaf("^"), //
 				new RegexOr(//
 						new RegexLeaf("->"), //
-						new RegexLeaf("COLOR", "-\\[(#\\w+)\\]->")), //
+						new RegexLeaf("COLOR", CommandArrow3.STYLE_COLORS)), //
 				new RegexLeaf("[%s]*"), //
 				new RegexLeaf("LABEL", "(.*)"), //
 				new RegexLeaf("$"));
@@ -72,8 +73,14 @@ public class CommandArrowLong3 extends CommandMultilines2<ActivityDiagram3> {
 	public CommandExecutionResult executeNow(ActivityDiagram3 diagram, BlocLines lines) {
 		lines = lines.removeEmptyColumns();
 		final RegexResult line0 = getStartingPattern().matcher(StringUtils.trin(lines.getFirst499()));
-		final HtmlColor color = diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(line0.get("COLOR", 0));
-		diagram.setColorNextArrow(color);
+		// final HtmlColor color = diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(line0.get("COLOR", 0));
+		// diagram.setColorNextArrow(HtmlColorAndStyle.fromColor(color));
+		final String colorString = line0.get("COLOR", 0);
+		if (colorString != null) {
+			Rainbow rainbow = Rainbow.build(diagram.getSkinParam(), colorString, diagram.getSkinParam()
+					.colorArrowSeparationSpace());
+			diagram.setColorNextArrow(rainbow);
+		}
 		lines = lines.removeStartingAndEnding2(line0.get("LABEL", 0));
 		diagram.setLabelNextArrow(lines.toDisplay());
 		return CommandExecutionResult.ok();
@@ -83,7 +90,7 @@ public class CommandArrowLong3 extends CommandMultilines2<ActivityDiagram3> {
 		if (lines.size() == 0) {
 			return;
 		}
-		lines.set(0, (CS)data);
+		lines.set(0, (CS) data);
 	}
 
 	private <CS extends CharSequence> void removeEnding(List<CS> lines) {
@@ -92,7 +99,7 @@ public class CommandArrowLong3 extends CommandMultilines2<ActivityDiagram3> {
 		}
 		final int n = lines.size() - 1;
 		final CharSequence s = lines.get(n);
-		lines.set(n, (CS)s.subSequence(0, s.length() - 1));
+		lines.set(n, (CS) s.subSequence(0, s.length() - 1));
 	}
 
 }

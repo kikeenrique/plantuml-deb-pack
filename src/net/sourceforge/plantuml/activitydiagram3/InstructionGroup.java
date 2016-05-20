@@ -41,6 +41,7 @@ import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
+import net.sourceforge.plantuml.sequencediagram.NoteType;
 
 public class InstructionGroup implements Instruction, InstructionCollection {
 
@@ -80,15 +81,15 @@ public class InstructionGroup implements Instruction, InstructionCollection {
 	}
 
 	public LinkRendering getInLinkRendering() {
-		return null;
+		return LinkRendering.none();
 	}
 
-	public boolean addNote(Display note, NotePosition position) {
+	public boolean addNote(Display note, NotePosition position, NoteType type) {
 		if (list.isEmpty()) {
 			this.headerNote = note;
 			return true;
 		}
-		return list.addNote(note, position);
+		return list.addNote(note, position, type);
 	}
 
 	public Set<Swimlane> getSwimlanes() {

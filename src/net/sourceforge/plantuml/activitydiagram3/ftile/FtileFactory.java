@@ -44,6 +44,7 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
+import net.sourceforge.plantuml.sequencediagram.NoteType;
 
 public interface FtileFactory extends ISkinSimple {
 
@@ -59,7 +60,7 @@ public interface FtileFactory extends ISkinSimple {
 
 	public Ftile activity(Display label, Swimlane swimlane, BoxStyle style, Colors colors);
 
-	public Ftile addNote(Ftile ftile, Display note, NotePosition notePosition);
+	public Ftile addNote(Ftile ftile, Display note, NotePosition notePosition, NoteType type, Swimlane swimlane);
 
 	public Ftile addUrl(Ftile ftile, Url url);
 
@@ -69,8 +70,8 @@ public interface FtileFactory extends ISkinSimple {
 
 	public Ftile assembly(Ftile tile1, Ftile tile2);
 
-	public Ftile repeat(Swimlane swimlane, Ftile repeat, Display test, Display yes, Display out, HtmlColor color,
-			LinkRendering backRepeatLinkRendering);
+	public Ftile repeat(Swimlane swimlane, Swimlane swimlaneOut, Ftile repeat, Display test, Display yes, Display out,
+			HtmlColor color, LinkRendering backRepeatLinkRendering);
 
 	public Ftile createWhile(Swimlane swimlane, Ftile whileBlock, Display test, Display yes, Display out,
 			LinkRendering afterEndwhile, HtmlColor color);

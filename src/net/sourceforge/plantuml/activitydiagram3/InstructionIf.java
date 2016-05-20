@@ -47,18 +47,20 @@ import net.sourceforge.plantuml.activitydiagram3.ftile.vcompact.FtileWithNoteOpa
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
+import net.sourceforge.plantuml.sequencediagram.NoteType;
 
 public class InstructionIf implements Instruction, InstructionCollection {
 
 	private final List<Branch> thens = new ArrayList<Branch>();
 	private Branch elseBranch;
+	private boolean endifCalled = false;
 	private final ISkinParam skinParam;
 
 	private final Instruction parent;
 
 	private Branch current;
 	private final LinkRendering topInlinkRendering;
-	private LinkRendering afterEndwhile;
+	private LinkRendering afterEndwhile = LinkRendering.none();
 
 	private final Swimlane swimlane;
 
@@ -67,6 +69,9 @@ public class InstructionIf implements Instruction, InstructionCollection {
 		this.parent = parent;
 		this.skinParam = skinParam;
 		this.topInlinkRendering = inlinkRendering;
+		if (inlinkRendering == null) {
+			throw new IllegalArgumentException();
+		}
 		this.swimlane = swimlane;
 		this.thens.add(new Branch(swimlane, whenThen, labelTest, color));
 		this.current = this.thens.get(0);
@@ -78,6 +83,7 @@ public class InstructionIf implements Instruction, InstructionCollection {
 
 	private Display note;
 	private NotePosition position;
+	private NoteType type;
 
 	public Ftile createFtile(FtileFactory factory) {
 		for (Branch branch : thens) {
@@ -89,7 +95,7 @@ public class InstructionIf implements Instruction, InstructionCollection {
 		elseBranch.updateFtile(factory);
 		Ftile result = factory.createIf(swimlane, thens, elseBranch, afterEndwhile, topInlinkRendering);
 		if (note != null) {
-			result = new FtileWithNoteOpale(result, note, position, skinParam, false);
+			result = new FtileWithNoteOpale(result, note, position, type, skinParam, false);
 		}
 		return result;
 	}
@@ -120,6 +126,7 @@ public class InstructionIf implements Instruction, InstructionCollection {
 	}
 
 	public void endif(LinkRendering nextLinkRenderer) {
+		endifCalled = true;
 		if (elseBranch == null) {
 			this.elseBranch = new Branch(swimlane, Display.NULL, Display.NULL, null);
 		}
@@ -127,6 +134,17 @@ public class InstructionIf implements Instruction, InstructionCollection {
 	}
 
 	final public boolean kill() {
+		if (endifCalled) {
+			for (Branch branch : thens) {
+				if (branch.getLast().kill() == false) {
+					return false;
+				}
+				if (elseBranch != null && elseBranch.getLast().kill() == false) {
+					return false;
+				}
+				return true;
+			}
+		}
 		return current.kill();
 	}
 
@@ -134,13 +152,14 @@ public class InstructionIf implements Instruction, InstructionCollection {
 		return topInlinkRendering;
 	}
 
-	public boolean addNote(Display note, NotePosition position) {
+	public boolean addNote(Display note, NotePosition position, NoteType type) {
 		if (current.isEmpty()) {
 			this.note = note;
 			this.position = position;
+			this.type = type;
 			return true;
 		} else {
-			return current.addNote(note, position);
+			return current.addNote(note, position, type);
 		}
 	}
 
@@ -152,7 +171,9 @@ public class InstructionIf implements Instruction, InstructionCollection {
 		for (Branch branch : thens) {
 			result.addAll(branch.getSwimlanes());
 		}
-		result.addAll(elseBranch.getSwimlanes());
+		if (elseBranch != null) {
+			result.addAll(elseBranch.getSwimlanes());
+		}
 		return Collections.unmodifiableSet(result);
 	}
 
