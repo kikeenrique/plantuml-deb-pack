@@ -13,5 +13,5 @@ pipelines:
           script:
             - echo "Runs only on the master branch."
             - apt-get update
-            - apt-get -y --no-install-recommends install ant default-jdk dpkg-dev cdbs debhelper
+            - apt-get -y --no-install-recommends install ant default-jdk dpkg-dev cdbs debhelper build-essential
             - dpkg-buildpackage -j2 -us -uc -b
