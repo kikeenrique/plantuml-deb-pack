@@ -1,0 +1,17 @@
+# You can use a Docker image from Docker Hub or your own container
+# registry for your build environment.
+image: debian
+
+pipelines:
+  default:
+    - step:
+        script:
+          - echo "Runs on branches that don't have specific pipeline."
+  branches: # Container for all branch-specific pipelines.
+    master:
+      - step:
+          script:
+            - echo "Runs only on the master branch."
+            - apt-get update
+            - apt-get -y --no-install-recommends install ant default-jdk dpkg-dev cdbs debhelper
+            - dpkg-buildpackage -j2 -us -uc -b
