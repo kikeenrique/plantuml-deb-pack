@@ -6,10 +6,6 @@
 
 ### Contribution guidelines ###
 
-* Currents status for Continuous Integraion in drone.io.
-
-[![Build Status](https://drone.io/bitbucket.org/kikeenrique/plantuml/status.png)](https://drone.io/bitbucket.org/kikeenrique/plantuml/latest)
-
 ### Who do I talk to? ###
 
 * Repo owner or admin
