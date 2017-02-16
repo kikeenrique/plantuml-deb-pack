@@ -36,7 +36,7 @@
 
     <groupId>net.sourceforge.plantuml</groupId>
     <artifactId>plantuml</artifactId>
-    <version>8042-SNAPSHOT</version>
+    <version>8056-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>PlantUML</name>
@@ -116,8 +116,9 @@
                     <include>net/sourceforge/plantuml/openiconic/data/*.txt</include>
                     <include>net/sourceforge/plantuml/openiconic/data/*.svg</include>
                     <include>net/sourceforge/plantuml/fun/*.png</include>
-                    <include>sprite/archimate/*.png</include>
+                    <include>sprites/archimate/*.png</include>
                     <include>net/sourceforge/plantuml/dedication/*.png</include>
+                    <include>net/sourceforge/plantuml/math/*.js</include>
                 </includes>
             </resource>
         </resources>        

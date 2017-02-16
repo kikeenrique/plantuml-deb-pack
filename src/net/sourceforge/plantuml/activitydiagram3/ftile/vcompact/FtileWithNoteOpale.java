@@ -23,18 +23,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile.vcompact;
 
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import net.sourceforge.plantuml.ColorParam;
@@ -42,6 +41,7 @@ import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.Direction;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.activitydiagram3.PositionedNote;
 import net.sourceforge.plantuml.activitydiagram3.ftile.AbstractFtile;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Ftile;
 import net.sourceforge.plantuml.activitydiagram3.ftile.FtileGeometry;
@@ -52,7 +52,6 @@ import net.sourceforge.plantuml.creole.Sheet;
 import net.sourceforge.plantuml.creole.SheetBlock1;
 import net.sourceforge.plantuml.creole.SheetBlock2;
 import net.sourceforge.plantuml.creole.Stencil;
-import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
@@ -86,13 +85,30 @@ public class FtileWithNoteOpale extends AbstractFtile implements Stencil {
 	public Swimlane getSwimlaneOut() {
 		return tile.getSwimlaneOut();
 	}
+	
+	@Override
+	public Collection<Ftile> getMyChildren() {
+		return Collections.singleton(tile);
+	}
 
-	public FtileWithNoteOpale(Ftile tile, Display note, NotePosition notePosition, NoteType type, ISkinParam skinParam,
-			boolean withLink) {
-		super(tile.shadowing());
+	public static Ftile create(Ftile tile, Collection<PositionedNote> notes, ISkinParam skinParam, boolean withLink) {
+		if (notes.size() > 1) {
+			return new FtileWithNotes(tile, notes, skinParam);
+		}
+		if (notes.size() == 0) {
+			throw new IllegalArgumentException();
+		}
+		return new FtileWithNoteOpale(tile, notes.iterator().next(), skinParam, withLink);
+	}
+
+	private FtileWithNoteOpale(Ftile tile, PositionedNote note, ISkinParam skinParam, boolean withLink) {
+		super(tile.skinParam());
+		if (note.getColors() != null) {
+			skinParam = note.getColors().mute(skinParam);
+		}
 		this.tile = tile;
-		this.notePosition = notePosition;
-		if (type == NoteType.FLOATING_NOTE) {
+		this.notePosition = note.getNotePosition();
+		if (note.getType() == NoteType.FLOATING_NOTE) {
 			withLink = false;
 		}
 
@@ -103,8 +119,8 @@ public class FtileWithNoteOpale extends AbstractFtile implements Stencil {
 
 		final FontConfiguration fc = new FontConfiguration(skinParam, FontParam.NOTE, null);
 
-		final Sheet sheet = new CreoleParser(fc, HorizontalAlignment.LEFT, skinParam, CreoleMode.FULL)
-				.createSheet(note);
+		final Sheet sheet = new CreoleParser(fc, skinParam.getDefaultTextAlignment(HorizontalAlignment.LEFT),
+				skinParam, CreoleMode.FULL).createSheet(note.getDisplay());
 		final TextBlock text = new SheetBlock2(new SheetBlock1(sheet, 0, skinParam.getPadding()), this, new UStroke(1));
 		opale = new Opale(borderColor, noteBackgroundColor, text, skinParam.shadowing(), withLink);
 

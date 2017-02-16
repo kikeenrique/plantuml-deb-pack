@@ -23,34 +23,45 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
+import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.LineParam;
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
 import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 public abstract class AbstractFtile extends AbstractTextBlock implements Ftile {
 
 	private final boolean shadowing;
+	private final ISkinParam skinParam;
 
-	public AbstractFtile(boolean shadowing) {
+	private AbstractFtile(boolean shadowing) {
 		this.shadowing = shadowing;
+		this.skinParam = null;
 	}
 
-	final public boolean shadowing() {
-		return shadowing;
+	public AbstractFtile(ISkinParam skinParam) {
+		this.shadowing = skinParam.shadowing();
+		this.skinParam = skinParam;
+	}
+
+	final public ISkinParam skinParam() {
+		if (skinParam == null) {
+			throw new IllegalStateException();
+		}
+		return skinParam;
 	}
 
 	public LinkRendering getInLinkRendering() {
@@ -66,7 +77,24 @@ public abstract class AbstractFtile extends AbstractTextBlock implements Ftile {
 	}
 
 	public UTranslate getTranslateFor(Ftile child, StringBounder stringBounder) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("" + getClass());
+	}
+
+	public final UStroke getThickness() {
+		UStroke thickness = skinParam.getThickness(LineParam.activityBorder, null);
+		if (thickness == null) {
+			thickness = new UStroke(1.5);
+		}
+		return thickness;
+	}
+
+	public List<WeldingPoint> getWeldingPoints() {
+		return Collections.emptyList();
+	}
+
+	public Collection<Ftile> getMyChildren() {
+		throw new UnsupportedOperationException("" + getClass());
+		// return Collections.emptyList();
 	}
 
 }

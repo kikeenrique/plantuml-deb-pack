@@ -23,8 +23,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
@@ -41,7 +39,7 @@ import javax.imageio.ImageIO;
 
 public class IconLoader {
 
-	private static final int NUMBER_OF_ICONS = 20;
+	private static final int NUMBER_OF_ICONS = 21;
 	
 	private final static Map<String, BufferedImage> all = new ConcurrentHashMap<String, BufferedImage>();
 

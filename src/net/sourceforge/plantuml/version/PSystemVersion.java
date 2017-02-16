@@ -23,15 +23,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
  */
 package net.sourceforge.plantuml.version;
 
-import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,7 +40,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,17 +48,16 @@ import javax.imageio.ImageIO;
 import net.sourceforge.plantuml.AbstractPSystem;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.Log;
+import net.sourceforge.plantuml.OptionPrint;
 import net.sourceforge.plantuml.core.DiagramDescription;
 import net.sourceforge.plantuml.core.DiagramDescriptionImpl;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
 import net.sourceforge.plantuml.graphic.GraphicPosition;
 import net.sourceforge.plantuml.graphic.GraphicStrings;
-import net.sourceforge.plantuml.graphic.HtmlColorUtils;
+import net.sourceforge.plantuml.svek.TextBlockBackcolored;
 import net.sourceforge.plantuml.ugraphic.ColorMapperIdentity;
 import net.sourceforge.plantuml.ugraphic.ImageBuilder;
-import net.sourceforge.plantuml.ugraphic.UAntiAliasing;
-import net.sourceforge.plantuml.ugraphic.UFont;
 
 public class PSystemVersion extends AbstractPSystem {
 
@@ -134,8 +129,11 @@ public class PSystemVersion extends AbstractPSystem {
 		return transparentIcon;
 	}
 
-	public ImageData exportDiagram(OutputStream os, int num, FileFormatOption fileFormat) throws IOException {
-		final GraphicStrings result = getGraphicStrings();
+	@Override
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat)
+			throws IOException {
+		final TextBlockBackcolored result = GraphicStrings.createBlackOnWhite(strings, image,
+				GraphicPosition.BACKGROUND_CORNER_BOTTOM_RIGHT);
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, result.getBackcolor(),
 				getMetadata(), null, 0, 0, null, false);
 		imageBuilder.setUDrawable(result);
@@ -151,33 +149,50 @@ public class PSystemVersion extends AbstractPSystem {
 
 		strings.addAll(GraphvizUtils.getTestDotStrings(true));
 		strings.add(" ");
-		final Properties p = System.getProperties();
-		strings.add(p.getProperty("java.runtime.name"));
-		strings.add(p.getProperty("java.vm.name"));
-		strings.add(p.getProperty("java.runtime.version"));
-		strings.add(p.getProperty("os.name"));
-		strings.add("Processors: " + Runtime.getRuntime().availableProcessors());
+		for (String name : OptionPrint.interestingProperties()) {
+			strings.add(name);
+		}
+		for (String v : OptionPrint.interestingValues()) {
+			strings.add(v);
+		}
+
 		return new PSystemVersion(true, strings);
 	}
 
 	public static PSystemVersion createShowAuthors() {
 		// Duplicate in OptionPrint
-		final List<String> strings = new ArrayList<String>();
-		strings.add("<b>PlantUML version " + Version.versionString() + "</b> (" + Version.compileTimeString() + ")");
-		strings.add("(" + License.getCurrent() + " source distribution)");
-		strings.add(" ");
-		strings.add("<u>Original idea</u>: Arnaud Roques");
-		strings.add("<u>Word Macro</u>: Alain Bertucat & Matthieu Sabatier");
-		strings.add("<u>Word Add-in</u>: Adriaan van den Brand");
-		strings.add("<u>Eclipse Plugin</u>: Claude Durif & Anne Pecoil");
-		strings.add("<u>Servlet & XWiki</u>: Maxime Sinclair");
-		strings.add("<u>Site design</u>: Raphael Cotisson");
-		strings.add("<u>Logo</u>: Benjamin Croizet");
-
-		strings.add(" ");
-		strings.add("http://plantuml.com");
-		strings.add(" ");
+		final List<String> strings = getAuthorsStrings(true);
 		return new PSystemVersion(true, strings);
+	}
+
+	public static List<String> getAuthorsStrings(boolean withTag) {
+		final List<String> strings = new ArrayList<String>();
+		add(strings, "<b>PlantUML version " + Version.versionString() + "</b> (" + Version.compileTimeString() + ")",
+				withTag);
+		add(strings, "(" + License.getCurrent() + " source distribution)", withTag);
+		add(strings, " ", withTag);
+		add(strings, "<u>Original idea</u>: Arnaud Roques", withTag);
+		add(strings, "<u>Word Macro</u>: Alain Bertucat & Matthieu Sabatier", withTag);
+		add(strings, "<u>Word Add-in</u>: Adriaan van den Brand", withTag);
+		add(strings, "<u>J2V8 & viz.js integration</u>: Andreas Studer", withTag);
+		add(strings, "<u>Official Eclipse Plugin</u>: Hallvard Tr\u00E6tteberg", withTag);
+		add(strings, "<u>Original Eclipse Plugin</u>: Claude Durif & Anne Pecoil", withTag);
+		add(strings, "<u>Servlet & XWiki</u>: Maxime Sinclair", withTag);
+		add(strings, "<u>Site design</u>: Raphael Cotisson", withTag);
+		add(strings, "<u>Logo</u>: Benjamin Croizet", withTag);
+
+		add(strings, " ", withTag);
+		add(strings, "http://plantuml.com", withTag);
+		add(strings, " ", withTag);
+		return strings;
+	}
+
+	private static void add(List<String> result, String s, boolean withTag) {
+		if (withTag == false) {
+			s = s.replaceAll("\\</?\\w+\\>", "");
+		}
+		result.add(s);
+
 	}
 
 	public static PSystemVersion createCheckVersions(String host, String port) {
@@ -188,8 +203,8 @@ public class PSystemVersion extends AbstractPSystem {
 
 		int lim = 7;
 		if (lastversion == -1) {
-			strings.add("<b><color:red>Error</b>");
-			strings.add("<color:red>Cannot connect to http://plantuml.com/</b>");
+			strings.add("<b><color:red>Error");
+			strings.add("<color:red>Cannot connect to http://plantuml.com/");
 			strings.add("Maybe you should set your proxy ?");
 			strings.add("@startuml");
 			strings.add("checkversion(proxy=myproxy.com,port=8080)");
@@ -197,14 +212,14 @@ public class PSystemVersion extends AbstractPSystem {
 			lim = 9;
 		} else if (lastversion == 0) {
 			strings.add("<b><color:red>Error</b>");
-			strings.add("Cannot retrieve last version from http://plantuml.com/</b>");
+			strings.add("Cannot retrieve last version from http://plantuml.com/");
 		} else {
 			strings.add("<b>Last available version for download</b> : " + lastversion);
 			strings.add(" ");
 			if (Version.version() >= lastversion) {
-				strings.add("<b><color:green>Your version is up to date.</b>");
+				strings.add("<b><color:green>Your version is up to date.");
 			} else {
-				strings.add("<b><color:red>A newer version is available for download.</b>");
+				strings.add("<b><color:red>A newer version is available for download.");
 			}
 		}
 
@@ -256,12 +271,6 @@ public class PSystemVersion extends AbstractPSystem {
 		final List<String> strings = new ArrayList<String>();
 		strings.addAll(GraphvizUtils.getTestDotStrings(true));
 		return new PSystemVersion(false, strings);
-	}
-
-	private GraphicStrings getGraphicStrings() throws IOException {
-		final UFont font = new UFont("SansSerif", Font.PLAIN, 12);
-		return new GraphicStrings(strings, font, HtmlColorUtils.BLACK, HtmlColorUtils.WHITE,
-				UAntiAliasing.ANTI_ALIASING_ON, image, GraphicPosition.BACKGROUND_CORNER_BOTTOM_RIGHT);
 	}
 
 	public DiagramDescription getDescription() {

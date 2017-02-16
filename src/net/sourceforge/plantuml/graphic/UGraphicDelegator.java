@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 10266 $
  *
  */
 package net.sourceforge.plantuml.graphic;
@@ -43,8 +40,8 @@ public abstract class UGraphicDelegator implements UGraphic {
 
 	final private UGraphic ug;
 	
-	public final boolean isSpecialTxt() {
-		return ug.isSpecialTxt();
+	public final boolean matchesProperty(String propertyName) {
+		return ug.matchesProperty(propertyName);
 	}
 
 

@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 8218 $
  *
  */
 package net.sourceforge.plantuml.cucadiagram;
@@ -63,12 +60,13 @@ import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockSimple;
-import net.sourceforge.plantuml.graphic.TextBlockSpotted;
+import net.sourceforge.plantuml.graphic.TextBlockSprited;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.VerticalAlignment;
 import net.sourceforge.plantuml.sequencediagram.MessageNumber;
 import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UStroke;
+import net.sourceforge.plantuml.ugraphic.sprite.Sprite;
 
 public class Display implements Iterable<CharSequence> {
 
@@ -76,10 +74,6 @@ public class Display implements Iterable<CharSequence> {
 	private final HorizontalAlignment naturalHorizontalAlignment;
 	private final boolean isNull;
 	private final CreoleMode defaultCreoleMode;
-
-	// public void setDefaultCreoleMode(CreoleMode defaultCreoleMode) {
-	// this.defaultCreoleMode = defaultCreoleMode;
-	// }
 
 	public Display removeUrlHiddenNewLineUrl() {
 		final String full = UrlBuilder.purgeUrl(asStringWithHiddenNewLine());
@@ -190,6 +184,19 @@ public class Display implements Iterable<CharSequence> {
 			result.add(s);
 		}
 		return result;
+	}
+
+	public Display manageGuillemet() {
+		final List<CharSequence> result = new ArrayList<CharSequence>();
+		for (CharSequence line : display) {
+			final String withGuillement = StringUtils.manageGuillemet(line.toString());
+			if (withGuillement.equals(line.toString())) {
+				result.add(line);
+			} else {
+				result.add(withGuillement);
+			}
+		}
+		return new Display(result, this.naturalHorizontalAlignment, this.isNull, this.defaultCreoleMode);
 	}
 
 	public Display underlined() {
@@ -413,15 +420,22 @@ public class Display implements Iterable<CharSequence> {
 	private TextBlock createStereotype(FontConfiguration fontConfiguration, HorizontalAlignment horizontalAlignment,
 			SpriteContainer spriteContainer, int position, UFont fontForStereotype, HtmlColor htmlColorForStereotype) {
 		final Stereotype stereotype = (Stereotype) get(position);
+		TextBlock circledCharacter = null;
 		if (stereotype.isSpotted()) {
-			final CircledCharacter circledCharacter = new CircledCharacter(stereotype.getCharacter(),
-					stereotype.getRadius(), stereotype.getCircledFont(), stereotype.getHtmlColor(), null,
-					fontConfiguration.getColor());
+			circledCharacter = new CircledCharacter(stereotype.getCharacter(), stereotype.getRadius(),
+					stereotype.getCircledFont(), stereotype.getHtmlColor(), null, fontConfiguration.getColor());
+		} else if (stereotype.getSprite() != null) {
+			final Sprite tmp = spriteContainer.getSprite(stereotype.getSprite());
+			if (tmp != null) {
+				circledCharacter = tmp.asTextBlock(stereotype.getHtmlColor(), 1);
+			}
+		}
+		if (circledCharacter != null) {
 			if (stereotype.getLabel(false) == null) {
-				return new TextBlockSpotted(circledCharacter, this.subList(1, this.size()), fontConfiguration,
+				return new TextBlockSprited(circledCharacter, this.subList(1, this.size()), fontConfiguration,
 						horizontalAlignment, spriteContainer);
 			}
-			return new TextBlockSpotted(circledCharacter, this, fontConfiguration, horizontalAlignment, spriteContainer);
+			return new TextBlockSprited(circledCharacter, this, fontConfiguration, horizontalAlignment, spriteContainer);
 		}
 		return new TextBlockSimple(this, fontConfiguration, horizontalAlignment, spriteContainer, 0, fontForStereotype,
 				htmlColorForStereotype);

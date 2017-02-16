@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 3830 $
  *
  */
 package net.sourceforge.plantuml.command;
@@ -60,13 +57,21 @@ public abstract class PSystemBasicFactory<P extends AbstractPSystem> extends PSy
 		return null;
 	}
 
+	private boolean isEmptyLine(CharSequence2 result) {
+		return result.trin().length() == 0;
+	}
 
 	final public Diagram createSystem(UmlSource source) {
 		final IteratorCounter2 it = source.iterator2();
 		final CharSequence2 startLine = it.next();
 		P system = init(startLine.toString2());
+		boolean first = true;
 		while (it.hasNext()) {
 			final CharSequence2 s = it.next();
+			if (first && s != null && isEmptyLine(s)) {
+				continue;
+			}
+			first = false;
 			if (StartUtils.isArobaseEndDiagram(s)) {
 				if (source.getTotalLineCount() == 2) {
 					return buildEmptyError(source, s.getLocation());
@@ -87,7 +92,5 @@ public abstract class PSystemBasicFactory<P extends AbstractPSystem> extends PSy
 		}
 		return system;
 	}
-
-
 
 }

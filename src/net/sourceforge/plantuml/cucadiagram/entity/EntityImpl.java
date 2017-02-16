@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 7755 $
  *
  */
 package net.sourceforge.plantuml.cucadiagram.entity;
@@ -36,6 +33,7 @@ package net.sourceforge.plantuml.cucadiagram.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +62,7 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.USymbol;
 import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.graphic.color.Colors;
+import net.sourceforge.plantuml.skin.VisibilityModifier;
 import net.sourceforge.plantuml.svek.IEntityImage;
 import net.sourceforge.plantuml.svek.PackageStyle;
 import net.sourceforge.plantuml.svek.SingleStrategy;
@@ -98,6 +97,7 @@ final class EntityImpl implements ILeaf, IGroup {
 
 	// Other
 	private boolean nearDecoration = false;
+	private final Collection<String> portShortNames = new HashSet<String>();
 	private int xposition;
 	private IEntityImage svekImage;
 
@@ -470,6 +470,9 @@ final class EntityImpl implements ILeaf, IGroup {
 
 	public boolean isRemoved() {
 		if (isGroup()) {
+			if (removed) {
+				return true;
+			}
 			if (getLeafsDirect().size() == 0) {
 				return false;
 			}
@@ -577,15 +580,23 @@ final class EntityImpl implements ILeaf, IGroup {
 	// colors = colors.addSpecificLineStroke(specificLineStroke);
 	// }
 
-	@Deprecated
-	public void applyStroke(String s) {
-		throw new UnsupportedOperationException();
-		// if (s == null) {
-		// return;
-		// }
-		// final LinkStyle style = LinkStyle.valueOf(StringUtils.goUpperCase(s));
-		// colors = colors.addSpecificLineStroke(style);
-		// // setSpecificLineStroke(LinkStyle.getStroke(style));
+	public Collection<String> getPortShortNames() {
+		checkNotGroup();
+		return Collections.unmodifiableCollection(portShortNames);
 	}
 
+	public void addPortShortName(String portShortName) {
+		portShortNames.add(portShortName);
+	}
+
+	private VisibilityModifier visibility;
+
+	public void setVisibilityModifier(VisibilityModifier visibility) {
+		this.visibility = visibility;
+
+	}
+
+	public VisibilityModifier getVisibilityModifier() {
+		return visibility;
+	}
 }

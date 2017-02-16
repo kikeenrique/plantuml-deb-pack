@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19109 $
  *
  */
 package net.sourceforge.plantuml.svg;
@@ -42,6 +39,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
@@ -64,6 +62,8 @@ import net.sourceforge.plantuml.ugraphic.UPath;
 import net.sourceforge.plantuml.ugraphic.USegment;
 import net.sourceforge.plantuml.ugraphic.USegmentType;
 
+import org.w3c.dom.CDATASection;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -97,6 +97,9 @@ public class SvgGraphics {
 	private int maxY = 10;
 
 	private final double scale;
+	private final String filterUid;
+	private final String shadowId;
+	private final String gradientId;
 
 	final protected void ensureVisible(double x, double y) {
 		if (x > maxX) {
@@ -107,11 +110,11 @@ public class SvgGraphics {
 		}
 	}
 
-	public SvgGraphics(double scale) {
-		this(null, scale);
+	public SvgGraphics(double scale, String hover) {
+		this(null, scale, hover);
 	}
 
-	public SvgGraphics(String backcolor, double scale) {
+	public SvgGraphics(String backcolor, double scale, String hover) {
 		try {
 			this.scale = scale;
 			this.document = getDocument();
@@ -124,10 +127,37 @@ public class SvgGraphics {
 			defs = simpleElement("defs");
 			gRoot = simpleElement("g");
 			strokeWidth = "" + scale;
+			final Random rnd = new Random();
+			this.filterUid = "b" + getRandomString(rnd);
+			this.shadowId = "f" + getRandomString(rnd);
+			this.gradientId = "g" + getRandomString(rnd);
+			if (hover != null) {
+				defs.appendChild(getPathHover(hover));
+			}
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 			throw new IllegalStateException(e);
 		}
+	}
+
+	private Element getPathHover(String hover) {
+		final Element style = simpleElement("style");
+		final CDATASection cdata = document.createCDATASection("path:hover { stroke: " + hover + " !important;}");
+		style.setAttribute("type", "text/css");
+		style.appendChild(cdata);
+		return style;
+	}
+
+	private static String getRandomString(final Random rnd) {
+		String result = Integer.toString(Math.abs(rnd.nextInt()), 36);
+		while (result.length() < 6) {
+			result = "0" + result;
+		}
+		return result;
+	}
+
+	public static void main(String[] args) {
+		System.err.println(getRandomString(new Random()));
 	}
 
 	private Element pendingBackground;
@@ -188,9 +218,7 @@ public class SvgGraphics {
 			elt.setAttribute("ry", format(yRadius));
 			elt.setAttribute("fill", fill);
 			elt.setAttribute("style", getStyle());
-			if (deltaShadow > 0) {
-				elt.setAttribute("filter", "url(#f1)");
-			}
+			addFilterShadowId(elt, deltaShadow);
 			getG().appendChild(elt);
 		}
 		ensureVisible(x + xRadius + deltaShadow * 2, y + yRadius + deltaShadow * 2);
@@ -238,7 +266,7 @@ public class SvgGraphics {
 				elt.setAttribute("x2", "100%");
 				elt.setAttribute("y2", "100%");
 			}
-			id = "gr" + gradients.size();
+			id = gradientId + gradients.size();
 			gradients.put(key, id);
 			elt.setAttribute("id", id);
 
@@ -291,6 +319,9 @@ public class SvgGraphics {
 		pendingLink2.add(0, (Element) document.createElement("a"));
 		pendingLink2.get(0).setAttribute("target", target);
 		pendingLink2.get(0).setAttribute("xlink:href", url);
+		pendingLink2.get(0).setAttribute("xlink:type", "simple");
+		pendingLink2.get(0).setAttribute("xlink:actuate", "onRequest");
+		pendingLink2.get(0).setAttribute("xlink:show", "new");
 		if (title == null) {
 			pendingLink2.get(0).setAttribute("xlink:title", url);
 		} else {
@@ -313,9 +344,7 @@ public class SvgGraphics {
 		manageShadow(deltaShadow);
 		if (hidden == false) {
 			final Element elt = createRectangleInternal(x, y, width, height);
-			if (deltaShadow > 0) {
-				elt.setAttribute("filter", "url(#f1)");
-			}
+			addFilterShadowId(elt, deltaShadow);
 			if (rx > 0 && ry > 0) {
 				elt.setAttribute("rx", format(rx));
 				elt.setAttribute("ry", format(ry));
@@ -346,9 +375,7 @@ public class SvgGraphics {
 			elt.setAttribute("x2", format(x2));
 			elt.setAttribute("y2", format(y2));
 			elt.setAttribute("style", getStyle());
-			if (deltaShadow > 0) {
-				elt.setAttribute("filter", "url(#f1)");
-			}
+			addFilterShadowId(elt, deltaShadow);
 			getG().appendChild(elt);
 		}
 		ensureVisible(x1 + 2 * deltaShadow, y1 + 2 * deltaShadow);
@@ -381,9 +408,7 @@ public class SvgGraphics {
 			elt.setAttribute("points", sb.toString());
 			elt.setAttribute("fill", fill);
 			elt.setAttribute("style", getStyle());
-			if (deltaShadow > 0) {
-				elt.setAttribute("filter", "url(#f1)");
-			}
+			addFilterShadowId(elt, deltaShadow);
 			getG().appendChild(elt);
 		}
 
@@ -398,6 +423,8 @@ public class SvgGraphics {
 			String textBackColor) {
 		if (hidden == false) {
 			final Element elt = (Element) document.createElement("text");
+			// required for web-kit based browsers
+			// elt.setAttribute("text-rendering", "geometricPrecision");
 			elt.setAttribute("x", format(x));
 			elt.setAttribute("y", format(y));
 			elt.setAttribute("fill", fill);
@@ -415,6 +442,10 @@ public class SvgGraphics {
 				elt.setAttribute("text-decoration", textDecoration);
 			}
 			if (fontFamily != null) {
+				// http://plantuml.sourceforge.net/qa/?qa=5432/svg-monospace-output-has-wrong-font-family
+				if ("monospaced".equalsIgnoreCase(fontFamily)) {
+					fontFamily = "monospace";
+				}
 				elt.setAttribute("font-family", fontFamily);
 			}
 			if (textBackColor != null) {
@@ -448,7 +479,7 @@ public class SvgGraphics {
 	private String getIdFilterBackColor(String color) {
 		String result = filterBackColor.get(color);
 		if (result == null) {
-			result = "b" + filterBackColor.size();
+			result = filterUid + filterBackColor.size();
 			filterBackColor.put(color, result);
 		}
 		return result;
@@ -466,22 +497,22 @@ public class SvgGraphics {
 		filter.setAttribute("y", "0");
 		filter.setAttribute("width", "1");
 		filter.setAttribute("height", "1");
-		addFilter(filter, "feFlood", "flood-color", color);
-		addFilter(filter, "feComposite", "in", "SourceGraphic");
+		addFilter(filter, "feFlood", "flood-color", color, "result", "flood");
+		addFilter(filter, "feComposite", "in", "SourceGraphic", "in2", "flood", "operator", "over");
 		defs.appendChild(filter);
 		return id;
 	}
 
 	private Transformer getTransformer() throws TransformerException {
 		// Get a TransformerFactory object.
-		final TransformerFactory xformFactory = TransformerFactory.newInstance();
-		// try {
-		// final Class<?> factoryClass = Class
-		// .forName("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
-		// xformFactory = (TransformerFactory) factoryClass.newInstance();
-		// } catch (Exception e) {
-		// xformFactory = TransformerFactory.newInstance();
-		// }
+		TransformerFactory xformFactory = null;
+		try {
+			final Class<?> factoryClass = Class
+					.forName("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
+			xformFactory = (TransformerFactory) factoryClass.newInstance();
+		} catch (Exception e) {
+			xformFactory = TransformerFactory.newInstance();
+		}
 		Log.info("TransformerFactory=" + xformFactory.getClass());
 
 		// Get an XSL Transformer object.
@@ -490,13 +521,9 @@ public class SvgGraphics {
 
 		// // Sets the standalone property in the first line of
 		// // the output file.
-		transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
-		//
-		// Properties proprietes = new Properties();
-		// proprietes.put("standalone", "yes");
-		// transformer.setOutputProperties(proprietes);
-		//
-		// transformer.setParameter(OutputKeys.STANDALONE, "yes");
+		transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
+		// transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "SVG 1.1");
+		// transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 
 		return transformer;
 	}
@@ -536,6 +563,10 @@ public class SvgGraphics {
 		root.setAttribute("width", format(maxX) + "px");
 		root.setAttribute("height", format(maxY) + "px");
 		root.setAttribute("viewBox", "0 0 " + maxXscaled + " " + maxYscaled);
+		root.setAttribute("zoomAndPan", "magnify");
+		root.setAttribute("preserveAspectRatio", "none");
+		root.setAttribute("contentScriptType", "application/ecmascript");
+		root.setAttribute("contentStyleType", "text/css");
 
 		if (pendingBackground != null) {
 			pendingBackground.setAttribute("width", format(maxX));
@@ -591,10 +622,14 @@ public class SvgGraphics {
 			elt.setAttribute("d", sb.toString());
 			elt.setAttribute("style", getStyle());
 			elt.setAttribute("fill", fill);
-			if (deltaShadow > 0) {
-				elt.setAttribute("filter", "url(#f1)");
-			}
+			addFilterShadowId(elt, deltaShadow);
 			getG().appendChild(elt);
+		}
+	}
+
+	private void addFilterShadowId(final Element elt, double deltaShadow) {
+		if (deltaShadow > 0) {
+			elt.setAttribute("filter", "url(#" + shadowId + ")");
 		}
 	}
 
@@ -701,7 +736,7 @@ public class SvgGraphics {
 			if (withShadow == false) {
 				// <filter id="f1" x="0" y="0" width="120%" height="120%">
 				final Element filter = (Element) document.createElement("filter");
-				filter.setAttribute("id", "f1");
+				filter.setAttribute("id", shadowId);
 				filter.setAttribute("x", "-1");
 				filter.setAttribute("y", "-1");
 				filter.setAttribute("width", "300%");
@@ -731,6 +766,11 @@ public class SvgGraphics {
 
 	public void setHidden(boolean hidden) {
 		this.hidden = hidden;
+	}
+
+	public void addComment(String comment) {
+		final Comment commentElement = document.createComment(comment);
+		getG().appendChild(commentElement);
 	}
 
 }

@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 9997 $
  *
  */
 package net.sourceforge.plantuml;
@@ -55,10 +52,6 @@ public class PSystemUtils {
 
 	public static List<File> exportDiagrams(Diagram system, File suggestedFile, FileFormatOption fileFormatOption)
 			throws IOException {
-		if (system instanceof UmlDiagram) {
-			final ISkinParam skinParam = ((UmlDiagram) system).getSkinParam();
-			fileFormatOption = fileFormatOption.withSvgLinkTarget(skinParam.getSvgLinkTarget());
-		}
 		if (system instanceof NewpagedDiagram) {
 			return exportDiagramsNewpaged((NewpagedDiagram) system, suggestedFile, fileFormatOption);
 		}
@@ -219,7 +212,8 @@ public class PSystemUtils {
 
 		if (fileFormat.getFileFormat() == FileFormat.PNG) {
 			result = new PngSplitter(suggestedFile, system.getHorizontalPages(), system.getVerticalPages(),
-					system.getMetadata(), system.getDpi(fileFormat), fileFormat.isWithMetadata()).getFiles();
+					system.getMetadata(), system.getDpi(fileFormat), fileFormat.isWithMetadata(), system.getSkinParam()
+							.getSplitParam()).getFiles();
 		}
 		return result;
 

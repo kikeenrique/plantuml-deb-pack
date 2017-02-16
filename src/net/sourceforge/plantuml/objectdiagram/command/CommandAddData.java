@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4546 $
  *
  */
 package net.sourceforge.plantuml.objectdiagram.command;
@@ -53,10 +50,10 @@ public class CommandAddData extends SingleLineCommand<AbstractClassOrObjectDiagr
 		final IEntity entity = diagram.getOrCreateLeaf(Code.of(arg.get(0)), null, null);
 
 		final String field = arg.get(1);
-		if (field.length() > 0 && VisibilityModifier.isVisibilityCharacter(field.charAt(0))) {
+		if (field.length() > 0 && VisibilityModifier.isVisibilityCharacter(field)) {
 			diagram.setVisibilityModifierPresent(true);
 		}
-		entity.getBodier().addFieldOrMethod(field);
+		entity.getBodier().addFieldOrMethod(field, entity);
 		return CommandExecutionResult.ok();
 	}
 }

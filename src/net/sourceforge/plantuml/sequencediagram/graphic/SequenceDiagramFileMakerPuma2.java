@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 9591 $
  *
  */
 package net.sourceforge.plantuml.sequencediagram.graphic;
@@ -42,13 +39,13 @@ import java.util.List;
 import java.util.Map;
 
 import net.sourceforge.plantuml.AnnotatedWorker;
-import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.activitydiagram3.ftile.EntityImageLegend;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.DisplayPositionned;
+import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -61,10 +58,7 @@ import net.sourceforge.plantuml.sequencediagram.Event;
 import net.sourceforge.plantuml.sequencediagram.Newpage;
 import net.sourceforge.plantuml.sequencediagram.Participant;
 import net.sourceforge.plantuml.sequencediagram.SequenceDiagram;
-import net.sourceforge.plantuml.skin.Area;
-import net.sourceforge.plantuml.skin.Component;
 import net.sourceforge.plantuml.skin.ComponentType;
-import net.sourceforge.plantuml.skin.SimpleContext2D;
 import net.sourceforge.plantuml.skin.Skin;
 import net.sourceforge.plantuml.ugraphic.ImageBuilder;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
@@ -72,18 +66,18 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 
-	private static final StringBounder dummyStringBounder = TextBlockUtils.getDummyStringBounder();
-
 	private final SequenceDiagram diagram;
 	private final DrawableSet drawableSet;
 	private final Dimension2D fullDimension;
 	private final List<Page> pages;
 	private final FileFormatOption fileFormatOption;
+	private final StringBounder stringBounder;
 
 	private double scale;
 
 	public SequenceDiagramFileMakerPuma2(SequenceDiagram sequenceDiagram, Skin skin, FileFormatOption fileFormatOption) {
 		this.diagram = sequenceDiagram;
+		this.stringBounder = fileFormatOption.getDefaultStringBounder();
 		this.fileFormatOption = fileFormatOption;
 		final DrawableSetInitializer initializer = new DrawableSetInitializer(skin, sequenceDiagram.getSkinParam(),
 				sequenceDiagram.isShowFootbox(), sequenceDiagram.getAutonewpage());
@@ -107,7 +101,7 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 			// }
 			// }
 		}
-		drawableSet = initializer.createDrawableSet(dummyStringBounder);
+		drawableSet = initializer.createDrawableSet(stringBounder);
 		final List<Newpage> newpages = new ArrayList<Newpage>();
 		for (Event ev : drawableSet.getAllEvents()) {
 			if (ev instanceof Newpage) {
@@ -117,7 +111,7 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 		fullDimension = drawableSet.getDimension();
 		final Map<Newpage, Double> positions = new LinkedHashMap<Newpage, Double>();
 		for (Newpage n : newpages) {
-			positions.put(n, initializer.getYposition(dummyStringBounder, n));
+			positions.put(n, initializer.getYposition(stringBounder, n));
 		}
 		pages = create(drawableSet, positions, sequenceDiagram.isShowFootbox(), sequenceDiagram.getTitle().getDisplay())
 				.getPages();
@@ -130,12 +124,12 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 	private PageSplitter create(DrawableSet drawableSet, Map<Newpage, Double> positions, boolean showFootbox,
 			Display title) {
 
-		final double headerHeight = drawableSet.getHeadHeight(dummyStringBounder);
-		final double tailHeight = drawableSet.getTailHeight(dummyStringBounder, showFootbox);
+		final double headerHeight = drawableSet.getHeadHeight(stringBounder);
+		final double tailHeight = drawableSet.getTailHeight(stringBounder, showFootbox);
 		final double signatureHeight = 0;
 		final double newpageHeight = drawableSet.getSkin()
 				.createComponent(ComponentType.NEWPAGE, null, drawableSet.getSkinParam(), Display.create(""))
-				.getPreferredHeight(dummyStringBounder);
+				.getPreferredHeight(stringBounder);
 
 		return new PageSplitter(fullDimension.getHeight(), headerHeight, positions, tailHeight, signatureHeight,
 				newpageHeight, title);
@@ -146,20 +140,21 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 		final Page page = pages.get(index);
 		final SequenceDiagramArea area = new SequenceDiagramArea(fullDimension.getWidth(), page.getHeight());
 
-		final Component compTitle;
+		final TextBlock compTitle;
 		final TextBlock caption = new AnnotatedWorker(diagram, diagram.getSkinParam()).getCaption();
-		area.setCaptionArea(caption.calculateDimension(dummyStringBounder));
+		area.setCaptionArea(caption.calculateDimension(stringBounder));
 
 		if (Display.isNull(page.getTitle())) {
 			compTitle = null;
 		} else {
-			compTitle = drawableSet.getSkin().createComponent(ComponentType.TITLE, null, drawableSet.getSkinParam(),
-					page.getTitle());
-			area.setTitleArea(compTitle.getPreferredWidth(dummyStringBounder),
-					compTitle.getPreferredHeight(dummyStringBounder));
+			compTitle = TextBlockUtils.withMargin(TextBlockUtils.title(new FontConfiguration(
+					drawableSet.getSkinParam(), FontParam.SEQUENCE_TITLE, null), page.getTitle(), drawableSet
+					.getSkinParam()), 7, 7);
+			final Dimension2D dimTitle = compTitle.calculateDimension(stringBounder);
+			area.setTitleArea(dimTitle.getWidth(), dimTitle.getHeight());
 		}
-		area.initFooter(getPngTitler(FontParam.FOOTER));
-		area.initHeader(getPngTitler(FontParam.HEADER));
+		area.initFooter(getPngTitler(FontParam.FOOTER), stringBounder);
+		area.initHeader(getPngTitler(FontParam.HEADER), stringBounder);
 
 		final DisplayPositionned legend = diagram.getLegend();
 		final TextBlock legendBlock;
@@ -168,7 +163,7 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 		} else {
 			legendBlock = EntityImageLegend.create(legend.getDisplay(), diagram.getSkinParam());
 		}
-		final Dimension2D dimLegend = TextBlockUtils.getDimension(legendBlock);
+		final Dimension2D dimLegend = legendBlock.calculateDimension(stringBounder);
 
 		scale = getScale(area.getWidth(), area.getHeight());
 
@@ -178,9 +173,8 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 
 		final String metadata = fileFormatOption.isWithMetadata() ? diagram.getMetadata() : null;
 
-		final ImageBuilder imageBuilder = new ImageBuilder(diagram.getSkinParam().getColorMapper(), oneOf(scale,
-				dpiFactor), diagram.getSkinParam().getBackgroundColor(), metadata, null, 3, 10, diagram.getAnimation(),
-				diagram.getSkinParam().handwritten());
+		final ImageBuilder imageBuilder = new ImageBuilder(diagram.getSkinParam(), oneOf(scale, dpiFactor), metadata, null, 3,
+				10, diagram.getAnimation());
 
 		imageBuilder.setUDrawable(new UDrawable() {
 			public void drawU(UGraphic ug) {
@@ -196,11 +190,9 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 				double legendYdelta = 0;
 				if (compTitle != null) {
 					final StringBounder stringBounder = ug.getStringBounder();
-					final double h = compTitle.getPreferredHeight(stringBounder);
+					final double h = compTitle.calculateDimension(stringBounder).getHeight();
 					legendYdelta += h;
-					final double w = compTitle.getPreferredWidth(stringBounder);
-					compTitle.drawU(ug.apply(new UTranslate(area.getTitleX(), area.getTitleY())), new Area(
-							new Dimension2DDouble(w, h)), new SimpleContext2D(false));
+					compTitle.drawU(ug.apply(new UTranslate(area.getTitleX(), area.getTitleY())));
 				}
 				caption.drawU(ug.apply(new UTranslate(area.getCaptionX(), area.getCaptionY())));
 

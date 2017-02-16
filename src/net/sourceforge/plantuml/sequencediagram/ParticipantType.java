@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19109 $
  *
  */
 package net.sourceforge.plantuml.sequencediagram;
@@ -41,7 +38,8 @@ public enum ParticipantType {
 	BOUNDARY(ColorParam.boundaryBackground), //
 	CONTROL(ColorParam.controlBackground), //
 	ENTITY(ColorParam.entityBackground), //
-	DATABASE(ColorParam.databaseBackground);
+	DATABASE(ColorParam.databaseBackground), //
+	COLLECTIONS(ColorParam.collectionsBackground);
 
 	private final ColorParam background;
 

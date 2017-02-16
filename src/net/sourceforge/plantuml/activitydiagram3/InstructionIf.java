@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 9786 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3;
@@ -41,15 +38,18 @@ import java.util.Set;
 
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Ftile;
+import net.sourceforge.plantuml.activitydiagram3.ftile.FtileDecorateWelding;
 import net.sourceforge.plantuml.activitydiagram3.ftile.FtileFactory;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
+import net.sourceforge.plantuml.activitydiagram3.ftile.WeldingPoint;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vcompact.FtileWithNoteOpale;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 import net.sourceforge.plantuml.sequencediagram.NoteType;
 
-public class InstructionIf implements Instruction, InstructionCollection {
+public class InstructionIf extends WithNote implements Instruction, InstructionCollection {
 
 	private final List<Branch> thens = new ArrayList<Branch>();
 	private Branch elseBranch;
@@ -73,7 +73,7 @@ public class InstructionIf implements Instruction, InstructionCollection {
 			throw new IllegalArgumentException();
 		}
 		this.swimlane = swimlane;
-		this.thens.add(new Branch(swimlane, whenThen, labelTest, color));
+		this.thens.add(new Branch(swimlane, whenThen, labelTest, color, Display.NULL));
 		this.current = this.thens.get(0);
 	}
 
@@ -81,21 +81,25 @@ public class InstructionIf implements Instruction, InstructionCollection {
 		current.add(ins);
 	}
 
-	private Display note;
-	private NotePosition position;
-	private NoteType type;
-
 	public Ftile createFtile(FtileFactory factory) {
 		for (Branch branch : thens) {
 			branch.updateFtile(factory);
 		}
 		if (elseBranch == null) {
-			this.elseBranch = new Branch(swimlane, Display.NULL, Display.NULL, null);
+			this.elseBranch = new Branch(swimlane, Display.NULL, Display.NULL, null, Display.NULL);
 		}
 		elseBranch.updateFtile(factory);
 		Ftile result = factory.createIf(swimlane, thens, elseBranch, afterEndwhile, topInlinkRendering);
-		if (note != null) {
-			result = new FtileWithNoteOpale(result, note, position, type, skinParam, false);
+		if (getPositionedNotes().size() > 0) {
+			result = FtileWithNoteOpale.create(result, getPositionedNotes(), skinParam, false);
+		}
+		final List<WeldingPoint> weldingPoints = new ArrayList<WeldingPoint>();
+		for (Branch branch : thens) {
+			weldingPoints.addAll(branch.getWeldingPoints());
+		}
+		weldingPoints.addAll(elseBranch.getWeldingPoints());
+		if (weldingPoints.size() > 0) {
+			result = new FtileDecorateWelding(result, weldingPoints);
 		}
 		return result;
 	}
@@ -109,17 +113,18 @@ public class InstructionIf implements Instruction, InstructionCollection {
 			return false;
 		}
 		this.current.setInlinkRendering(nextLinkRenderer);
-		this.elseBranch = new Branch(swimlane, whenElse, Display.NULL, null);
+		this.elseBranch = new Branch(swimlane, whenElse, Display.NULL, null, Display.NULL);
 		this.current = elseBranch;
 		return true;
 	}
 
-	public boolean elseIf(Display test, Display whenThen, LinkRendering nextLinkRenderer, HtmlColor color) {
+	public boolean elseIf(Display inlabel, Display test, Display whenThen, LinkRendering nextLinkRenderer,
+			HtmlColor color) {
 		if (elseBranch != null) {
 			return false;
 		}
 		this.current.setInlinkRendering(nextLinkRenderer);
-		this.current = new Branch(swimlane, whenThen, test, color);
+		this.current = new Branch(swimlane, whenThen, test, color, inlabel);
 		this.thens.add(current);
 		return true;
 
@@ -128,7 +133,7 @@ public class InstructionIf implements Instruction, InstructionCollection {
 	public void endif(LinkRendering nextLinkRenderer) {
 		endifCalled = true;
 		if (elseBranch == null) {
-			this.elseBranch = new Branch(swimlane, Display.NULL, Display.NULL, null);
+			this.elseBranch = new Branch(swimlane, Display.NULL, Display.NULL, null, Display.NULL);
 		}
 		this.current.setInlinkRendering(nextLinkRenderer);
 	}
@@ -152,14 +157,12 @@ public class InstructionIf implements Instruction, InstructionCollection {
 		return topInlinkRendering;
 	}
 
-	public boolean addNote(Display note, NotePosition position, NoteType type) {
-		if (current.isEmpty()) {
-			this.note = note;
-			this.position = position;
-			this.type = type;
-			return true;
+	@Override
+	public boolean addNote(Display note, NotePosition position, NoteType type, Colors colors) {
+		if (endifCalled || current.isEmpty()) {
+			return super.addNote(note, position, type, colors);
 		} else {
-			return current.addNote(note, position, type);
+			return current.addNote(note, position, type, colors);
 		}
 	}
 

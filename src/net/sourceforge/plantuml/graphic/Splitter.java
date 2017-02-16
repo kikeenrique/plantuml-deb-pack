@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19880 $
  *
  */
 package net.sourceforge.plantuml.graphic;
@@ -67,6 +64,8 @@ public class Splitter {
 	static final String htmlTag;
 
 	static final String linkPattern = "\\[\\[([^\\[\\]]+)\\]\\]";
+	public static final String mathPattern = "\\<math\\>(.+?)\\</math\\>";
+	public static final String latexPattern = "\\<latex\\>(.+?)\\</latex\\>";
 
 	private static final Pattern2 tagOrText;
 
@@ -74,9 +73,6 @@ public class Splitter {
 		final StringBuilder sb = new StringBuilder("(?i)");
 
 		for (FontStyle style : EnumSet.allOf(FontStyle.class)) {
-			if (style == FontStyle.PLAIN) {
-				continue;
-			}
 			sb.append(style.getActivationPattern());
 			sb.append('|');
 			sb.append(style.getDeactivationPattern());
@@ -102,8 +98,8 @@ public class Splitter {
 		sb.append('|');
 		sb.append(fontFamilyPattern);
 		sb.append('|');
-		sb.append(spritePattern);
-		sb.append('|');
+		// sb.append(spritePattern);
+		// sb.append('|');
 		sb.append(linkPattern);
 		sb.append('|');
 		sb.append(svgAttributePattern);

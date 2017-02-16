@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4771 $
  *
  */
 package net.sourceforge.plantuml;
@@ -167,7 +164,7 @@ public class SourceFileReader implements ISourceFileReader {
 		final List<GeneratedImage> result = new ArrayList<GeneratedImage>();
 
 		for (BlockUml blockUml : builder.getBlockUmls()) {
-			String newName = blockUml.getFileOrDirname();
+			String newName = blockUml.getFileOrDirname(fileFormatOption.getFileFormat());
 			Log.info("name from block=" + newName);
 			File suggested = null;
 			if (newName != null) {

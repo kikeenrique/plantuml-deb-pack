@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 9786 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3;
@@ -48,7 +45,7 @@ public class InstructionLabel extends MonoSwimable implements Instruction {
 	}
 
 	public Ftile createFtile(FtileFactory factory) {
-		return new FtileLabel(factory.shadowing(), getSwimlaneIn(), name);
+		return new FtileLabel(factory.skinParam(), getSwimlaneIn(), name);
 	}
 
 	public void add(Instruction other) {

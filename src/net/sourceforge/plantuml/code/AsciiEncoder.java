@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 19109 $
  *
  */
 package net.sourceforge.plantuml.code;
@@ -46,6 +43,9 @@ public class AsciiEncoder implements URLEncoder {
 	}
 
 	public String encode(byte data[]) {
+		if (data == null) {
+			return "";
+		}
 		final StringBuilder resu = new StringBuilder((data.length * 4 + 2) / 3);
 		for (int i = 0; i < data.length; i += 3) {
 			append3bytes(resu, data[i] & 0xFF, i + 1 < data.length ? data[i + 1] & 0xFF : 0,

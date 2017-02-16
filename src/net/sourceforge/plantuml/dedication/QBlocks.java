@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4041 $
  *
  */
 package net.sourceforge.plantuml.dedication;
@@ -39,6 +36,8 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
+import net.sourceforge.plantuml.code.AsciiEncoder;
 
 public class QBlocks {
 
@@ -73,4 +72,24 @@ public class QBlocks {
 		}
 	}
 
+	public String encodeAscii() {
+		final StringBuilder sb = new StringBuilder();
+		final AsciiEncoder encoder = new AsciiEncoder();
+		for (QBlock rsa : all) {
+			sb.append(encoder.encode(rsa.getData()));
+			sb.append("!");
+		}
+		return sb.toString();
+	}
+
+	public static QBlocks descodeAscii(String s) {
+		final QBlocks result = new QBlocks();
+		final AsciiEncoder encoder = new AsciiEncoder();
+		for (String bl : s.split("!")) {
+			final BigInteger bigInteger = new BigInteger(encoder.decode(bl));
+			result.all.add(new QBlock(bigInteger));
+
+		}
+		return result;
+	}
 }

@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 5885 $
  *
  */
 package net.sourceforge.plantuml.swing;
@@ -74,6 +71,7 @@ import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.GeneratedImage;
 import net.sourceforge.plantuml.graphic.GraphicStrings;
+import net.sourceforge.plantuml.svek.TextBlockBackcolored;
 import net.sourceforge.plantuml.ugraphic.ColorMapperIdentity;
 import net.sourceforge.plantuml.ugraphic.ImageBuilder;
 import net.sourceforge.plantuml.version.PSystemVersion;
@@ -282,7 +280,7 @@ class ImageWindow2 extends JFrame {
 			}
 		} catch (IOException ex) {
 			final String msg = "Error reading file: " + ex.toString();
-			final GraphicStrings error = GraphicStrings.createDefault(Arrays.asList(msg), false);
+			final TextBlockBackcolored error = GraphicStrings.createForError(Arrays.asList(msg), false);
 			final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, error.getBackcolor(),
 					null, null, 0, 0, null, false);
 			imageBuilder.setUDrawable(error);

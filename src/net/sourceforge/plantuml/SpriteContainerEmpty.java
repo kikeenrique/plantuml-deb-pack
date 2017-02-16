@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4236 $
  *
  */
 package net.sourceforge.plantuml;
@@ -67,6 +64,10 @@ public class SpriteContainerEmpty implements SpriteContainer, ISkinSimple {
 
 	public IHtmlColorSet getIHtmlColorSet() {
 		return new HtmlColorSetSimple();
+	}
+
+	public int getDpi() {
+		return 96;
 	}
 
 }

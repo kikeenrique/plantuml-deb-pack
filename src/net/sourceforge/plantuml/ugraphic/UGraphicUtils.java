@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4129 $
  *
  */
 package net.sourceforge.plantuml.ugraphic;
@@ -46,7 +43,6 @@ import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.eps.EpsStrategy;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.TextBlock;
-import net.sourceforge.plantuml.graphic.UDrawable;
 import net.sourceforge.plantuml.png.PngIO;
 import net.sourceforge.plantuml.ugraphic.eps.UGraphicEps;
 import net.sourceforge.plantuml.ugraphic.g2d.UGraphicG2d;
@@ -54,14 +50,14 @@ import net.sourceforge.plantuml.ugraphic.svg.UGraphicSvg;
 
 public abstract class UGraphicUtils {
 
-	public static UDrawable translate(final UDrawable d, final double dx, final double dy) {
-		return new UDrawable() {
-			public void drawU(UGraphic ug) {
-				d.drawU(ug.apply(new UTranslate(dx, dy)));
-			}
-		};
-
-	}
+	// public static UDrawable translate(final UDrawable d, final double dx, final double dy) {
+	// return new UDrawable() {
+	// public void drawU(UGraphic ug) {
+	// d.drawU(ug.apply(new UTranslate(dx, dy)));
+	// }
+	// };
+	//
+	// }
 
 	public static void writeImage(OutputStream os, String metadata, FileFormatOption fileFormatOption,
 			ColorMapper colorMapper, HtmlColor background, TextBlock image) throws IOException {
@@ -71,7 +67,8 @@ public abstract class UGraphicUtils {
 			PngIO.write(im, os, fileFormatOption.isWithMetadata() ? metadata : null, 96);
 		} else if (fileFormat == FileFormat.SVG) {
 			final UGraphicSvg svg = new UGraphicSvg(colorMapper, StringUtils.getAsHtml(colorMapper
-					.getMappedColor(background)), false, 1.0, fileFormatOption.getSvgLinkTarget());
+					.getMappedColor(background)), false, 1.0, fileFormatOption.getSvgLinkTarget(),
+					fileFormatOption.getHoverColor());
 			image.drawU(svg);
 			svg.createXml(os);
 		} else if (fileFormat == FileFormat.EPS) {

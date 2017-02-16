@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4749 $
  *
  */
 package net.sourceforge.plantuml.cucadiagram;
@@ -36,7 +33,10 @@ package net.sourceforge.plantuml.cucadiagram;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FontParam;
@@ -52,8 +52,11 @@ import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockLineBefore;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.TextBlockWidth;
+import net.sourceforge.plantuml.graphic.TextBlockWithUrl;
 import net.sourceforge.plantuml.skin.VisibilityModifier;
 import net.sourceforge.plantuml.skin.rose.Rose;
+import net.sourceforge.plantuml.svek.Ports;
+import net.sourceforge.plantuml.svek.WithPorts;
 import net.sourceforge.plantuml.ugraphic.PlacementStrategy;
 import net.sourceforge.plantuml.ugraphic.PlacementStrategyVisibility;
 import net.sourceforge.plantuml.ugraphic.PlacementStrategyY1Y2Center;
@@ -62,7 +65,7 @@ import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULayoutGroup;
 import net.sourceforge.plantuml.utils.CharHidder;
 
-public class MethodsOrFieldsArea extends AbstractTextBlock implements TextBlockWidth, TextBlock {
+public class MethodsOrFieldsArea extends AbstractTextBlock implements TextBlockWidth, TextBlock, WithPorts {
 
 	public TextBlock asBlockMemberImpl() {
 		return new TextBlockLineBefore(TextBlockUtils.withMargin(this, 6, 4));
@@ -77,13 +80,16 @@ public class MethodsOrFieldsArea extends AbstractTextBlock implements TextBlockW
 	private final List<Member> members = new ArrayList<Member>();
 	private final HorizontalAlignment align;
 	private final Stereotype stereotype;
+	private final ILeaf leaf;
 
-	public MethodsOrFieldsArea(List<Member> members, FontParam fontParam, ISkinParam skinParam, Stereotype stereotype) {
-		this(members, fontParam, skinParam, HorizontalAlignment.LEFT, stereotype);
+	public MethodsOrFieldsArea(List<Member> members, FontParam fontParam, ISkinParam skinParam, Stereotype stereotype,
+			ILeaf leaf) {
+		this(members, fontParam, skinParam, HorizontalAlignment.LEFT, stereotype, leaf);
 	}
 
 	public MethodsOrFieldsArea(List<Member> members, FontParam fontParam, ISkinParam skinParam,
-			HorizontalAlignment align, Stereotype stereotype) {
+			HorizontalAlignment align, Stereotype stereotype, ILeaf leaf) {
+		this.leaf = leaf;
 		this.stereotype = stereotype;
 		this.align = align;
 		this.skinParam = skinParam;
@@ -121,6 +127,26 @@ public class MethodsOrFieldsArea extends AbstractTextBlock implements TextBlockW
 		}
 		x += smallIcon;
 		return new Dimension2DDouble(x, y);
+	}
+
+	public Ports getPorts(StringBounder stringBounder) {
+		final Ports result = new Ports();
+		double y = 0;
+		final Election election = new Election();
+		for (Member m : members) {
+			election.addCandidat(m.getDisplay(false), m);
+		}
+		final Map<Member, String> memberWithPort = election.getAllElected(leaf.getPortShortNames());
+		for (Member m : members) {
+			final TextBlock bloc = createTextBlock(m);
+			final Dimension2D dim = bloc.calculateDimension(stringBounder);
+			final String port = memberWithPort.get(m);
+			if (port != null) {
+				result.add(port, y, dim.getHeight());
+			}
+			y += dim.getHeight();
+		}
+		return result;
 	}
 
 	private TextBlock createTextBlock(Member m) {
@@ -173,7 +199,7 @@ public class MethodsOrFieldsArea extends AbstractTextBlock implements TextBlockW
 
 	}
 
-	private TextBlock getUBlock(final VisibilityModifier modifier) {
+	private TextBlock getUBlock(final VisibilityModifier modifier, Url url) {
 		if (modifier == null) {
 			return new AbstractTextBlock() {
 
@@ -189,8 +215,8 @@ public class MethodsOrFieldsArea extends AbstractTextBlock implements TextBlockW
 				modifier.getBackground());
 		final HtmlColor fore = rose.getHtmlColor(skinParam, modifier.getForeground());
 
-		final TextBlock uBlock = modifier.getUBlock(skinParam.classAttributeIconSize(), fore, back);
-		return uBlock;
+		final TextBlock uBlock = modifier.getUBlock(skinParam.classAttributeIconSize(), fore, back, url != null);
+		return TextBlockWithUrl.withUrl(uBlock, url);
 	}
 
 	public TextBlock asTextBlock(final double widthToUse) {
@@ -221,7 +247,7 @@ public class MethodsOrFieldsArea extends AbstractTextBlock implements TextBlockW
 			for (Member att : members) {
 				final TextBlock bloc = createTextBlock(att);
 				final VisibilityModifier modifier = att.getVisibilityModifier();
-				group.add(getUBlock(modifier));
+				group.add(getUBlock(modifier, att.getUrl()));
 				group.add(bloc);
 			}
 		} else {

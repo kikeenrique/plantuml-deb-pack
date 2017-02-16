@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 19529 $
  *
  */
 package net.sourceforge.plantuml.asciiart;
@@ -69,13 +66,13 @@ public class TextSkin implements Skin {
 			return new ComponentTextSelfArrow(type, config, stringsToDisplay, fileFormat);
 		}
 		if (type == ComponentType.PARTICIPANT_LINE) {
-			return new ComponentTextLine(fileFormat);
+			return new ComponentTextLine(type, fileFormat);
 		}
 		if (type == ComponentType.CONTINUE_LINE) {
-			return new ComponentTextLine(fileFormat);
+			return new ComponentTextLine(type, fileFormat);
 		}
 		if (type == ComponentType.DELAY_LINE) {
-			return new ComponentTextLine(fileFormat);
+			return new ComponentTextLine(type, fileFormat);
 		}
 		if (type == ComponentType.ALIVE_BOX_CLOSE_CLOSE) {
 			return new ComponentTextActiveLine(fileFormat);
@@ -106,6 +103,9 @@ public class TextSkin implements Skin {
 		}
 		if (type == ComponentType.NEWPAGE) {
 			return new ComponentTextNewpage(fileFormat);
+		}
+		if (type == ComponentType.DELAY_TEXT) {
+			return new ComponentTextDelay(type, stringsToDisplay, fileFormat);
 		}
 		throw new UnsupportedOperationException(type.toString());
 	}

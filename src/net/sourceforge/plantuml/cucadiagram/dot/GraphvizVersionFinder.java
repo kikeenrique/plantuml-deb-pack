@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 11325 $
  *
  */
 package net.sourceforge.plantuml.cucadiagram.dot;
@@ -42,13 +39,21 @@ import net.sourceforge.plantuml.StringUtils;
 public class GraphvizVersionFinder {
 
 	final private File dotExe;
-	final private static GraphvizVersion DEFAULT = new GraphvizVersion() {
+	final public static GraphvizVersion DEFAULT = new GraphvizVersion() {
 		public boolean useShield() {
 			return true;
 		}
 
 		public boolean useProtectionWhenThereALinkFromOrToGroup() {
 			return true;
+		}
+
+		public boolean modeSafe() {
+			return false;
+		}
+
+		public boolean isVizjs() {
+			return false;
 		}
 	};
 
@@ -74,6 +79,14 @@ public class GraphvizVersionFinder {
 			public boolean useProtectionWhenThereALinkFromOrToGroup() {
 				// return v < 238;
 				return true;
+			}
+
+			public boolean modeSafe() {
+				return false;
+			}
+
+			public boolean isVizjs() {
+				return false;
 			}
 
 		};

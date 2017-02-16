@@ -23,8 +23,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
@@ -36,6 +34,7 @@ import java.io.OutputStream;
 
 import javax.xml.transform.TransformerException;
 
+import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.graphic.HtmlColorGradient;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -47,6 +46,7 @@ import net.sourceforge.plantuml.ugraphic.AbstractUGraphic;
 import net.sourceforge.plantuml.ugraphic.ClipContainer;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
 import net.sourceforge.plantuml.ugraphic.UCenteredCharacter;
+import net.sourceforge.plantuml.ugraphic.UComment;
 import net.sourceforge.plantuml.ugraphic.UEllipse;
 import net.sourceforge.plantuml.ugraphic.UGraphic2;
 import net.sourceforge.plantuml.ugraphic.UImage;
@@ -76,16 +76,16 @@ public class UGraphicSvg extends AbstractUGraphic<SvgGraphics> implements ClipCo
 		register();
 	}
 
-	public UGraphicSvg(ColorMapper colorMapper, String backcolor, boolean textAsPath, double scale, String linkTarget) {
-		this(colorMapper, new SvgGraphics(backcolor, scale), textAsPath, linkTarget);
+	public UGraphicSvg(ColorMapper colorMapper, String backcolor, boolean textAsPath, double scale, String linkTarget, String hover) {
+		this(colorMapper, new SvgGraphics(backcolor, scale, hover), textAsPath, linkTarget);
 	}
 
-	public UGraphicSvg(ColorMapper colorMapper, boolean textAsPath, double scale, String linkTarget) {
-		this(colorMapper, new SvgGraphics(scale), textAsPath, linkTarget);
+	public UGraphicSvg(ColorMapper colorMapper, boolean textAsPath, double scale, String linkTarget, String hover) {
+		this(colorMapper, new SvgGraphics(scale, hover), textAsPath, linkTarget);
 	}
 
-	public UGraphicSvg(ColorMapper mapper, HtmlColorGradient gr, boolean textAsPath, double scale, String linkTarget) {
-		this(mapper, new SvgGraphics(scale), textAsPath, linkTarget);
+	public UGraphicSvg(ColorMapper mapper, HtmlColorGradient gr, boolean textAsPath, double scale, String linkTarget, String hover) {
+		this(mapper, new SvgGraphics(scale, hover), textAsPath, linkTarget);
 
 		final SvgGraphics svg = getGraphicObject();
 		svg.paintBackcolorGradient(mapper, gr);
@@ -108,7 +108,7 @@ public class UGraphicSvg extends AbstractUGraphic<SvgGraphics> implements ClipCo
 
 	private UGraphicSvg(ColorMapper colorMapper, SvgGraphics svg, boolean textAsPath, String linkTarget) {
 		super(colorMapper, svg);
-		this.stringBounder = TextBlockUtils.getDummyStringBounder();
+		this.stringBounder = FileFormat.PNG.getDefaultStringBounder();
 		this.textAsPath2 = textAsPath;
 		this.target = linkTarget;
 		register();
@@ -157,6 +157,19 @@ public class UGraphicSvg extends AbstractUGraphic<SvgGraphics> implements ClipCo
 
 	public void writeImageTOBEMOVED(OutputStream os, String metadata, int dpi) throws IOException {
 		createXml(os);
+	}
+
+	@Override
+	protected void drawComment(UComment comment) {
+		getGraphicObject().addComment(comment.getComment());
+	}
+
+	@Override
+	public boolean matchesProperty(String propertyName) {
+		if (propertyName.equalsIgnoreCase("SVG")) {
+			return true;
+		}
+		return super.matchesProperty(propertyName);
 	}
 
 	// @Override

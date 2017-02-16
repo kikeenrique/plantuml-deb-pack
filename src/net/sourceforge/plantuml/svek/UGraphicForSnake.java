@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 10266 $
  *
  */
 package net.sourceforge.plantuml.svek;
@@ -48,7 +45,7 @@ public class UGraphicForSnake extends UGraphicDelegator {
 	private final double dx;
 	private final double dy;
 	private final List<PendingSnake> snakes;
-	
+
 	public UTranslate getTranslation() {
 		return new UTranslate(dx, dy);
 	}
@@ -70,23 +67,37 @@ public class UGraphicForSnake extends UGraphicDelegator {
 			snake.drawInternal(ug);
 		}
 
+		public void removeEndDecorationIfTouches(List<PendingSnake> snakes) {
+			for (PendingSnake other : snakes) {
+				if (moved().touches(other.moved())) {
+					this.snake.removeEndDecoration();
+					return;
+				}
+			}
+		}
+		
+		private Snake moved() {
+			return snake.move(dx, dy);
+		}
+
 		@Override
 		public String toString() {
 			return "dx=" + dx + " dy=" + dy + " " + snake.move(dx, dy).toString();
 		}
 
 		public PendingSnake merge(PendingSnake newItem) {
-//			if (snake.isMergeable() == false || newItem.snake.isMergeable() == false) {
-//				return null;
-//			}
+			// if (snake.isMergeable() == false || newItem.snake.isMergeable() == false) {
+			// return null;
+			// }
 			final Snake s1 = snake.move(dx, dy);
 			final Snake s2 = newItem.snake.move(newItem.dx, newItem.dy);
-			final Snake merge = s1.merge(s2);
+			final Snake merge = s1.merge(s2, ug.getStringBounder());
 			if (merge == null) {
 				return null;
 			}
 			return new PendingSnake(merge.move(-dx, -dy), ug, dx, dy);
 		}
+
 	}
 
 	public UGraphicForSnake(UGraphic ug) {
@@ -124,6 +135,7 @@ public class UGraphicForSnake extends UGraphicDelegator {
 	@Override
 	public void flushUg() {
 		for (PendingSnake snake : snakes) {
+			snake.removeEndDecorationIfTouches(snakes);
 			snake.drawInternal();
 		}
 		snakes.clear();

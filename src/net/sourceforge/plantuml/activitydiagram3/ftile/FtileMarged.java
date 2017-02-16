@@ -23,16 +23,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
@@ -47,10 +46,16 @@ public class FtileMarged extends AbstractFtile {
 	private final double margin2;
 
 	public FtileMarged(Ftile tile, double margin1, double margin2) {
-		super(tile.shadowing());
+		super(tile.skinParam());
 		this.tile = tile;
 		this.margin1 = margin1;
 		this.margin2 = margin2;
+	}
+
+	@Override
+	public Collection<Ftile> getMyChildren() {
+		return Collections.singleton(tile);
+		// return tile.getMyChildren();
 	}
 
 	@Override
@@ -81,8 +86,21 @@ public class FtileMarged extends AbstractFtile {
 				orig.getInY(), orig.getOutY());
 	}
 
+	public UTranslate getTranslateFor(Ftile child, StringBounder stringBounder) {
+		if (child == tile) {
+			return getTranslate();
+		}
+		UTranslate result = tile.getTranslateFor(child, stringBounder);
+		result = result.compose(getTranslate());
+		return result;
+	}
+
+	private UTranslate getTranslate() {
+		return new UTranslate(margin1, 0);
+	}
+
 	public void drawU(UGraphic ug) {
-		ug.apply(new UTranslate(margin1, 0)).draw(tile);
+		ug.apply(getTranslate()).draw(tile);
 	}
 
 }

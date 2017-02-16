@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 5183 $
  *
  */
 package net.sourceforge.plantuml.ugraphic;
@@ -42,7 +39,7 @@ import net.sourceforge.plantuml.posimo.DotPath;
 
 public class LimitFinder implements UGraphic {
 
-	public boolean isSpecialTxt() {
+	public boolean matchesProperty(String propertyName) {
 		return false;
 	}
 
@@ -121,6 +118,9 @@ public class LimitFinder implements UGraphic {
 			drawDotPath(x, y, (DotPath) shape);
 		} else if (shape instanceof UImage) {
 			drawImage(x, y, (UImage) shape);
+		} else if (shape instanceof UImageSvg) {
+			drawImageSvg(x, y, (UImageSvg) shape);
+		} else if (shape instanceof UComment) {
 		} else if (shape instanceof UEmpty) {
 			drawEmpty(x, y, (UEmpty) shape);
 		} else if (shape instanceof TextBlock) {
@@ -172,6 +172,11 @@ public class LimitFinder implements UGraphic {
 	}
 
 	private void drawImage(double x, double y, UImage shape) {
+		addPoint(x, y);
+		addPoint(x + shape.getWidth(), y + shape.getHeight());
+	}
+
+	private void drawImageSvg(double x, double y, UImageSvg shape) {
 		addPoint(x, y);
 		addPoint(x + shape.getWidth(), y + shape.getHeight());
 	}

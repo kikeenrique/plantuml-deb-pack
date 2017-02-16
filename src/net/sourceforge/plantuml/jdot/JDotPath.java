@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 18280 $
  *
  */
 package net.sourceforge.plantuml.jdot;
@@ -82,15 +79,15 @@ public class JDotPath implements UDrawable {
 
 	private ColorParam getArrowColorParam() {
 		if (diagram.getUmlDiagramType() == UmlDiagramType.CLASS) {
-			return ColorParam.classArrow;
+			return ColorParam.arrow;
 		} else if (diagram.getUmlDiagramType() == UmlDiagramType.OBJECT) {
-			return ColorParam.objectArrow;
+			return ColorParam.arrow;
 		} else if (diagram.getUmlDiagramType() == UmlDiagramType.DESCRIPTION) {
-			return ColorParam.usecaseArrow;
+			return ColorParam.arrow;
 		} else if (diagram.getUmlDiagramType() == UmlDiagramType.ACTIVITY) {
-			return ColorParam.activityArrow;
+			return ColorParam.arrow;
 		} else if (diagram.getUmlDiagramType() == UmlDiagramType.STATE) {
-			return ColorParam.stateArrow;
+			return ColorParam.arrow;
 		}
 		throw new IllegalStateException();
 	}

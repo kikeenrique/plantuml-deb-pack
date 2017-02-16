@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 7715 $
  * 
  */
 package net.sourceforge.plantuml;
@@ -42,10 +39,16 @@ public enum LineParam {
 //	sequenceReferenceBorder(0.1),
 	sequenceLifeLineBorder,
 	sequenceParticipantBorder, noteBorder, sequenceGroupBorder, sequenceReferenceBorder,
+	legendBorder,
+	sequenceArrow,
 	classBorder, objectBorder,
 	partitionBorder,
 	packageBorder,
-	swimlaneBorder;
+	swimlaneBorder,
+	activityBorder,
+	titleBorder,
+	diagramBorder,
+	rectangleBorder;
 //	sequenceBoxBorder(0.1);
 	
 }

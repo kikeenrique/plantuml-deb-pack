@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 19880 $
  *
  */
 package net.sourceforge.plantuml;
@@ -56,11 +53,14 @@ import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.IHtmlColorSet;
 import net.sourceforge.plantuml.graphic.SkinParameter;
 import net.sourceforge.plantuml.graphic.color.Colors;
+import net.sourceforge.plantuml.skin.ArrowDirection;
 import net.sourceforge.plantuml.svek.ConditionStyle;
 import net.sourceforge.plantuml.svek.PackageStyle;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
 import net.sourceforge.plantuml.ugraphic.ColorMapperIdentity;
 import net.sourceforge.plantuml.ugraphic.ColorMapperMonochrome;
+import net.sourceforge.plantuml.ugraphic.ColorMapperReverse;
+import net.sourceforge.plantuml.ugraphic.ColorOrder;
 import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.sprite.Sprite;
@@ -74,6 +74,7 @@ public class SkinParam implements ISkinParam {
 	private final Map<String, String> params = new HashMap<String, String>();
 	private Rankdir rankdir = Rankdir.TOP_TO_BOTTOM;
 	private String dotExecutable;
+	private final UmlDiagramType type;
 
 	public String getDotExecutable() {
 		return dotExecutable;
@@ -87,8 +88,16 @@ public class SkinParam implements ISkinParam {
 		params.put(cleanForKey(key), StringUtils.trin(value));
 	}
 
-	public static SkinParam noShadowing() {
-		final SkinParam result = new SkinParam();
+	private SkinParam(UmlDiagramType type) {
+		this.type = type;
+	}
+
+	public static SkinParam create(UmlDiagramType type) {
+		return new SkinParam(type);
+	}
+
+	public static SkinParam noShadowing(UmlDiagramType type) {
+		final SkinParam result = new SkinParam(type);
 		result.setParam("shadowing", "false");
 		return result;
 	}
@@ -96,19 +105,20 @@ public class SkinParam implements ISkinParam {
 	static String cleanForKey(String key) {
 		key = StringUtils.trin(StringUtils.goLowerCase(key));
 		key = key.replaceAll("_|\\.|\\s", "");
-		key = replaceSmart(key, "partition", "package");
+		// key = replaceSmart(key, "partition", "package");
 		key = replaceSmart(key, "sequenceparticipant", "participant");
 		key = replaceSmart(key, "sequenceactor", "actor");
-		if (key.contains("arrow")) {
-			key = key.replaceAll("activityarrow|objectarrow|classarrow|componentarrow|statearrow|usecasearrow",
-					"genericarrow");
-		}
-		// // key = key.replaceAll("activityarrow", "genericarrow");
-		// // key = key.replaceAll("objectarrow", "genericarrow");
-		// // key = key.replaceAll("classarrow", "genericarrow");
-		// // key = key.replaceAll("componentarrow", "genericarrow");
-		// // key = key.replaceAll("statearrow", "genericarrow");
-		// // key = key.replaceAll("usecasearrow", "genericarrow");
+		// if (key.contains("arrow")) {
+		// key = key.replaceAll("activityarrow|objectarrow|classarrow|componentarrow|statearrow|usecasearrow",
+		// "genericarrow");
+		// }
+		key = key.replaceAll("activityarrow", "arrow");
+		key = key.replaceAll("objectarrow", "arrow");
+		key = key.replaceAll("classarrow", "arrow");
+		key = key.replaceAll("componentarrow", "arrow");
+		key = key.replaceAll("statearrow", "arrow");
+		key = key.replaceAll("usecasearrow", "arrow");
+		key = key.replaceAll("sequencearrow", "arrow");
 		final Matcher2 m = stereoPattern.matcher(key);
 		if (m.find()) {
 			final String s = m.group(1);
@@ -331,10 +341,6 @@ public class SkinParam implements ISkinParam {
 		return 10;
 	}
 
-	private boolean isMonochrome() {
-		return "true".equals(getValue("monochrome"));
-	}
-
 	public static Collection<String> getPossibleValues() {
 		final Set<String> result = new TreeSet<String>();
 		result.add("Monochrome");
@@ -345,6 +351,36 @@ public class SkinParam implements ISkinParam {
 		result.add("DefaultFontStyle");
 		result.add("DefaultFontSize");
 		result.add("DefaultFontColor");
+		result.add("MinClassWidth");
+		result.add("MinClassWidth");
+		result.add("Dpi");
+		result.add("DefaultTextAlignment");
+		result.add("Shadowing");
+		result.add("NoteShadowing");
+		result.add("Handwritten");
+		result.add("CircledCharacterRadius");
+		result.add("ClassAttributeIconSize");
+		result.add("Linetype");
+		result.add("PackageStyle");
+		result.add("ComponentStyle");
+		result.add("StereotypePosition");
+		result.add("Nodesep");
+		result.add("Ranksep");
+		result.add("RoundCorner");
+		result.add("TitleBorderRoundCorner");
+		result.add("MaxMessageSize");
+		result.add("Style");
+		result.add("SequenceParticipant");
+		result.add("ConditionStyle");
+		result.add("SameClassWidth");
+		result.add("HyperlinkUnderline");
+		result.add("Padding");
+		result.add("Guillemet");
+		result.add("SvglinkTarget");
+		result.add("DefaultMonospacedFontName");
+		result.add("TabSize");
+		result.add("MaxAsciiMessageLength");
+		result.add("ColorArrowSeparationSpace");
 		for (FontParam p : EnumSet.allOf(FontParam.class)) {
 			final String h = humanName(p.name());
 			result.add(h + "FontStyle");
@@ -386,7 +422,7 @@ public class SkinParam implements ISkinParam {
 		return DotSplines.SPLINES;
 	}
 
-	public HorizontalAlignment getHorizontalAlignment(AlignParam param) {
+	public HorizontalAlignment getHorizontalAlignment(AlignParam param, ArrowDirection arrowDirection) {
 		final String value;
 		switch (param) {
 		case SEQUENCE_MESSAGE_ALIGN:
@@ -398,6 +434,22 @@ public class SkinParam implements ISkinParam {
 		default:
 			value = getValue(param.name());
 		}
+		if ("direction".equalsIgnoreCase(value)) {
+			if (arrowDirection == ArrowDirection.LEFT_TO_RIGHT_NORMAL) {
+				return HorizontalAlignment.LEFT;
+			}
+			if (arrowDirection == ArrowDirection.RIGHT_TO_LEFT_REVERSE) {
+				return HorizontalAlignment.RIGHT;
+			}
+		}
+		if ("reversedirection".equalsIgnoreCase(value)) {
+			if (arrowDirection == ArrowDirection.LEFT_TO_RIGHT_NORMAL) {
+				return HorizontalAlignment.RIGHT;
+			}
+			if (arrowDirection == ArrowDirection.RIGHT_TO_LEFT_REVERSE) {
+				return HorizontalAlignment.LEFT;
+			}
+		}
 		final HorizontalAlignment result = HorizontalAlignment.fromString(value);
 		if (result == null) {
 			return param.getDefaultValue();
@@ -405,11 +457,11 @@ public class SkinParam implements ISkinParam {
 		return result;
 	}
 
-	public HorizontalAlignment getDefaultTextAlignment() {
+	public HorizontalAlignment getDefaultTextAlignment(HorizontalAlignment defaultValue) {
 		final String value = getValue("defaulttextalignment");
 		final HorizontalAlignment result = HorizontalAlignment.fromString(value);
 		if (result == null) {
-			return HorizontalAlignment.CENTER;
+			return defaultValue;
 		}
 		return result;
 	}
@@ -426,10 +478,22 @@ public class SkinParam implements ISkinParam {
 	}
 
 	public ColorMapper getColorMapper() {
-		if (isMonochrome()) {
-			return new ColorMapperMonochrome();
+		final String monochrome = getValue("monochrome");
+		if ("true".equals(monochrome)) {
+			return new ColorMapperMonochrome(false);
 		}
-		return new ColorMapperIdentity();
+		if ("reverse".equals(monochrome)) {
+			return new ColorMapperMonochrome(true);
+		}
+		final String value = getValue("reversecolor");
+		if (value == null) {
+			return new ColorMapperIdentity();
+		}
+		final ColorOrder order = ColorOrder.fromString(value);
+		if (order == null) {
+			return new ColorMapperIdentity();
+		}
+		return new ColorMapperReverse(order);
 	}
 
 	public boolean shadowing() {
@@ -550,8 +614,12 @@ public class SkinParam implements ISkinParam {
 		return 0;
 	}
 
-	public double getRoundCorner() {
-		final String value = getValue("roundcorner");
+	public double getRoundCorner(String param, Stereotype stereotype) {
+		String key = param + "roundcorner";
+		if (stereotype != null) {
+			key += stereotype.getLabel(false);
+		}
+		final String value = getValue(key);
 		if (value != null && value.matches("\\d+")) {
 			return Double.parseDouble(value);
 		}
@@ -732,6 +800,43 @@ public class SkinParam implements ISkinParam {
 			return Integer.parseInt(value);
 		}
 		return 0;
+	}
+
+	public SplitParam getSplitParam() {
+		final String border = getValue("pageBorderColor");
+		final String external = getValue("pageExternalColor");
+
+		final String marginString = getValue("pageMargin");
+		int margin = 0;
+		if (marginString != null && marginString.matches("\\d+")) {
+			margin = Integer.parseInt(marginString);
+		}
+
+		return new SplitParam(getIHtmlColorSet().getColorIfValid(border), getIHtmlColorSet().getColorIfValid(external),
+				margin);
+	}
+
+	public int swimlaneWidth() {
+		final String value = getValue("swimlanewidth");
+		if ("same".equalsIgnoreCase(value)) {
+			return -1;
+		}
+		if (value != null && value.matches("\\d+")) {
+			return Integer.parseInt(value);
+		}
+		return 0;
+	}
+
+	public UmlDiagramType getUmlDiagramType() {
+		return type;
+	}
+
+	public HtmlColor getHoverPathColor() {
+		final String value = getValue("pathhovercolor");
+		if (value == null) {
+			return null;
+		}
+		return getIHtmlColorSet().getColorIfValid(value, false);
 	}
 
 }

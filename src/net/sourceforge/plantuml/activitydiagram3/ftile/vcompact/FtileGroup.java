@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile.vcompact;
@@ -71,23 +68,18 @@ public class FtileGroup extends AbstractFtile {
 	private final Ftile inner;
 	private final TextBlock name;
 	private final TextBlock headerNote;
-	private final HtmlColor arrowColor;
 	private final HtmlColor borderColor;
 	private final HtmlColor backColor;
-	private final HtmlColor titleColor;
 	private final UStroke stroke;
 
 	public FtileGroup(Ftile inner, Display title, Display displayNote, HtmlColor arrowColor, HtmlColor backColor,
 			HtmlColor titleColor, ISkinParam skinParam, HtmlColor borderColor) {
-		super(inner.shadowing());
+		super(inner.skinParam());
 		this.backColor = backColor == null ? HtmlColorUtils.WHITE : backColor;
 		this.inner = FtileUtils.addHorizontalMargin(inner, 10);
-		this.arrowColor = arrowColor;
-		this.titleColor = titleColor;
 		this.borderColor = backColor == null ? HtmlColorUtils.BLACK : borderColor;
 		final UFont font = skinParam.getFont(null, false, FontParam.PARTITION);
-		// final UFont font = new UFont("Serif", Font.PLAIN, 14);
-		// final HtmlColor fontColor = HtmlColorUtils.BLACK;
+
 		final HtmlColor fontColor = skinParam.getFontHtmlColor(null, FontParam.PARTITION);
 		final FontConfiguration fc = new FontConfiguration(font, fontColor, skinParam.getHyperlinkColor(),
 				skinParam.useUnderlineForHyperlink(), skinParam.getTabSize());
@@ -185,8 +177,8 @@ public class FtileGroup extends AbstractFtile {
 		final StringBounder stringBounder = ug.getStringBounder();
 		final Dimension2D dimTotal = calculateDimension(stringBounder);
 
-		final SymbolContext symbolContext = new SymbolContext(backColor, borderColor).withShadow(shadowing())
-				.withStroke(stroke);
+		final SymbolContext symbolContext = new SymbolContext(backColor, borderColor).withShadow(
+				skinParam().shadowing()).withStroke(stroke);
 		USymbol.FRAME.asBig(name, TextBlockUtils.empty(0, 0), dimTotal.getWidth(), dimTotal.getHeight(), symbolContext)
 				.drawU(ug);
 

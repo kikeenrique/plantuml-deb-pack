@@ -23,8 +23,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Adrian Vogt
  *
@@ -131,8 +129,8 @@ public class UGraphicHandwritten implements UGraphic {
 		ug.flushUg();
 	}
 
-	public boolean isSpecialTxt() {
-		return false;
+	public boolean matchesProperty(String propertyName) {
+		return ug.matchesProperty(propertyName);
 	}
 
 }

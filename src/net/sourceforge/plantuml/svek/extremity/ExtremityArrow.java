@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4236 $
  * 
  */
 package net.sourceforge.plantuml.svek.extremity;
@@ -74,12 +71,12 @@ class ExtremityArrow extends Extremity {
 
 	private int buildPolygon() {
 		polygon.addPoint(0, 0);
-		final int xAile = 9;
-		final int yOuverture = 4;
-		polygon.addPoint(-xAile, -yOuverture);
+		final int xWing = 9;
+		final int yAperture = 4;
+		polygon.addPoint(-xWing, -yAperture);
 		final int xContact = 5;
 		polygon.addPoint(-xContact, 0);
-		polygon.addPoint(-xAile, yOuverture);
+		polygon.addPoint(-xWing, yAperture);
 		polygon.addPoint(0, 0);
 		return xContact;
 	}

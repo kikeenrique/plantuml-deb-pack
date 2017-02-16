@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 9786 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3;
@@ -43,10 +40,11 @@ import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vcompact.FtileWithNoteOpale;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 import net.sourceforge.plantuml.sequencediagram.NoteType;
 
-public class InstructionWhile implements Instruction, InstructionCollection {
+public class InstructionWhile extends WithNote implements Instruction, InstructionCollection {
 
 	private final InstructionList repeatList = new InstructionList();
 	private final Instruction parent;
@@ -91,15 +89,11 @@ public class InstructionWhile implements Instruction, InstructionCollection {
 		repeatList.add(ins);
 	}
 
-	private Display note;
-	private NotePosition position;
-	private NoteType type;
-
 	public Ftile createFtile(FtileFactory factory) {
 		Ftile tmp = factory.decorateOut(repeatList.createFtile(factory), endInlinkRendering);
 		tmp = factory.createWhile(swimlane, tmp, test, yes, out, afterEndwhile, color);
-		if (note != null) {
-			tmp = new FtileWithNoteOpale(tmp, note, position, type, skinParam, false);
+		if (getPositionedNotes().size() > 0) {
+			tmp = FtileWithNoteOpale.create(tmp, getPositionedNotes(), skinParam, false);
 		}
 		if (killed) {
 			return new FtileKilled(tmp);
@@ -136,14 +130,12 @@ public class InstructionWhile implements Instruction, InstructionCollection {
 		this.afterEndwhile = linkRenderer;
 	}
 
-	public boolean addNote(Display note, NotePosition position, NoteType type) {
+	@Override
+	public boolean addNote(Display note, NotePosition position, NoteType type, Colors colors) {
 		if (repeatList.isEmpty()) {
-			this.note = note;
-			this.position = position;
-			this.type = type;
-			return true;
+			return super.addNote(note, position, type, colors);
 		} else {
-			return repeatList.addNote(note, position, type);
+			return repeatList.addNote(note, position, type, colors);
 		}
 	}
 
@@ -152,11 +144,11 @@ public class InstructionWhile implements Instruction, InstructionCollection {
 	}
 
 	public Swimlane getSwimlaneIn() {
-		return parent.getSwimlaneOut();
+		return parent.getSwimlaneIn();
 	}
 
 	public Swimlane getSwimlaneOut() {
-		return getSwimlaneIn();
+		return parent.getSwimlaneOut();
 	}
 
 	public Instruction getLast() {

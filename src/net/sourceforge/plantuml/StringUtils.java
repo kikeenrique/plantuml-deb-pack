@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 13958 $
  *
  */
 package net.sourceforge.plantuml;
@@ -416,8 +413,22 @@ public class StringUtils {
 		return st;
 	}
 
+	public static String rot(String s) {
+		final StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			if ((c >= 'a' && c <= 'm') || (c >= 'A' && c <= 'M')) {
+				c += 13;
+			} else if ((c >= 'n' && c <= 'z') || (c >= 'N' && c <= 'Z')) {
+				c -= 13;
+			}
+			sb.append(c);
+		}
+		return sb.toString();
+	}
+
 	public static String manageGuillemet(String st) {
-		return st.replaceAll("\\<\\<\\s?([^<>]+?)\\s?\\>\\>", "\u00AB$1\u00BB");
+		return st.replaceAll("\\<\\<\\s?((?:\\<&\\w+\\>|[^<>])+?)\\s?\\>\\>", "\u00AB$1\u00BB");
 	}
 
 	public static String manageUnicodeNotationUplus(String s) {

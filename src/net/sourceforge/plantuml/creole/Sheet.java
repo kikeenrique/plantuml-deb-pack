@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 11025 $
  *
  */
 package net.sourceforge.plantuml.creole;
@@ -46,6 +43,11 @@ public class Sheet implements Iterable<Stripe> {
 
 	public Sheet(HorizontalAlignment horizontalAlignment) {
 		this.horizontalAlignment = horizontalAlignment;
+	}
+	
+	@Override
+	public String toString() {
+		return stripes.toString();
 	}
 
 	public void add(Stripe stripe) {

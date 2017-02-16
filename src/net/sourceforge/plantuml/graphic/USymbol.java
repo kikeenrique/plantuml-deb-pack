@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 8066 $
  *
  */
 package net.sourceforge.plantuml.graphic;
@@ -57,8 +54,9 @@ public abstract class USymbol {
 	public final static USymbol PACKAGE = record("PACKAGE", SkinParameter.PACKAGE, new USymbolFolder(
 			SkinParameter.PACKAGE));
 	public final static USymbol FOLDER = record("FOLDER", SkinParameter.FOLDER, new USymbolFolder(SkinParameter.FOLDER));
-	public final static USymbol RECTANGLE = record("RECTANGLE", SkinParameter.CARD, new USymbolRect(SkinParameter.CARD,
-			HorizontalAlignment.CENTER));
+	public final static USymbol FILE = record("FILE", SkinParameter.FILE, new USymbolFile());
+	public final static USymbol RECTANGLE = record("RECTANGLE", SkinParameter.RECTANGLE, new USymbolRect(
+			SkinParameter.RECTANGLE, HorizontalAlignment.CENTER));
 	public final static USymbol AGENT = record("AGENT", SkinParameter.AGENT, new USymbolRect(SkinParameter.AGENT,
 			HorizontalAlignment.CENTER));
 	public final static USymbol ACTOR = record("ACTOR", SkinParameter.ACTOR, new USymbolActor());
@@ -178,4 +176,49 @@ public abstract class USymbol {
 		};
 	}
 
+	public static USymbol getFoo1(String symbol, boolean useUml2ForComponent) {
+		USymbol usymbol = null;
+		if (symbol.equalsIgnoreCase("artifact")) {
+			usymbol = USymbol.ARTIFACT;
+		} else if (symbol.equalsIgnoreCase("folder")) {
+			usymbol = USymbol.FOLDER;
+		} else if (symbol.equalsIgnoreCase("file")) {
+			usymbol = USymbol.FILE;
+		} else if (symbol.equalsIgnoreCase("package")) {
+			usymbol = USymbol.PACKAGE;
+		} else if (symbol.equalsIgnoreCase("rectangle")) {
+			usymbol = USymbol.RECTANGLE;
+		} else if (symbol.equalsIgnoreCase("node")) {
+			usymbol = USymbol.NODE;
+		} else if (symbol.equalsIgnoreCase("frame")) {
+			usymbol = USymbol.FRAME;
+		} else if (symbol.equalsIgnoreCase("cloud")) {
+			usymbol = USymbol.CLOUD;
+		} else if (symbol.equalsIgnoreCase("database")) {
+			usymbol = USymbol.DATABASE;
+		} else if (symbol.equalsIgnoreCase("queue")) {
+			usymbol = USymbol.QUEUE;
+		} else if (symbol.equalsIgnoreCase("storage")) {
+			usymbol = USymbol.STORAGE;
+		} else if (symbol.equalsIgnoreCase("agent")) {
+			usymbol = USymbol.AGENT;
+		} else if (symbol.equalsIgnoreCase("actor")) {
+			usymbol = USymbol.ACTOR;
+		} else if (symbol.equalsIgnoreCase("component")) {
+			usymbol = useUml2ForComponent ? USymbol.COMPONENT2 : USymbol.COMPONENT1;
+		} else if (symbol.equalsIgnoreCase("boundary")) {
+			usymbol = USymbol.BOUNDARY;
+		} else if (symbol.equalsIgnoreCase("control")) {
+			usymbol = USymbol.CONTROL;
+		} else if (symbol.equalsIgnoreCase("entity")) {
+			usymbol = USymbol.ENTITY_DOMAIN;
+		} else if (symbol.equalsIgnoreCase("card")) {
+			usymbol = USymbol.CARD;
+		} else if (symbol.equalsIgnoreCase("interface")) {
+			usymbol = USymbol.INTERFACE;
+		} else if (symbol.equalsIgnoreCase("()")) {
+			usymbol = USymbol.INTERFACE;
+		}
+		return usymbol;
+	}
 }

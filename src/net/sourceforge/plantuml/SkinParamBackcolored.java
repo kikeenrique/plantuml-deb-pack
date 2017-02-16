@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4246 $
  *
  */
 package net.sourceforge.plantuml;
@@ -55,6 +52,11 @@ public class SkinParamBackcolored extends SkinParamDelegator {
 
 	public SkinParamBackcolored(ISkinParam skinParam, HtmlColor backColorElement, HtmlColor backColorGeneral) {
 		this(skinParam, backColorElement, backColorGeneral, false);
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " " + backColorElement + " " + backColorGeneral;
 	}
 
 	public SkinParamBackcolored(ISkinParam skinParam, HtmlColor backColorElement, HtmlColor backColorGeneral,

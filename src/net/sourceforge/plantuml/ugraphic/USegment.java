@@ -23,16 +23,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 3837 $
  *
  */
 package net.sourceforge.plantuml.ugraphic;
 
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.util.Arrays;
 
 public class USegment {
@@ -56,6 +55,24 @@ public class USegment {
 
 	public final USegmentType getSegmentType() {
 		return pathType;
+	}
+
+	public USegment translate(double dx, double dy) {
+		if (coord.length != 2) {
+			throw new UnsupportedOperationException();
+		}
+		Point2D p1 = new Point2D.Double(coord[0] + dx, coord[1] + dy);
+		return new USegment(new double[] { p1.getX(), p1.getY() }, pathType);
+	}
+
+	public USegment rotate(double theta) {
+		if (coord.length != 2) {
+			throw new UnsupportedOperationException();
+		}
+		Point2D p1 = new Point2D.Double(coord[0], coord[1]);
+		final AffineTransform rotate = AffineTransform.getRotateInstance(theta);
+		rotate.transform(p1, p1);
+		return new USegment(new double[] { p1.getX(), p1.getY() }, pathType);
 	}
 
 }

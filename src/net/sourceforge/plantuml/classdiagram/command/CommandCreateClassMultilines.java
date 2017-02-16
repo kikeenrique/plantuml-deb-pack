@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4161 $
  *
  */
 package net.sourceforge.plantuml.classdiagram.command;
@@ -83,7 +80,8 @@ public class CommandCreateClassMultilines extends CommandMultilines2<ClassDiagra
 
 	private static RegexConcat getRegexConcat() {
 		return new RegexConcat(new RegexLeaf("^"), //
-				new RegexLeaf("TYPE", "(interface|enum|abstract[%s]+class|abstract|class)[%s]+"), //
+				new RegexLeaf("VISIBILITY", "(" + VisibilityModifier.regexForVisibilityCharacterInClassName() + ")?"), //
+				new RegexLeaf("TYPE", "(interface|enum|abstract[%s]+class|abstract|class|entity)[%s]+"), //
 				new RegexOr(//
 						new RegexConcat(//
 								new RegexLeaf("DISPLAY1", "[%g](.+)[%g]"), //
@@ -134,10 +132,10 @@ public class CommandCreateClassMultilines extends CommandMultilines2<ClassDiagra
 				lines = lines.subExtract(1, 0);
 			}
 			for (CharSequence s : lines) {
-				if (s.length() > 0 && VisibilityModifier.isVisibilityCharacter(s.charAt(0))) {
+				if (s.length() > 0 && VisibilityModifier.isVisibilityCharacter(s)) {
 					diagram.setVisibilityModifierPresent(true);
 				}
-				entity.getBodier().addFieldOrMethod(s.toString());
+				entity.getBodier().addFieldOrMethod(s.toString(), entity);
 			}
 			if (url != null) {
 				entity.addUrl(url);
@@ -178,6 +176,11 @@ public class CommandCreateClassMultilines extends CommandMultilines2<ClassDiagra
 	private IEntity executeArg0(ClassDiagram diagram, RegexResult arg) {
 
 		final LeafType type = LeafType.getLeafType(StringUtils.goUpperCase(arg.get("TYPE", 0)));
+		final String visibilityString = arg.get("VISIBILITY", 0);
+		VisibilityModifier visibilityModifier = null;
+		if (visibilityString != null) {
+			visibilityModifier = VisibilityModifier.getVisibilityModifier(visibilityString + "FOO", false);
+		}
 
 		final Code code = Code.of(arg.getLazzy("CODE", 0)).eventuallyRemoveStartingAndEndingDoubleQuote("\"([:");
 		final String display = arg.getLazzy("DISPLAY", 0);
@@ -192,6 +195,7 @@ public class CommandCreateClassMultilines extends CommandMultilines2<ClassDiagra
 		} else {
 			result = diagram.createLeaf(code, Display.getWithNewlines(display), type, null);
 		}
+		result.setVisibilityModifier(visibilityModifier);
 		if (stereotype != null) {
 			result.setStereotype(new Stereotype(stereotype, diagram.getSkinParam().getCircledCharacterRadius(), diagram
 					.getSkinParam().getFont(null, false, FontParam.CIRCLED_CHARACTER), diagram.getSkinParam()
@@ -227,5 +231,4 @@ public class CommandCreateClassMultilines extends CommandMultilines2<ClassDiagra
 		}
 		return result;
 	}
-
 }

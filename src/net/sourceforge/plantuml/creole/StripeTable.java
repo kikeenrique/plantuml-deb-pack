@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 11025 $
  *
  */
 package net.sourceforge.plantuml.creole;
@@ -116,6 +113,10 @@ public class StripeTable implements Stripe {
 			for (String s : lines) {
 				final StripeSimple cell = new StripeSimple(getFontConfiguration(mode), stripeStyle,
 						new CreoleContext(), skinParam, CreoleMode.FULL);
+				if (s.startsWith("<r>")) {
+					cell.setCellAlignment(HorizontalAlignment.RIGHT);
+					s = s.substring("<r>".length());
+				}
 				cell.analyzeAndAdd(s);
 				cells.add(cell);
 			}

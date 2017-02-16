@@ -23,18 +23,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4749 $
  *
  */
 package net.sourceforge.plantuml.cucadiagram;
 
+import java.util.Collection;
+
 import net.sourceforge.plantuml.cucadiagram.dot.Neighborhood;
 import net.sourceforge.plantuml.graphic.USymbol;
+import net.sourceforge.plantuml.skin.VisibilityModifier;
 import net.sourceforge.plantuml.svek.IEntityImage;
 
 public interface ILeaf extends IEntity {
@@ -65,10 +65,16 @@ public interface ILeaf extends IEntity {
 
 	public void setSvekImage(IEntityImage svekImage);
 
-	public void setRemoved(boolean removed);
-
 	public void setNeighborhood(Neighborhood neighborhood);
 
 	public Neighborhood getNeighborhood();
+
+	public Collection<String> getPortShortNames();
+
+	public void addPortShortName(String portShortName);
+
+	public void setVisibilityModifier(VisibilityModifier visibility);
+
+	public VisibilityModifier getVisibilityModifier();
 
 }

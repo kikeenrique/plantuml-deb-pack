@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19109 $
  *
  */
 package net.sourceforge.plantuml.ugraphic;
@@ -41,17 +38,24 @@ import java.util.List;
 public class UPolygon extends AbstractShadowable {
 
 	private final List<Point2D.Double> all = new ArrayList<Point2D.Double>();
+	private final String name;
 
 	private MinMax minmax = MinMax.getEmpty(false);
 
 	public UPolygon() {
+		this((String) null);
 	}
 
 	public UPolygon(List<Point2D.Double> points) {
+		this((String) null);
 		all.addAll(points);
 		for (Point2D.Double pt : all) {
 			manageMinMax(pt.getX(), pt.getY());
 		}
+	}
+
+	public UPolygon(String name) {
+		this.name = name;
 	}
 
 	public void addPoint(double x, double y) {
@@ -84,6 +88,9 @@ public class UPolygon extends AbstractShadowable {
 
 	@Override
 	public String toString() {
+		if (name != null) {
+			return name;
+		}
 		return super.toString() + " " + all;
 	}
 

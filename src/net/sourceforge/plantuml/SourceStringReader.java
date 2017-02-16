@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4041 $
  *
  */
 package net.sourceforge.plantuml;
@@ -49,6 +46,7 @@ import net.sourceforge.plantuml.core.DiagramDescriptionImpl;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.graphic.GraphicStrings;
 import net.sourceforge.plantuml.preproc.Defines;
+import net.sourceforge.plantuml.svek.TextBlockBackcolored;
 import net.sourceforge.plantuml.ugraphic.ColorMapperIdentity;
 import net.sourceforge.plantuml.ugraphic.ImageBuilder;
 
@@ -68,11 +66,20 @@ public class SourceStringReader {
 		this(defines, source, "UTF-8", config);
 	}
 
+	public SourceStringReader(String source, File newCurrentDir) {
+		this(new Defines(), source, "UTF-8", Collections.<String> emptyList(), newCurrentDir);
+	}
+
 	public SourceStringReader(Defines defines, String source, String charset, List<String> config) {
+		this(defines, source, charset, config, null);
+	}
+
+	public SourceStringReader(Defines defines, String source, String charset, List<String> config, File newCurrentDir) {
 		// WARNING GLOBAL LOCK HERE
 		synchronized (SourceStringReader.class) {
 			try {
-				final BlockUmlBuilder builder = new BlockUmlBuilder(config, charset, defines, new StringReader(source));
+				final BlockUmlBuilder builder = new BlockUmlBuilder(config, charset, defines, new StringReader(source),
+						newCurrentDir, null);
 				this.blocks = builder.getBlockUmls();
 			} catch (IOException e) {
 				Log.error("error " + e);
@@ -123,8 +130,28 @@ public class SourceStringReader {
 
 	}
 
+	public String getCMapData(int numImage, FileFormatOption fileFormatOption) throws IOException {
+		if (blocks.size() == 0) {
+			return null;
+		}
+		for (BlockUml b : blocks) {
+			final Diagram system = b.getDiagram();
+			final int nbInSystem = system.getNbImages();
+			if (numImage < nbInSystem) {
+				final ImageData imageData = system.exportDiagram(new NullOutputStream(), numImage, fileFormatOption);
+				if (imageData.containsCMapData()) {
+					return imageData.getCMapData("plantuml");
+				}
+				return null;
+			}
+			numImage -= nbInSystem;
+		}
+		return null;
+
+	}
+
 	private void noStartumlFound(OutputStream os, FileFormatOption fileFormatOption) throws IOException {
-		final GraphicStrings error = GraphicStrings.createDefault(Arrays.asList("No @startuml found"),
+		final TextBlockBackcolored error = GraphicStrings.createForError(Arrays.asList("No @startuml found"),
 				fileFormatOption.isUseRedForError());
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, error.getBackcolor(), null,
 				null, 0, 0, null, false);

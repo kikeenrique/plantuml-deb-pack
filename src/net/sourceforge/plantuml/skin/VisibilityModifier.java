@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4189 $
  *
  */
 package net.sourceforge.plantuml.skin;
@@ -58,10 +55,16 @@ public enum VisibilityModifier {
 	PRIVATE_METHOD(ColorParam.iconPrivate, ColorParam.iconPrivateBackground), PROTECTED_METHOD(
 			ColorParam.iconProtected, ColorParam.iconProtectedBackground), PACKAGE_PRIVATE_METHOD(
 			ColorParam.iconPackage, ColorParam.iconPackageBackground), PUBLIC_METHOD(ColorParam.iconPublic,
-			ColorParam.iconPublicBackground);
+			ColorParam.iconPublicBackground),
+
+	IE_MANDATORY(ColorParam.iconIEMandatory, ColorParam.iconIEMandatory);
 
 	private final ColorParam foregroundParam;
 	private final ColorParam backgroundParam;
+
+	public static String regexForVisibilityCharacterInClassName() {
+		return "[-#+~]";
+	}
 
 	private VisibilityModifier(ColorParam foreground, ColorParam background) {
 		this.foregroundParam = foreground;
@@ -77,19 +80,23 @@ public enum VisibilityModifier {
 		};
 	}
 
-	public TextBlock getUBlock(final int size, final HtmlColor foregroundColor, final HtmlColor backgoundColor) {
+	public TextBlock getUBlock(final int size, final HtmlColor foregroundColor, final HtmlColor backgoundColor,
+			final boolean withInvisibleRectanble) {
 		return new AbstractTextBlock() {
 
 			public Dimension2D calculateDimension(StringBounder stringBounder) {
 				return new Dimension2DDouble(size + 1, size + 1);
 			}
-			
+
 			@Override
 			public Rectangle2D getInnerPosition(String member, StringBounder stringBounder) {
 				return null;
 			}
 
 			public void drawU(UGraphic ug) {
+				if (withInvisibleRectanble) {
+					ug.apply(new UChangeColor(null)).draw(new URectangle(size * 2, size));
+				}
 				drawInternal(ug, size, foregroundColor, backgoundColor, 0, 0);
 			}
 		};
@@ -132,6 +139,10 @@ public enum VisibilityModifier {
 			drawCircle(ug, true, size, x, y);
 			break;
 
+		case IE_MANDATORY:
+			drawCircle(ug, true, size, x, y);
+			break;
+
 		default:
 			throw new IllegalStateException();
 		}
@@ -171,7 +182,14 @@ public enum VisibilityModifier {
 		ug.apply(new UTranslate(x + 1, y)).draw(poly);
 	}
 
-	public static boolean isVisibilityCharacter(char c) {
+	public static boolean isVisibilityCharacter(CharSequence s) {
+		if (s.length() <= 2) {
+			return false;
+		}
+		final char c = s.charAt(0);
+		if (s.charAt(1) == c) {
+			return false;
+		}
 		if (c == '-') {
 			return true;
 		}
@@ -184,10 +202,20 @@ public enum VisibilityModifier {
 		if (c == '~') {
 			return true;
 		}
+		if (c == '*') {
+			return true;
+		}
 		return false;
 	}
 
-	public static VisibilityModifier getVisibilityModifier(char c, boolean isField) {
+	public static VisibilityModifier getVisibilityModifier(CharSequence s, boolean isField) {
+		if (s.length() <= 2) {
+			return null;
+		}
+		final char c = s.charAt(0);
+		if (s.charAt(1) == c) {
+			return null;
+		}
 		if (isField) {
 			return getVisibilityModifierForField(c);
 		}
@@ -207,6 +235,9 @@ public enum VisibilityModifier {
 		if (c == '~') {
 			return VisibilityModifier.PACKAGE_PRIVATE_FIELD;
 		}
+		if (c == '*') {
+			return VisibilityModifier.IE_MANDATORY;
+		}
 		return null;
 	}
 
@@ -223,6 +254,9 @@ public enum VisibilityModifier {
 		if (c == '~') {
 			return VisibilityModifier.PACKAGE_PRIVATE_METHOD;
 		}
+		if (c == '*') {
+			return VisibilityModifier.IE_MANDATORY;
+		}
 		return null;
 	}
 
@@ -232,6 +266,22 @@ public enum VisibilityModifier {
 
 	public final ColorParam getBackground() {
 		return backgroundParam;
+	}
+
+	public String getXmiVisibility() {
+		if (this == PUBLIC_FIELD || this == PUBLIC_METHOD) {
+			return "public";
+		}
+		if (this == PRIVATE_FIELD || this == PRIVATE_METHOD) {
+			return "private";
+		}
+		if (this == PROTECTED_FIELD || this == PROTECTED_METHOD) {
+			return "protected";
+		}
+		if (this == PACKAGE_PRIVATE_FIELD || this == VisibilityModifier.PACKAGE_PRIVATE_METHOD) {
+			return "package";
+		}
+		throw new IllegalStateException();
 	}
 
 }

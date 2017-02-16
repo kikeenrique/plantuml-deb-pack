@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 7946 $
  *
  */
 package net.sourceforge.plantuml.graphic.color;
@@ -62,6 +59,10 @@ public class Colors {
 
 	public static Colors empty() {
 		return new Colors();
+	}
+
+	public boolean isEmpty() {
+		return map.isEmpty();
 	}
 
 	private Colors copy() {

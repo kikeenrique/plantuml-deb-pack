@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4975 $
  *
  */
 package net.sourceforge.plantuml.suggest;
@@ -51,6 +48,8 @@ import net.sourceforge.plantuml.version.IteratorCounter2;
 import net.sourceforge.plantuml.version.IteratorCounter2Impl;
 
 final public class SuggestEngine {
+
+	private static final int LIMIT = 120;
 
 	private final UmlDiagramFactory systemFactory;
 
@@ -100,12 +99,14 @@ final public class SuggestEngine {
 	}
 
 	SuggestEngineResult checkAndCorrect() {
+		final String incorrectLine = it99.peek().toString();
+		if (incorrectLine.length() > LIMIT) {
+			return SuggestEngineResult.CANNOT_CORRECT;
+		}
 		final CommandControl commandControl = systemFactory.isValid2(it99);
 		if (commandControl != CommandControl.NOT_OK) {
 			return SuggestEngineResult.SYNTAX_OK;
 		}
-
-		final String incorrectLine = it99.peek().toString();
 
 		if (StringUtils.trin(incorrectLine).startsWith("{")
 				&& systemFactory.isValid(BlocLines.single(it99.peekPrevious() + " {")) != CommandControl.NOT_OK) {

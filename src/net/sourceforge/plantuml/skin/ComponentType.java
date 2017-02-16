@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 5191 $
  *
  */
 package net.sourceforge.plantuml.skin;
@@ -43,6 +40,7 @@ public enum ComponentType {
 	CONTROL_HEAD, CONTROL_TAIL,
 	ENTITY_HEAD, ENTITY_TAIL,
 	DATABASE_HEAD, DATABASE_TAIL,
+	COLLECTIONS_HEAD, COLLECTIONS_TAIL,
 
 	//
 	ALIVE_BOX_CLOSE_CLOSE, ALIVE_BOX_CLOSE_OPEN, ALIVE_BOX_OPEN_CLOSE, ALIVE_BOX_OPEN_OPEN,
@@ -57,10 +55,10 @@ public enum ComponentType {
 	NEWPAGE, NOTE, NOTE_HEXAGONAL, NOTE_BOX, DIVIDER, REFERENCE, ENGLOBER,
 
 	//
-	PARTICIPANT_HEAD, PARTICIPANT_TAIL,
+	PARTICIPANT_HEAD, PARTICIPANT_TAIL
 
 	//
-	TITLE, SIGNATURE;
+	/*TITLE, SIGNATURE*/;
 
 	public boolean isArrow() {
 		return this == ARROW;

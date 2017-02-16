@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4762 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.command;
@@ -43,6 +40,9 @@ import net.sourceforge.plantuml.command.regex.RegexConcat;
 import net.sourceforge.plantuml.command.regex.RegexLeaf;
 import net.sourceforge.plantuml.command.regex.RegexResult;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.color.ColorParser;
+import net.sourceforge.plantuml.graphic.color.ColorType;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 import net.sourceforge.plantuml.sequencediagram.NoteType;
 
@@ -51,6 +51,11 @@ public class CommandNoteLong3 extends CommandMultilines2<ActivityDiagram3> {
 	public CommandNoteLong3() {
 		super(getRegexConcat(), MultilinesStrategy.REMOVE_STARTING_QUOTE);
 	}
+	
+	private static ColorParser color() {
+		return ColorParser.simpleColor(ColorType.BACK);
+	}
+
 
 	public String getPatternEnd() {
 		return "(?i)^end[%s]?note$";
@@ -64,13 +69,16 @@ public class CommandNoteLong3 extends CommandMultilines2<ActivityDiagram3> {
 		final NotePosition position = NotePosition.defaultLeft(line0.get("POSITION", 0));
 		final NoteType type = NoteType.defaultType(line0.get("TYPE", 0));
 		final Display note = lines.toDisplay();
-		return diagram.addNote(note, position, type);
+		final Colors colors = color().getColor(line0, diagram.getSkinParam().getIHtmlColorSet());
+		return diagram.addNote(note, position, type, colors);
 	}
 
 	static RegexConcat getRegexConcat() {
 		return new RegexConcat(new RegexLeaf("^"), //
 				new RegexLeaf("TYPE", "(note|floating note)"), //
 				new RegexLeaf("POSITION", "[%s]*(left|right)?"), //
+				new RegexLeaf("[%s]*"), //
+				color().getRegex(), //
 				new RegexLeaf("$"));
 	}
 

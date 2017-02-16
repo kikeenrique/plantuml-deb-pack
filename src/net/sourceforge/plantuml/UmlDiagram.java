@@ -23,17 +23,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 19863 $
  *
  */
 package net.sourceforge.plantuml;
 
-import java.awt.Font;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
@@ -66,6 +62,7 @@ import net.sourceforge.plantuml.fun.IconLoader;
 import net.sourceforge.plantuml.graphic.GraphicPosition;
 import net.sourceforge.plantuml.graphic.GraphicStrings;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
+import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.UDrawable;
 import net.sourceforge.plantuml.graphic.VerticalAlignment;
@@ -73,10 +70,9 @@ import net.sourceforge.plantuml.mjpeg.MJPEGGenerator;
 import net.sourceforge.plantuml.pdf.PdfConverter;
 import net.sourceforge.plantuml.svek.EmptySvgException;
 import net.sourceforge.plantuml.svek.GraphvizCrash;
+import net.sourceforge.plantuml.svek.TextBlockBackcolored;
 import net.sourceforge.plantuml.ugraphic.ColorMapperIdentity;
 import net.sourceforge.plantuml.ugraphic.ImageBuilder;
-import net.sourceforge.plantuml.ugraphic.UAntiAliasing;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UImage;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
@@ -100,7 +96,7 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram, Ann
 	private Scale scale;
 	private Animation animation;
 
-	private final SkinParam skinParam = new SkinParam();
+	private final SkinParam skinParam = SkinParam.create(getUmlDiagramType());
 
 	final public void setTitle(DisplayPositionned title) {
 		this.title = title;
@@ -216,8 +212,16 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram, Ann
 		this.hideUnlinkedData = hideUnlinkedData;
 	}
 
-	final public ImageData exportDiagram(OutputStream os, int index, FileFormatOption fileFormatOption)
+	@Override
+	final protected ImageData exportDiagramNow(OutputStream os, int index, FileFormatOption fileFormatOption)
 			throws IOException {
+
+		final HtmlColor hover = getSkinParam().getHoverPathColor();
+		fileFormatOption = fileFormatOption.withSvgLinkTarget(getSkinParam().getSvgLinkTarget());
+		if (hover != null) {
+			fileFormatOption = fileFormatOption.withHoverColor(StringUtils.getAsHtml(getSkinParam().getColorMapper()
+					.getMappedColor(hover)));
+		}
 
 		if (fileFormatOption.getFileFormat() == FileFormat.PDF) {
 			return exportDiagramInternalPdf(os, index);
@@ -245,7 +249,12 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram, Ann
 
 	public static void exportDiagramError(OutputStream os, Throwable exception, FileFormatOption fileFormat,
 			String metadata, String flash, List<String> strings) throws IOException {
-		final UFont font = new UFont("SansSerif", Font.PLAIN, 12);
+
+		if (fileFormat.getFileFormat() == FileFormat.ATXT || fileFormat.getFileFormat() == FileFormat.UTXT) {
+			exportDiagramErrorText(os, exception, strings);
+			return;
+		}
+
 		strings.addAll(CommandExecutionResult.getStackTrace(exception));
 
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, HtmlColorUtils.WHITE,
@@ -257,8 +266,7 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram, Ann
 			GraphvizCrash.addDecodeHint(strings);
 		}
 
-		final GraphicStrings graphicStrings = new GraphicStrings(strings, font, HtmlColorUtils.BLACK,
-				HtmlColorUtils.WHITE, UAntiAliasing.ANTI_ALIASING_ON, IconLoader.getRandom(),
+		final TextBlockBackcolored graphicStrings = GraphicStrings.createBlackOnWhite(strings, IconLoader.getRandom(),
 				GraphicPosition.BACKGROUND_CORNER_TOP_RIGHT);
 
 		if (im == null) {
@@ -274,6 +282,18 @@ public abstract class UmlDiagram extends AbstractPSystem implements Diagram, Ann
 			});
 		}
 		imageBuilder.writeImageTOBEMOVED(fileFormat, os);
+	}
+
+	private static void exportDiagramErrorText(OutputStream os, Throwable exception, List<String> strings) {
+		final PrintWriter pw = new PrintWriter(os);
+		exception.printStackTrace(pw);
+		pw.println();
+		pw.println();
+		for (String s : strings) {
+			s = s.replaceAll("\\</?\\w+?\\>", "");
+			pw.println(s);
+		}
+		pw.flush();
 	}
 
 	public String getFlashData() {

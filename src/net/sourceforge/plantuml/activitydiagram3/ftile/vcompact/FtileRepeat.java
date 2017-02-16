@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile.vcompact;
@@ -36,6 +33,8 @@ package net.sourceforge.plantuml.activitydiagram3.ftile.vcompact;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -77,8 +76,13 @@ class FtileRepeat extends AbstractFtile {
 	private final Ftile diamond2;
 	private final TextBlock tbTest;
 
+	@Override
+	public Collection<Ftile> getMyChildren() {
+		return Arrays.asList(repeat, diamond1, diamond2);
+	}
+
 	private FtileRepeat(Ftile repeat, Ftile diamond1, Ftile diamond2, TextBlock tbTest) {
-		super(repeat.shadowing());
+		super(repeat.skinParam());
 		this.repeat = repeat;
 		this.diamond1 = diamond1;
 		this.diamond2 = diamond2;
@@ -101,27 +105,28 @@ class FtileRepeat extends AbstractFtile {
 	public static Ftile create(LinkRendering backRepeatLinkRendering, Swimlane swimlane, Swimlane swimlaneOut,
 			Ftile repeat, Display test, Display yes, Display out, HtmlColor borderColor, HtmlColor backColor,
 			Rainbow arrowColor, Rainbow endRepeatLinkColor, ConditionStyle conditionStyle, ISkinSimple spriteContainer,
-			FontConfiguration fontConfiguration) {
+			FontConfiguration fcDiamond, FontConfiguration fcArrow) {
+
+		final FontConfiguration fontConfiguration1 = conditionStyle == ConditionStyle.INSIDE ? fcDiamond : fcArrow;
 
 		final TextBlock tbTest = (Display.isNull(test) || test.isWhite()) ? TextBlockUtils.empty(0, 0) : test.create(
-				fontConfiguration, HorizontalAlignment.LEFT, spriteContainer);
-		final TextBlock yesTb = yes.create(fontConfiguration, HorizontalAlignment.LEFT, spriteContainer);
-		final TextBlock outTb = out.create(fontConfiguration, HorizontalAlignment.LEFT, spriteContainer);
+				fontConfiguration1, repeat.skinParam().getDefaultTextAlignment(HorizontalAlignment.LEFT),
+				spriteContainer);
+		final TextBlock yesTb = yes.create(fcArrow, HorizontalAlignment.LEFT, spriteContainer);
+		final TextBlock outTb = out.create(fcArrow, HorizontalAlignment.LEFT, spriteContainer);
 
-		final Ftile diamond1 = new FtileDiamond(repeat.shadowing(), backColor, borderColor, swimlane);
+		final Ftile diamond1 = new FtileDiamond(repeat.skinParam(), backColor, borderColor, swimlane);
 		final FtileRepeat result;
 		if (conditionStyle == ConditionStyle.INSIDE) {
-			final Ftile diamond2 = new FtileDiamondInside(repeat.shadowing(), backColor, borderColor, swimlaneOut,
+			final Ftile diamond2 = new FtileDiamondInside(repeat.skinParam(), backColor, borderColor, swimlaneOut,
 					tbTest).withEast(yesTb).withSouth(outTb);
-			// final Ftile diamond2 = new FtileDiamondInside(repeat.shadowing(), backColor, borderColor, swimlane,
-			// tbTest).withEast(yesTb).withSouth(outTb);
 			result = new FtileRepeat(repeat, diamond1, diamond2, TextBlockUtils.empty(0, 0));
 		} else if (conditionStyle == ConditionStyle.DIAMOND) {
-			final Ftile diamond2 = new FtileDiamond(repeat.shadowing(), backColor, borderColor, swimlane)
+			final Ftile diamond2 = new FtileDiamond(repeat.skinParam(), backColor, borderColor, swimlane)
 					.withEast(tbTest);
 			result = new FtileRepeat(repeat, diamond1, diamond2, tbTest);
 		} else if (conditionStyle == ConditionStyle.FOO1) {
-			final Ftile diamond2 = new FtileDiamondFoo1(repeat.shadowing(), backColor, borderColor, swimlane, tbTest);
+			final Ftile diamond2 = new FtileDiamondFoo1(repeat.skinParam(), backColor, borderColor, swimlane, tbTest);
 			result = new FtileRepeat(repeat, diamond1, diamond2, TextBlockUtils.empty(0, 0));
 		} else {
 			throw new IllegalStateException();
@@ -129,13 +134,13 @@ class FtileRepeat extends AbstractFtile {
 
 		final List<Connection> conns = new ArrayList<Connection>();
 		final Display in1 = repeat.getInLinkRendering().getDisplay();
-		final TextBlock tbin1 = in1 == null ? null : in1.create(fontConfiguration, HorizontalAlignment.LEFT,
-				spriteContainer, CreoleMode.SIMPLE_LINE);
+		final TextBlock tbin1 = in1 == null ? null : in1.create(fcArrow, HorizontalAlignment.LEFT, spriteContainer,
+				CreoleMode.SIMPLE_LINE);
 		conns.add(result.new ConnectionIn(repeat.getInLinkRendering().getRainbow(arrowColor), tbin1));
 
 		final Display backLink1 = backRepeatLinkRendering.getDisplay();
-		final TextBlock tbbackLink1 = backLink1 == null ? null : backLink1.create(fontConfiguration,
-				HorizontalAlignment.LEFT, spriteContainer, CreoleMode.SIMPLE_LINE);
+		final TextBlock tbbackLink1 = backLink1 == null ? null : backLink1.create(fcArrow, HorizontalAlignment.LEFT,
+				spriteContainer, CreoleMode.SIMPLE_LINE);
 		if (repeat.getSwimlaneIn() == repeat.getSwimlaneOut()) {
 			conns.add(result.new ConnectionBackSimple(backRepeatLinkRendering.getRainbow(arrowColor), tbbackLink1));
 		} else {
@@ -145,8 +150,8 @@ class FtileRepeat extends AbstractFtile {
 		}
 
 		final Display out1 = repeat.getOutLinkRendering().getDisplay();
-		final TextBlock tbout1 = out1 == null ? null : out1.create(fontConfiguration, HorizontalAlignment.LEFT,
-				spriteContainer, CreoleMode.SIMPLE_LINE);
+		final TextBlock tbout1 = out1 == null ? null : out1.create(fcArrow, HorizontalAlignment.LEFT, spriteContainer,
+				CreoleMode.SIMPLE_LINE);
 
 		final Rainbow tmpColor = endRepeatLinkColor.withDefault(arrowColor);
 		conns.add(result.new ConnectionOut(tmpColor, tbout1));
@@ -261,7 +266,7 @@ class FtileRepeat extends AbstractFtile {
 		}
 
 		public void drawU(UGraphic ug) {
-			throw new UnsupportedOperationException();
+			// throw new UnsupportedOperationException();
 		}
 
 		public void drawTranslate(UGraphic ug, UTranslate translate1, UTranslate translate2) {

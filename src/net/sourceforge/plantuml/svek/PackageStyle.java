@@ -23,13 +23,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * Modified by : Arno Peterson
  *
- * Revision $Revision: 4236 $
  * 
  */
 package net.sourceforge.plantuml.svek;
@@ -49,13 +46,16 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 public enum PackageStyle {
 
-	FOLDER, RECT, NODE, FRAME, CLOUD, DATABASE, AGENT, STORAGE, COMPONENT1, COMPONENT2, ARTIFACT, CARD;
+	FOLDER, RECTANGLE, NODE, FRAME, CLOUD, DATABASE, AGENT, STORAGE, COMPONENT1, COMPONENT2, ARTIFACT, CARD;
 
 	public static PackageStyle fromString(String value) {
 		for (PackageStyle p : EnumSet.allOf(PackageStyle.class)) {
 			if (p.toString().equalsIgnoreCase(value)) {
 				return p;
 			}
+		}
+		if ("rect".equalsIgnoreCase(value)) {
+			return RECTANGLE;
 		}
 		return null;
 	}
@@ -76,7 +76,7 @@ public enum PackageStyle {
 		if (this == FRAME) {
 			return USymbol.FRAME;
 		}
-		if (this == RECT) {
+		if (this == RECTANGLE) {
 			return USymbol.RECTANGLE;
 		}
 		if (this == FOLDER) {
@@ -99,7 +99,7 @@ public enum PackageStyle {
 			drawFrame(ug, width, height, titleDim, shadowing);
 		} else if (this == CLOUD) {
 			drawCloud(ug, width, height, shadowing);
-		} else if (this == RECT) {
+		} else if (this == RECTANGLE) {
 			drawRect(ug, width, height, shadowing);
 		} else if (this == COMPONENT1) {
 			drawComponent1(ug, width, height, shadowing);

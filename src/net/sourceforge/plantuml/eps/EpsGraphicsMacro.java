@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4207 $
  *
  */
 package net.sourceforge.plantuml.eps;
@@ -88,6 +85,9 @@ public class EpsGraphicsMacro extends EpsGraphics {
 
 	@Override
 	public void fill(int windingRule) {
+		if (macroInProgress != null) {
+			closeMacro();
+		}
 		if (windingRule == PathIterator.WIND_EVEN_ODD) {
 			append("eofill", true);
 		} else if (windingRule == PathIterator.WIND_NON_ZERO) {

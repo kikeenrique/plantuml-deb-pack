@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19878 $
  *
  */
 package net.sourceforge.plantuml.graphic;
@@ -52,9 +49,6 @@ class HtmlCommandFactory {
 		final StringBuilder sbRemoveStyle = new StringBuilder();
 
 		for (FontStyle style : EnumSet.allOf(FontStyle.class)) {
-			if (style == FontStyle.PLAIN) {
-				continue;
-			}
 			if (sbAddStyle.length() > 0) {
 				sbAddStyle.append('|');
 				sbRemoveStyle.append('|');

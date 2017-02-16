@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 5183 $
  *
  */
 package net.sourceforge.plantuml.svek.image;
@@ -53,6 +50,9 @@ import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockGeneric;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
+import net.sourceforge.plantuml.graphic.VerticalAlignment;
+import net.sourceforge.plantuml.skin.VisibilityModifier;
+import net.sourceforge.plantuml.skin.rose.Rose;
 import net.sourceforge.plantuml.svek.AbstractEntityImage;
 import net.sourceforge.plantuml.svek.HeaderLayout;
 import net.sourceforge.plantuml.svek.ShapeType;
@@ -69,16 +69,27 @@ public class EntityImageClassHeader2 extends AbstractEntityImage {
 		final boolean italic = entity.getEntityType() == LeafType.ABSTRACT_CLASS
 				|| entity.getEntityType() == LeafType.INTERFACE;
 
-		final HtmlColor color = SkinParamUtils.getFontColor(getSkinParam(), FontParam.CLASS, getStereo());
+		// final HtmlColor color = SkinParamUtils.getFontColor(getSkinParam(), FontParam.CLASS, getStereo());
 		final Stereotype stereotype = entity.getStereotype();
 		final String generic = entity.getGeneric();
 		FontConfiguration fontConfigurationName = new FontConfiguration(getSkinParam(), FontParam.CLASS, stereotype);
 		if (italic) {
 			fontConfigurationName = fontConfigurationName.italic();
 		}
-		final TextBlock name = TextBlockUtils.withMargin(
-				entity.getDisplay().createWithNiceCreoleMode(fontConfigurationName, HorizontalAlignment.CENTER,
-						skinParam), 3, 3, 0, 0);
+		TextBlock name = entity.getDisplay().createWithNiceCreoleMode(fontConfigurationName,
+				HorizontalAlignment.CENTER, skinParam);
+		final VisibilityModifier modifier = entity.getVisibilityModifier();
+		if (modifier == null) {
+			name = TextBlockUtils.withMargin(name, 3, 3, 0, 0);
+		} else {
+			final Rose rose = new Rose();
+			final HtmlColor back = rose.getHtmlColor(skinParam, modifier.getBackground());
+			final HtmlColor fore = rose.getHtmlColor(skinParam, modifier.getForeground());
+
+			final TextBlock uBlock = modifier.getUBlock(skinParam.classAttributeIconSize(), fore, back, false);
+			name = TextBlockUtils.mergeLR(uBlock, name, VerticalAlignment.CENTER);
+			name = TextBlockUtils.withMargin(name, 3, 3, 0, 0);
+		}
 
 		final TextBlock stereo;
 		if (stereotype == null || stereotype.getLabel(false) == null
@@ -131,7 +142,7 @@ public class EntityImageClassHeader2 extends AbstractEntityImage {
 		}
 		if (entity.getEntityType() == LeafType.ANNOTATION) {
 			return new CircledCharacter('@', getSkinParam().getCircledCharacterRadius(), font, SkinParamUtils.getColor(
-					getSkinParam(), ColorParam.stereotypeABackground, stereotype), classBorder,
+					getSkinParam(), ColorParam.stereotypeNBackground, stereotype), classBorder,
 					SkinParamUtils.getFontColor(getSkinParam(), FontParam.CIRCLED_CHARACTER, null));
 		}
 		if (entity.getEntityType() == LeafType.ABSTRACT_CLASS) {
@@ -152,6 +163,11 @@ public class EntityImageClassHeader2 extends AbstractEntityImage {
 		if (entity.getEntityType() == LeafType.ENUM) {
 			return new CircledCharacter('E', getSkinParam().getCircledCharacterRadius(), font, SkinParamUtils.getColor(
 					getSkinParam(), ColorParam.stereotypeEBackground, stereotype), classBorder,
+					SkinParamUtils.getFontColor(getSkinParam(), FontParam.CIRCLED_CHARACTER, null));
+		}
+		if (entity.getEntityType() == LeafType.ENTITY) {
+			return new CircledCharacter('E', getSkinParam().getCircledCharacterRadius(), font, SkinParamUtils.getColor(
+					getSkinParam(), ColorParam.stereotypeCBackground, stereotype), classBorder,
 					SkinParamUtils.getFontColor(getSkinParam(), FontParam.CIRCLED_CHARACTER, null));
 		}
 		assert false;

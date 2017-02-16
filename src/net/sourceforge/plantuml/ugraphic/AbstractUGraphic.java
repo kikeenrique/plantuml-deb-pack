@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19109 $
  *
  */
 package net.sourceforge.plantuml.ugraphic;
@@ -69,6 +66,10 @@ public abstract class AbstractUGraphic<O> extends AbstractCommonUGraphic {
 		if (shape instanceof UEmpty) {
 			return;
 		}
+		if (shape instanceof UComment) {
+			drawComment((UComment) shape);
+			return;
+		}
 		final UDriver<O> driver = drivers.get(shape.getClass());
 		if (driver == null) {
 			throw new UnsupportedOperationException(shape.getClass().toString() + " " + this.getClass());
@@ -85,6 +86,9 @@ public abstract class AbstractUGraphic<O> extends AbstractCommonUGraphic {
 			driver.draw(shape, getTranslateX(), getTranslateY(), getColorMapper(), getParam(), g2d);
 		}
 		afterDraw();
+	}
+
+	protected void drawComment(UComment shape) {
 	}
 
 	protected void beforeDraw() {

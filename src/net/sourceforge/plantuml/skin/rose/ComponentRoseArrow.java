@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 9696 $
  *
  */
 package net.sourceforge.plantuml.skin.rose;
@@ -63,9 +60,11 @@ public class ComponentRoseArrow extends AbstractComponentRoseArrow {
 	private final HorizontalAlignment messagePosition;
 	private final boolean niceArrow;
 
-	public ComponentRoseArrow(HtmlColor foregroundColor, FontConfiguration font, Display stringsToDisplay, ArrowConfiguration arrowConfiguration, HorizontalAlignment messagePosition, ISkinSimple spriteContainer,
+	public ComponentRoseArrow(HtmlColor foregroundColor, FontConfiguration font, Display stringsToDisplay,
+			ArrowConfiguration arrowConfiguration, HorizontalAlignment messagePosition, ISkinSimple spriteContainer,
 			HorizontalAlignment textHorizontalAlignment, double maxMessageSize, boolean niceArrow) {
-		super(foregroundColor, font, stringsToDisplay, arrowConfiguration, spriteContainer, textHorizontalAlignment, maxMessageSize);
+		super(foregroundColor, font, stringsToDisplay, arrowConfiguration, spriteContainer, textHorizontalAlignment,
+				maxMessageSize);
 		this.messagePosition = messagePosition;
 		this.niceArrow = niceArrow;
 	}
@@ -129,13 +128,7 @@ public class ComponentRoseArrow extends AbstractComponentRoseArrow {
 			len -= 2 * spaceCrossX;
 		}
 
-		if (getArrowConfiguration().isDotted()) {
-			ug = stroke(ug, 2, 2);
-		}
-		ug.apply(new UTranslate(start, textHeight)).draw(new ULine(len, 0));
-		if (getArrowConfiguration().isDotted()) {
-			ug = ug.apply(new UStroke());
-		}
+		getArrowConfiguration().applyStroke(ug).apply(new UTranslate(start, textHeight)).draw(new ULine(len, 0));
 
 		final ArrowDirection direction2 = getDirection2();
 		final double textPos;
@@ -169,10 +162,10 @@ public class ComponentRoseArrow extends AbstractComponentRoseArrow {
 
 		if (dressing.getHead() == ArrowHead.ASYNC) {
 			if (dressing.getPart() != ArrowPart.BOTTOM_PART) {
-				ug.apply(new UTranslate(x - 1, textHeight)).draw(new ULine(getArrowDeltaX(), -getArrowDeltaY()));
+				getArrowConfiguration().applyThicknessOnly(ug).apply(new UTranslate(x - 1, textHeight)).draw(new ULine(getArrowDeltaX(), -getArrowDeltaY()));
 			}
 			if (dressing.getPart() != ArrowPart.TOP_PART) {
-				ug.apply(new UTranslate(x - 1, textHeight)).draw(new ULine(getArrowDeltaX(), getArrowDeltaY()));
+				getArrowConfiguration().applyThicknessOnly(ug).apply(new UTranslate(x - 1, textHeight)).draw(new ULine(getArrowDeltaX(), getArrowDeltaY()));
 			}
 		} else if (dressing.getHead() == ArrowHead.CROSSX) {
 			ug = ug.apply(new UStroke(2));
@@ -202,10 +195,10 @@ public class ComponentRoseArrow extends AbstractComponentRoseArrow {
 
 		if (dressing.getHead() == ArrowHead.ASYNC) {
 			if (dressing.getPart() != ArrowPart.BOTTOM_PART) {
-				ug.apply(new UTranslate(x, textHeight)).draw(new ULine(-getArrowDeltaX(), -getArrowDeltaY()));
+				getArrowConfiguration().applyThicknessOnly(ug).apply(new UTranslate(x, textHeight)).draw(new ULine(-getArrowDeltaX(), -getArrowDeltaY()));
 			}
 			if (dressing.getPart() != ArrowPart.TOP_PART) {
-				ug.apply(new UTranslate(x, textHeight)).draw(new ULine(-getArrowDeltaX(), getArrowDeltaY()));
+				getArrowConfiguration().applyThicknessOnly(ug).apply(new UTranslate(x, textHeight)).draw(new ULine(-getArrowDeltaX(), getArrowDeltaY()));
 			}
 		} else if (dressing.getHead() == ArrowHead.CROSSX) {
 			ug = ug.apply(new UStroke(2));

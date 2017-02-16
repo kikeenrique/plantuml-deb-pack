@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 3835 $
  *
  */
 package net.sourceforge.plantuml.preproc;
@@ -41,11 +38,10 @@ import net.sourceforge.plantuml.CharSequence2;
 import net.sourceforge.plantuml.CharSequence2Impl;
 import net.sourceforge.plantuml.LineLocation;
 import net.sourceforge.plantuml.LineLocationImpl;
-import net.sourceforge.plantuml.Log;
 
 public class ReadLineReader implements ReadLine {
 
-	private static final int LIMIT = 700;
+	// private static final int LIMIT = 850;
 	private final BufferedReader br;
 	private LineLocationImpl location;
 
@@ -64,10 +60,10 @@ public class ReadLineReader implements ReadLine {
 		if (s == null) {
 			return null;
 		}
-		if (s.length() > LIMIT) {
-			Log.debug("Line truncated from " + s.length() + " to " + LIMIT);
-			s = s.substring(0, LIMIT);
-		}
+		// if (s.length() > LIMIT) {
+		// Log.debug("Line truncated from " + s.length() + " to " + LIMIT);
+		// s = s.substring(0, LIMIT);
+		// }
 		if (s.startsWith("\uFEFF")) {
 			s = s.substring(1);
 		}

@@ -23,20 +23,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4041 $
  *
  */
 package net.sourceforge.plantuml.donors;
 
-import java.awt.Font;
+import java.awt.geom.Dimension2D;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -47,50 +45,66 @@ import net.sourceforge.plantuml.code.TranscoderImpl;
 import net.sourceforge.plantuml.core.DiagramDescription;
 import net.sourceforge.plantuml.core.DiagramDescriptionImpl;
 import net.sourceforge.plantuml.core.ImageData;
-import net.sourceforge.plantuml.graphic.GraphicPosition;
 import net.sourceforge.plantuml.graphic.GraphicStrings;
 import net.sourceforge.plantuml.graphic.HtmlColorUtils;
+import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.graphic.TextBlock;
+import net.sourceforge.plantuml.graphic.UDrawable;
+import net.sourceforge.plantuml.svek.TextBlockBackcolored;
 import net.sourceforge.plantuml.ugraphic.ColorMapperIdentity;
 import net.sourceforge.plantuml.ugraphic.ImageBuilder;
-import net.sourceforge.plantuml.ugraphic.UAntiAliasing;
-import net.sourceforge.plantuml.ugraphic.UFont;
+import net.sourceforge.plantuml.ugraphic.UGraphic;
+import net.sourceforge.plantuml.ugraphic.UImage;
+import net.sourceforge.plantuml.ugraphic.UTranslate;
 import net.sourceforge.plantuml.version.PSystemVersion;
 
 public class PSystemDonors extends AbstractPSystem {
 
-	public static final String DONORS = "UDfTKyjosp0ClEChUDQa7w7OhLlPJZ9Msixa1bk8H9icL99oAtrRR_snGcvbKkP96Bns5wlSPFyVENYXG4xbDh3LU81NokBZCsmuXiv3FhNY7bOkfgY7alReWqQhdhYnaDkAdLenXO76p_TtgPZAqS86aqKsm59FWJQGnz5yWRAB47fOwMp-B4CneUmyb87QXgnQCBV2Rpdj8G_hyrqhErYmqLRjkFC4HNUNpuuiHAQWrR1DKECv3MLLRkWNsahaN3HQfjReUc6wkz6sDJobwCC0pqPVf66f3oT1Vije2n_zRRHDG6HqWULmri7rQeCDLmZ5AFfRWp8-gSl8n7F9E_KYayKWTO9FS1N_mDDfnifMi_3QgMMGaRPd5_G0dsEwOjZgGqD6FQ8sVSh032aOx--X5OJsGu677nrvjUps3kMq9jB_niT0XqQj7NgCa6eInoO7_3aQJKhKcYywzStLELyZVusmIxmyhfZnF4ftcxYCJwDGZ-pGecaVr1i5vDR3JlYYgzHQZvU6JuRTAF_spszZhXw8_Z29LyLTcvkx74xYZoPevenyOfXHg1USlBFJC_YvqQf4hEI_SZMfxsHhSWzgcxz-AVFe-umjh2XLvIzt3mXu";
+	public static final String DONORS = "UDfbL4josp0CtUCKN6lIGoXsx5J-96EdwKnsi0HRZ2d29IMdyZbwbImwqrqlu2CLSYkJIhaIXW3utiE3KfFyE-JWaMfoAhKrMuqvF54I3bSmvn0w3sbVYXkOkd15BQnfWxxMQDMIImkfBTYfALDzekvpkvMCFXqjp35woDOmrdsW3QIXDHzXtGG8BKnrCZoM8UjHDXxMDHrAich4V11-u_uTyZ2hFfIoWn4RRTMA6q-GDH_karSM8drmqB28K6CLX_9KQkWxsaBa79LQkkxGjS9qTQLjTx2CqTSdU33wA0LZdUy5-VL6MxZprzOs0f7G4SQdIjUkLNCikK38Ej5VIfJsKLv29enBphuLcIpMaYVu15Vs5ppj1wni8Q7BHPC9RboxvpU_rzB8IDc3g_K9xaDsmR3GUKb6tQ8sRSp0d68mtaD6Q3zbc7zhoAjnit4eipI1xpE_rfINQkRGOu2q8x5eDB6tpbcIecPyrB5HBbRv4WXhX5Latkw9c6VoAjM7o5QyxvIvPOSMpU56lL2DVF2m4eBe2ZNJtMXXOjXrUYz-_pBcClHW21EPK-mqlzh9OQzsD_LooCZ38_RsMEa1uDHejKOiP7NSZjHNiZjoDsgHFdrUfy7Q2LkOqc1bOkOs5ujKwbbGZyMqiv3fg9kiBCkS2EwEiVEF2ClGXAeUP1BHc3PQVD5Kf2RSK1tqpJrCuibSk0Gts5Cicy1TwfruQAshi882I3PvsocDijKHwCGOEFyulqVjp-_ddp0g1wlTok8rcykFm5dPXNiUm9aIRxUEMhNKbGmkm___Ady0ufjPnG00";
 
-	public ImageData exportDiagram(OutputStream os, int num, FileFormatOption fileFormat) throws IOException {
-		final GraphicStrings result = getGraphicStrings();
-		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, result.getBackcolor(),
+	@Override
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat)
+			throws IOException {
+		final UDrawable result = getGraphicStrings();
+		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, HtmlColorUtils.WHITE,
 				getMetadata(), null, 0, 0, null, false);
 		imageBuilder.setUDrawable(result);
 		return imageBuilder.writeImageTOBEMOVED(fileFormat, os);
 	}
 
-	private GraphicStrings getGraphicStrings() throws IOException {
-		final List<String> lines = new ArrayList<String>();
-		lines.add("<b>Special thanks to our sponsors and donors !");
-		lines.add(" ");
-		int i = 0;
-		final List<String> donors = getDonors();
-		final int maxLine = (donors.size() + 1) / 2;
-		for (String d : donors) {
-			lines.add(d);
-			i++;
-			if (i == maxLine) {
-				lines.add(" ");
-				lines.add(" ");
-				i = 0;
+	private UDrawable getGraphicStrings() throws IOException {
+		final List<TextBlock> cols = getCols(getDonors(), 4, 5);
+		return new UDrawable() {
+			public void drawU(UGraphic ug) {
+				final TextBlockBackcolored header = GraphicStrings.createBlackOnWhite(Arrays
+						.asList("<b>Special thanks to our sponsors and donors !"));
+				header.drawU(ug);
+				final StringBounder stringBounder = ug.getStringBounder();
+				ug = ug.apply(new UTranslate(0, header.calculateDimension(stringBounder).getHeight()));
+				double x = 0;
+				double lastX = 0;
+				double y = 0;
+				for (TextBlock tb : cols) {
+					final Dimension2D dim = tb.calculateDimension(stringBounder);
+					tb.drawU(ug.apply(new UTranslate(x, 0)));
+					lastX = x;
+					x += dim.getWidth() + 10;
+					y = Math.max(y, dim.getHeight());
+				}
+				final UImage logo = new UImage(PSystemVersion.getPlantumlImage());
+				ug.apply(new UTranslate(lastX, y - logo.getHeight())).draw(logo);
 			}
+		};
+	}
+
+	public static List<TextBlock> getCols(List<String> lines, final int nbCol, final int reserved) throws IOException {
+		final List<TextBlock> result = new ArrayList<TextBlock>();
+		final int maxLine = (lines.size() + (nbCol - 1) + reserved) / nbCol;
+		for (int i = 0; i < lines.size(); i += maxLine) {
+			final List<String> current = lines.subList(i, Math.min(lines.size(), i + maxLine));
+			result.add(GraphicStrings.createBlackOnWhite(current));
 		}
-		lines.add(" ");
-		final UFont font = new UFont("SansSerif", Font.PLAIN, 12);
-		final GraphicStrings graphicStrings = new GraphicStrings(lines, font, HtmlColorUtils.BLACK,
-				HtmlColorUtils.WHITE, UAntiAliasing.ANTI_ALIASING_ON, PSystemVersion.getPlantumlImage(),
-				GraphicPosition.BACKGROUND_CORNER_BOTTOM_RIGHT);
-		graphicStrings.setMaxLine(maxLine + 2);
-		return graphicStrings;
+		return result;
 	}
 
 	private List<String> getDonors() throws IOException {

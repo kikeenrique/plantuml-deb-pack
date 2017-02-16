@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4236 $
  * 
  */
 package net.sourceforge.plantuml.svek.extremity;
@@ -37,10 +34,17 @@ import java.awt.geom.Point2D;
 
 import net.sourceforge.plantuml.graphic.UDrawable;
 import net.sourceforge.plantuml.svek.AbstractExtremityFactory;
+import net.sourceforge.plantuml.svek.Side;
 
 public class ExtremityFactoryCircleConnect extends AbstractExtremityFactory implements ExtremityFactory {
 
-	public UDrawable createUDrawable(Point2D p0, Point2D p1, Point2D p2) {
+	@Override
+	public UDrawable createUDrawable(Point2D p0, double angle, Side side) {
+		angle -= Math.PI / 2;
+		return new ExtremityCircleConnect(p0, angle);
+	}
+
+	public UDrawable createUDrawable(Point2D p0, Point2D p1, Point2D p2, Side side) {
 		final double ortho = atan2(p0, p2);
 		return new ExtremityCircleConnect(p1, ortho);
 	}

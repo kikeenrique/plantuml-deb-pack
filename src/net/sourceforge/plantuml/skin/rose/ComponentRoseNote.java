@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19109 $
  *
  */
 package net.sourceforge.plantuml.skin.rose;
@@ -114,7 +111,7 @@ final public class ComponentRoseNote extends AbstractTextualComponent implements
 
 		ug.apply(new UTranslate(x2 - cornersize, 0)).draw(new ULine(0, cornersize));
 		ug.apply(new UTranslate(x2, cornersize)).draw(new ULine(-cornersize, 0));
-		UGraphic ug2 = new UGraphicStencil(ug, this, new UStroke());
+		UGraphic ug2 = UGraphicStencil.create(ug, this, new UStroke());
 		ug2 = ug2.apply(new UTranslate(getMarginX1() + diffX / 2, getMarginY()));
 
 		getTextBlock().drawU(ug2);

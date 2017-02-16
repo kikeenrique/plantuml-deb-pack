@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4749 $
  *
  */
 package net.sourceforge.plantuml.cucadiagram;
@@ -99,9 +96,9 @@ public class MemberImpl implements Member {
 				displayClean = " ";
 			}
 
-			if (VisibilityModifier.isVisibilityCharacter(displayClean.charAt(0))) {
+			if (VisibilityModifier.isVisibilityCharacter(displayClean)) {
 				visibilityModifier = VisibilityModifier
-						.getVisibilityModifier(displayClean.charAt(0), isMethod == false);
+						.getVisibilityModifier(displayClean, isMethod == false);
 				this.display = StringUtils.trin(StringUtils.manageGuillemet(displayClean.substring(1)));
 			} else {
 				this.display = StringUtils.manageGuillemet(displayClean);
@@ -128,7 +125,7 @@ public class MemberImpl implements Member {
 		return display;
 	}
 
-	public String getDisplayWithVisibilityChar() {
+	private String getDisplayWithVisibilityChar() {
 		if (isPrivate()) {
 			return "-" + display;
 		}
@@ -141,6 +138,9 @@ public class MemberImpl implements Member {
 		if (isProtected()) {
 			return "#" + display;
 		}
+		if (isIEMandatory()) {
+			return "*" + display;
+		}		
 		return display;
 	}
 
@@ -183,6 +183,10 @@ public class MemberImpl implements Member {
 				|| visibilityModifier == VisibilityModifier.PACKAGE_PRIVATE_METHOD;
 	}
 
+	private boolean isIEMandatory() {
+		return visibilityModifier == VisibilityModifier.IE_MANDATORY;
+	}
+
 	public final VisibilityModifier getVisibilityModifier() {
 		return visibilityModifier;
 	}
@@ -196,6 +200,7 @@ public class MemberImpl implements Member {
 	}
 
 	public static boolean isMethod(String s) {
+		s = UrlBuilder.purgeUrl(s);
 		if (s.contains("{method}")) {
 			return true;
 		}
@@ -204,5 +209,4 @@ public class MemberImpl implements Member {
 		}
 		return s.contains("(") || s.contains(")");
 	}
-
 }

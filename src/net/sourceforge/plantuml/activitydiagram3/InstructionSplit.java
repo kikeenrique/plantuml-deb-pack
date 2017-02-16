@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 9786 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3;
@@ -41,6 +38,7 @@ import net.sourceforge.plantuml.activitydiagram3.ftile.Ftile;
 import net.sourceforge.plantuml.activitydiagram3.ftile.FtileFactory;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 import net.sourceforge.plantuml.sequencediagram.NoteType;
 
@@ -72,7 +70,7 @@ public class InstructionSplit implements Instruction {
 		for (InstructionList list : splits) {
 			all.add(list.createFtile(factory));
 		}
-		return factory.createSplit(all);
+		return factory.createParallel(getSwimlaneIn(), all, ForkStyle.SPLIT, null);
 	}
 
 	public Instruction getParent() {
@@ -102,8 +100,8 @@ public class InstructionSplit implements Instruction {
 		return inlinkRendering;
 	}
 
-	public boolean addNote(Display note, NotePosition position, NoteType type) {
-		return getLast().addNote(note, position, type);
+	public boolean addNote(Display note, NotePosition position, NoteType type, Colors colors) {
+		return getLast().addNote(note, position, type, colors);
 	}
 
 	public Set<Swimlane> getSwimlanes() {

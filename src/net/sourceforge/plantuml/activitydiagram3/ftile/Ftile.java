@@ -23,26 +23,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile;
 
 import java.util.Collection;
+import java.util.List;
 
+import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
+import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 public interface Ftile extends Swimable, TextBlock {
 
-	public boolean shadowing();
+	public UStroke getThickness();
+
+	public ISkinParam skinParam();
 
 	public LinkRendering getInLinkRendering();
 
@@ -52,6 +54,10 @@ public interface Ftile extends Swimable, TextBlock {
 
 	public UTranslate getTranslateFor(Ftile child, StringBounder stringBounder);
 
+	public Collection<Ftile> getMyChildren();
+
 	public Collection<Connection> getInnerConnections();
+
+	public List<WeldingPoint> getWeldingPoints();
 
 }

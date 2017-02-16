@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4639 $
  * 
  */
 package net.sourceforge.plantuml.syntax;
@@ -61,7 +58,7 @@ public class LanguageDescriptor {
 		type.add("object");
 		type.add("artifact");
 		type.add("folder");
-		type.add("rect");
+		type.add("rectangle");
 		type.add("node");
 		type.add("frame");
 		type.add("cloud");
@@ -72,9 +69,16 @@ public class LanguageDescriptor {
 		type.add("control");
 		type.add("entity");
 		type.add("card");
+		type.add("file");
+		type.add("package");
+		type.add("queue");
 
 		keyword.add("@startuml");
 		keyword.add("@enduml");
+		keyword.add("@startdot");
+		keyword.add("@enddot");
+		keyword.add("@startsalt");
+		keyword.add("@endsalt");
 		keyword.add("as");
 		keyword.add("also");
 		keyword.add("autonumber");
@@ -140,11 +144,15 @@ public class LanguageDescriptor {
 		keyword.add("kill");
 
 		preproc.add("!include");
+		preproc.add("!pragma");
 		preproc.add("!define");
 		preproc.add("!undef");
 		preproc.add("!ifdef");
 		preproc.add("!endif");
 		preproc.add("!ifndef");
+		preproc.add("!else");
+		preproc.add("!definelong");
+		preproc.add("!enddefinelong");
 	}
 
 	public void print(PrintStream ps) {

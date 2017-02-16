@@ -23,13 +23,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * Modified by : Arno Peterson
  * 
- * Revision $Revision: 5183 $
  *
  */
 package net.sourceforge.plantuml.svek.image;
@@ -57,6 +54,7 @@ import net.sourceforge.plantuml.graphic.USymbolFolder;
 import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.svek.AbstractEntityImage;
 import net.sourceforge.plantuml.svek.ShapeType;
+import net.sourceforge.plantuml.ugraphic.UComment;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UStroke;
 
@@ -83,8 +81,8 @@ public class EntityImageDescription extends AbstractEntityImage {
 		final Display codeDisplay = Display.getWithNewlines(entity.getCode());
 		final TextBlock desc = (entity.getDisplay().equals(codeDisplay) && symbol instanceof USymbolFolder)
 				|| entity.getDisplay().isWhite() ? TextBlockUtils.empty(0, 0) : new BodyEnhanced(entity.getDisplay(),
-				symbol.getFontParam(), getSkinParam(), HorizontalAlignment.CENTER, stereotype,
-				symbol.manageHorizontalLine(), false, false);
+				symbol.getFontParam(), getSkinParam(), HorizontalAlignment.LEFT, stereotype,
+				symbol.manageHorizontalLine(), false, false, entity);
 
 		this.url = entity.getUrl99();
 
@@ -93,9 +91,12 @@ public class EntityImageDescription extends AbstractEntityImage {
 			backcolor = SkinParamUtils.getColor(getSkinParam(), symbol.getColorParamBack(), getStereo());
 		}
 		// backcolor = HtmlColorUtils.BLUE;
-		final HtmlColor forecolor = SkinParamUtils.getColor(getSkinParam(), symbol.getColorParamBorder(), getStereo());
-		final SymbolContext ctx = new SymbolContext(backcolor, forecolor).withStroke(new UStroke(1.5)).withShadow(
-				getSkinParam().shadowing2(symbol.getSkinParameter()));
+		assert getStereo() == stereotype;
+		final HtmlColor forecolor = SkinParamUtils.getColor(getSkinParam(), symbol.getColorParamBorder(), stereotype);
+		final double roundCorner = symbol.getSkinParameter().getRoundCorner(getSkinParam(), stereotype);
+		final UStroke stroke = symbol.getSkinParameter().getStroke(getSkinParam(), stereotype);
+		final SymbolContext ctx = new SymbolContext(backcolor, forecolor).withStroke(stroke)
+				.withShadow(getSkinParam().shadowing2(symbol.getSkinParameter())).withRoundCorner(roundCorner);
 
 		TextBlock stereo = TextBlockUtils.empty(0, 0);
 
@@ -111,7 +112,7 @@ public class EntityImageDescription extends AbstractEntityImage {
 		}
 
 		name = new BodyEnhanced(codeDisplay, symbol.getFontParam(), getSkinParam(), HorizontalAlignment.CENTER,
-				stereotype, symbol.manageHorizontalLine(), false, false);
+				stereotype, symbol.manageHorizontalLine(), false, false, entity);
 
 		asSmall = symbol.asSmall(name, desc, stereo, ctx);
 	}
@@ -125,6 +126,7 @@ public class EntityImageDescription extends AbstractEntityImage {
 	}
 
 	final public void drawU(UGraphic ug) {
+		ug.draw(new UComment("entity " + getEntity().getCode().getFullName()));
 		if (url != null) {
 			ug.startUrl(url);
 		}

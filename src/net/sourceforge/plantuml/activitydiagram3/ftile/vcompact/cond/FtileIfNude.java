@@ -23,17 +23,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile.vcompact.cond;
 
 import java.awt.geom.Dimension2D;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -53,10 +52,15 @@ public class FtileIfNude extends FtileDimensionMemoize {
 	private final Swimlane in;
 
 	FtileIfNude(Ftile tile1, Ftile tile2, Swimlane in) {
-		super(tile1.shadowing() || tile2.shadowing());
+		super(tile1.skinParam());
 		this.tile1 = tile1;
 		this.tile2 = tile2;
 		this.in = in;
+	}
+	
+	@Override
+	public Collection<Ftile> getMyChildren() {
+		return Arrays.asList(tile1, tile2);
 	}
 
 	public boolean hasTwoBranches(StringBounder stringBounder) {
@@ -147,10 +151,10 @@ public class FtileIfNude extends FtileDimensionMemoize {
 		return (dim1.getWidth() - dim1.getLeft()) + dim2.getLeft();
 	}
 
-//	protected double getLeft(StringBounder stringBounder) {
-//		final double left1 = tile1.calculateDimension(stringBounder).translate(getTranslate1(stringBounder)).getLeft();
-//		final double left2 = tile2.calculateDimension(stringBounder).translate(getTranslate2(stringBounder)).getLeft();
-//		return (left1 + left2) / 2;
-//	}
+	// protected double getLeft(StringBounder stringBounder) {
+	// final double left1 = tile1.calculateDimension(stringBounder).translate(getTranslate1(stringBounder)).getLeft();
+	// final double left2 = tile2.calculateDimension(stringBounder).translate(getTranslate2(stringBounder)).getLeft();
+	// return (left1 + left2) / 2;
+	// }
 
 }

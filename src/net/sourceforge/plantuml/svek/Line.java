@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4236 $
  * 
  */
 package net.sourceforge.plantuml.svek;
@@ -38,6 +35,7 @@ import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.List;
 
+import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.Direction;
 import net.sourceforge.plantuml.Hideable;
 import net.sourceforge.plantuml.ISkinParam;
@@ -47,6 +45,7 @@ import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.command.Position;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.cucadiagram.EntityPort;
 import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.IGroup;
 import net.sourceforge.plantuml.cucadiagram.Link;
@@ -54,6 +53,7 @@ import net.sourceforge.plantuml.cucadiagram.LinkArrow;
 import net.sourceforge.plantuml.cucadiagram.LinkDecor;
 import net.sourceforge.plantuml.cucadiagram.LinkMiddleDecor;
 import net.sourceforge.plantuml.cucadiagram.LinkType;
+import net.sourceforge.plantuml.cucadiagram.NoteLinkStrategy;
 import net.sourceforge.plantuml.cucadiagram.dot.GraphvizVersion;
 import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
@@ -75,6 +75,7 @@ import net.sourceforge.plantuml.posimo.PositionableUtils;
 import net.sourceforge.plantuml.svek.SvekUtils.PointListIterator;
 import net.sourceforge.plantuml.svek.extremity.Extremity;
 import net.sourceforge.plantuml.svek.extremity.ExtremityFactory;
+import net.sourceforge.plantuml.svek.extremity.ExtremityFactoryExtends;
 import net.sourceforge.plantuml.svek.image.EntityImageNoteLink;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
@@ -90,12 +91,13 @@ public class Line implements Moveable, Hideable {
 	private final Cluster lhead;
 	private final Link link;
 
-	private final String startUid;
-	private final String endUid;
+	private final EntityPort startUid;
+	private final EntityPort endUid;
 
 	private final TextBlock startTailText;
 	private final TextBlock endHeadText;
 	private final TextBlock labelText;
+	private boolean divideLabelWidthByTwo = false;
 
 	private final int lineColor;
 	private final int noteLabelColor;
@@ -119,20 +121,9 @@ public class Line implements Moveable, Hideable {
 
 	private boolean opale;
 	private Cluster projectionCluster;
-	private final GraphvizVersion graphvizVersion;
 
 	private final Pragma pragma;
-
-	// private GraphvizVersion getGraphvizVersion() {
-	// if (pragma.isDefine("graphviz")==false) {
-	// return GraphvizVersion.COMMON;
-	// }
-	// final String value = pragma.getValue("graphviz");
-	// if ("2.34".equals(value)) {
-	// return GraphvizVersion.V2_34_0;
-	// }
-	// return GraphvizVersion.COMMON;
-	// }
+	private final HtmlColor backgroundColor;
 
 	@Override
 	public String toString() {
@@ -199,27 +190,42 @@ public class Line implements Moveable, Hideable {
 
 	}
 
-	// private boolean projectionStart() {
-	// return startUid.startsWith(Cluster.CENTER_ID);
-	// }
+	private Cluster getCluster2(Bibliotekon bibliotekon, IEntity entityMutable) {
+		for (Cluster cl : bibliotekon.allCluster()) {
+			if (entityMutable == cl.getGroup()) {
+				return cl;
+			}
+		}
+		throw new IllegalArgumentException();
+	}
 
-	public Line(String startUid, String endUid, Link link, ColorSequence colorSequence, Cluster ltail, Cluster lhead,
-			ISkinParam skinParam, StringBounder stringBounder, FontConfiguration labelFont, Bibliotekon bibliotekon,
-			GraphvizVersion graphvizVersion, Pragma pragma) {
-		if (startUid == null || endUid == null || link == null) {
+	public Line(Link link, ColorSequence colorSequence, ISkinParam skinParam, StringBounder stringBounder,
+			FontConfiguration labelFont, Bibliotekon bibliotekon, Pragma pragma) {
+
+		if (link == null) {
 			throw new IllegalArgumentException();
 		}
+		this.startUid = link.getEntityPort1(bibliotekon);
+		this.endUid = link.getEntityPort2(bibliotekon);
+
+		Cluster ltail = null;
+		if (startUid.startsWith(Cluster.CENTER_ID)) {
+			ltail = getCluster2(bibliotekon, link.getEntity1());
+		}
+		Cluster lhead = null;
+		if (endUid.startsWith(Cluster.CENTER_ID)) {
+			lhead = getCluster2(bibliotekon, link.getEntity2());
+		}
+
 		if (link.getColors() != null) {
 			skinParam = link.getColors().mute(skinParam);
 			labelFont = labelFont.mute(link.getColors());
 		}
-		this.graphvizVersion = graphvizVersion;
+		this.backgroundColor = skinParam.getBackgroundColor();
 		this.pragma = pragma;
 		this.bibliotekon = bibliotekon;
 		this.stringBounder = stringBounder;
 		this.link = link;
-		this.startUid = startUid;
-		this.endUid = endUid;
 		this.ltail = ltail;
 		this.lhead = lhead;
 
@@ -240,10 +246,10 @@ public class Line implements Moveable, Hideable {
 				labelOnly = new DirectionalTextBlock(right, left, up, down);
 			}
 		} else {
-			final double marginLabel = startUid.equals(endUid) ? 6 : 1;
+			final double marginLabel = startUid.equalsId(endUid) ? 6 : 1;
 			final TextBlock label = TextBlockUtils.withMargin(
-					link.getLabel().create(labelFont, skinParam.getDefaultTextAlignment(), skinParam), marginLabel,
-					marginLabel);
+					link.getLabel().create(labelFont, skinParam.getDefaultTextAlignment(HorizontalAlignment.CENTER),
+							skinParam), marginLabel, marginLabel);
 			if (getLinkArrow() == LinkArrow.NONE) {
 				labelOnly = label;
 			} else {
@@ -264,6 +270,10 @@ public class Line implements Moveable, Hideable {
 			noteOnly = null;
 		} else {
 			noteOnly = new EntityImageNoteLink(link.getNote(), link.getNoteColors(), skinParam);
+			if (link.getNoteLinkStrategy() == NoteLinkStrategy.HALF_NOT_PRINTED
+					|| link.getNoteLinkStrategy() == NoteLinkStrategy.HALF_PRINTED_FULL) {
+				divideLabelWidthByTwo = true;
+			}
 		}
 
 		if (labelOnly != null && noteOnly != null) {
@@ -308,16 +318,16 @@ public class Line implements Moveable, Hideable {
 		return link.getLinkArrow();
 	}
 
-	public void appendLine(StringBuilder sb) {
+	public void appendLine(GraphvizVersion graphvizVersion, StringBuilder sb, DotMode dotMode) {
 		// Log.println("inverted=" + isInverted());
 		// if (isInverted()) {
 		// sb.append(endUid);
 		// sb.append("->");
 		// sb.append(startUid);
 		// } else {
-		sb.append(startUid);
+		sb.append(startUid.getFullString());
 		sb.append("->");
-		sb.append(endUid);
+		sb.append(endUid.getFullString());
 		// }
 		sb.append("[");
 		final LinkType linkType = link.getTypePatchCluster();
@@ -332,14 +342,21 @@ public class Line implements Moveable, Hideable {
 		// length = 2;
 		// }
 		if (pragma.horizontalLineBetweenDifferentPackageAllowed() || link.isInvis() || length != 1) {
+			// if (graphvizVersion.isJs() == false) {
 			sb.append("minlen=" + (length - 1));
 			sb.append(",");
+			// }
 		}
 		sb.append("color=\"" + StringUtils.getAsHtml(lineColor) + "\"");
 		if (labelText != null) {
 			sb.append(",");
-			sb.append("label=<");
-			appendTable(sb, labelText.calculateDimension(stringBounder), noteLabelColor);
+			if (graphvizVersion.modeSafe() || dotMode == DotMode.NO_LEFT_RIGHT_AND_XLABEL) {
+				sb.append("xlabel=<");
+			} else {
+				sb.append("label=<");
+			}
+			appendTable(sb, eventuallyDivideByTwo(labelText.calculateDimension(stringBounder)), noteLabelColor,
+					graphvizVersion);
 			sb.append(">");
 			// sb.append(",labelfloat=true");
 		}
@@ -347,14 +364,14 @@ public class Line implements Moveable, Hideable {
 		if (startTailText != null) {
 			sb.append(",");
 			sb.append("taillabel=<");
-			appendTable(sb, startTailText.calculateDimension(stringBounder), startTailColor);
+			appendTable(sb, startTailText.calculateDimension(stringBounder), startTailColor, graphvizVersion);
 			sb.append(">");
 			// sb.append(",labelangle=0");
 		}
 		if (endHeadText != null) {
 			sb.append(",");
 			sb.append("headlabel=<");
-			appendTable(sb, endHeadText.calculateDimension(stringBounder), endHeadColor);
+			appendTable(sb, endHeadText.calculateDimension(stringBounder), endHeadColor, graphvizVersion);
 			sb.append(">");
 			// sb.append(",labelangle=0");
 		}
@@ -376,17 +393,25 @@ public class Line implements Moveable, Hideable {
 		SvekUtils.println(sb);
 	}
 
+	private Dimension2D eventuallyDivideByTwo(Dimension2D dim) {
+		if (divideLabelWidthByTwo) {
+			return new Dimension2DDouble(dim.getWidth() / 2, dim.getHeight());
+		}
+		return dim;
+	}
+
 	public String rankSame() {
 		// if (graphvizVersion == GraphvizVersion.V2_34_0) {
 		// return null;
 		// }
-		if (pragma.horizontalLineBetweenDifferentPackageAllowed() == false && link.getLength() == 1) {
-			return "{rank=same; " + getStartUid() + "; " + getEndUid() + "}";
+		if (pragma.horizontalLineBetweenDifferentPackageAllowed() == false && link.getLength() == 1
+		/* && graphvizVersion.isJs() == false */) {
+			return "{rank=same; " + getStartUidPrefix() + "; " + getEndUidPrefix() + "}";
 		}
 		return null;
 	}
 
-	public static void appendTable(StringBuilder sb, Dimension2D dim, int col) {
+	public static void appendTable(StringBuilder sb, Dimension2D dim, int col, GraphvizVersion graphvizVersion) {
 		final int w = (int) dim.getWidth();
 		final int h = (int) dim.getHeight();
 		appendTable(sb, w, h, col);
@@ -407,28 +432,25 @@ public class Line implements Moveable, Hideable {
 		sb.append("</TABLE>");
 	}
 
-	public final String getStartUid() {
-		if (startUid.endsWith(":h")) {
-			return startUid.substring(0, startUid.length() - 2);
-		}
-		return startUid;
+	public final String getStartUidPrefix() {
+		return startUid.getPrefix();
 	}
 
-	public final String getEndUid() {
-		if (endUid.endsWith(":h")) {
-			return endUid.substring(0, endUid.length() - 2);
-		}
-		return endUid;
+	public final String getEndUidPrefix() {
+		return endUid.getPrefix();
 	}
 
 	private UDrawable getExtremity(LinkDecor decor, PointListIterator pointListIterator, Point2D center, double angle,
-			Cluster cluster) {
-		final ExtremityFactory extremityFactory = decor.getExtremityFactory();
+			Cluster cluster, Shape shapeContact) {
+		final ExtremityFactory extremityFactory = decor.getExtremityFactory(backgroundColor);
 
 		if (cluster != null) {
 			if (extremityFactory != null) {
 				// System.err.println("angle=" + angle * 180 / Math.PI);
-				return extremityFactory.createUDrawable(center, angle);
+				return extremityFactory.createUDrawable(center, angle, null);
+			}
+			if (decor == LinkDecor.EXTENDS) {
+				return new ExtremityFactoryExtends(backgroundColor).createUDrawable(center, angle, null);
 			}
 			return null;
 		}
@@ -438,7 +460,11 @@ public class Line implements Moveable, Hideable {
 			final Point2D p0 = points.get(0);
 			final Point2D p1 = points.get(1);
 			final Point2D p2 = points.get(2);
-			return extremityFactory.createUDrawable(p0, p1, p2);
+			Side side = null;
+			if (shapeContact != null) {
+				side = shapeContact.getClusterPosition().getClosestSide(p1);
+			}
+			return extremityFactory.createUDrawable(p0, p1, p2, side);
 		} else if (decor != LinkDecor.NONE) {
 			final UShape sh = new UPolygon(pointListIterator.next());
 			return new UDrawable() {
@@ -475,7 +501,7 @@ public class Line implements Moveable, Hideable {
 
 		if (projectionCluster != null) {
 			// System.err.println("Line::solveLine1 projectionCluster=" + projectionCluster.getClusterPosition());
-			projectionCluster.manageEntryExitPoint(TextBlockUtils.getDummyStringBounder());
+			projectionCluster.manageEntryExitPoint(stringBounder);
 			// System.err.println("Line::solveLine2 projectionCluster=" + projectionCluster.getClusterPosition());
 			// if (lhead != null)
 			// System.err.println("Line::solveLine ltail=" + lhead.getClusterPosition());
@@ -488,9 +514,9 @@ public class Line implements Moveable, Hideable {
 
 		final LinkType linkType = link.getType();
 		this.extremity1 = getExtremity(linkType.getDecor2(), pointListIterator, dotPath.getStartPoint(),
-				dotPath.getStartAngle() + Math.PI, ltail);
+				dotPath.getStartAngle() + Math.PI, ltail, bibliotekon.getShape(link.getEntity1()));
 		this.extremity2 = getExtremity(linkType.getDecor1(), pointListIterator, dotPath.getEndPoint(),
-				dotPath.getEndAngle(), lhead);
+				dotPath.getEndAngle(), lhead, bibliotekon.getShape(link.getEntity2()));
 		if (extremity1 instanceof Extremity && extremity2 instanceof Extremity) {
 			final Point2D p1 = ((Extremity) extremity1).somePoint();
 			final Point2D p2 = ((Extremity) extremity2).somePoint();
@@ -503,9 +529,9 @@ public class Line implements Moveable, Hideable {
 				if (dist1start > dist1end && dist2end > dist2start) {
 					pointListIterator = new PointListIterator(svg.substring(end), fullHeight);
 					this.extremity2 = getExtremity(linkType.getDecor1(), pointListIterator, dotPath.getEndPoint(),
-							dotPath.getEndAngle(), lhead);
+							dotPath.getEndAngle(), lhead, bibliotekon.getShape(link.getEntity2()));
 					this.extremity1 = getExtremity(linkType.getDecor2(), pointListIterator, dotPath.getStartPoint(),
-							dotPath.getStartAngle() + Math.PI, ltail);
+							dotPath.getStartAngle() + Math.PI, ltail, bibliotekon.getShape(link.getEntity1()));
 				}
 			}
 
@@ -642,32 +668,35 @@ public class Line implements Moveable, Hideable {
 		ug = ug.apply(new UStroke()).apply(new UChangeColor(color));
 
 		if (this.extremity2 != null) {
+			UGraphic ug2 = ug;
 			if (linkType.getDecor1().isFill()) {
-				ug = ug.apply(new UChangeBackColor(color));
+				ug2 = ug2.apply(new UChangeBackColor(color));
 			} else {
-				ug = ug.apply(new UChangeBackColor(null));
+				ug2 = ug2.apply(new UChangeBackColor(null));
 			}
 			// System.err.println("Line::draw EXTREMITY1");
-			this.extremity2.drawU(ug.apply(new UTranslate(x, y)));
+			this.extremity2.drawU(ug2.apply(new UTranslate(x, y)));
 		}
 		if (this.extremity1 != null) {
+			UGraphic ug2 = ug;
 			if (linkType.getDecor2().isFill()) {
-				ug = ug.apply(new UChangeBackColor(color));
+				ug2 = ug2.apply(new UChangeBackColor(color));
 			} else {
-				ug = ug.apply(new UChangeBackColor(null));
+				ug2 = ug2.apply(new UChangeBackColor(null));
 			}
 			// System.err.println("Line::draw EXTREMITY2");
-			this.extremity1.drawU(ug.apply(new UTranslate(x, y)));
+			this.extremity1.drawU(ug2.apply(new UTranslate(x, y)));
 		}
-		if (this.labelText != null && this.labelXY != null) {
+		if (this.labelText != null && this.labelXY != null
+				&& link.getNoteLinkStrategy() != NoteLinkStrategy.HALF_NOT_PRINTED) {
 			this.labelText.drawU(ug.apply(new UTranslate(x + this.labelXY.getPosition().getX(), y
 					+ this.labelXY.getPosition().getY())));
 		}
-		if (this.startTailText != null) {
+		if (this.startTailText != null && this.startTailLabelXY != null && this.startTailLabelXY.getPosition() != null) {
 			this.startTailText.drawU(ug.apply(new UTranslate(x + this.startTailLabelXY.getPosition().getX(), y
 					+ this.startTailLabelXY.getPosition().getY())));
 		}
-		if (this.endHeadText != null) {
+		if (this.endHeadText != null && this.endHeadLabelXY != null && this.endHeadLabelXY.getPosition() != null) {
 			this.endHeadText.drawU(ug.apply(new UTranslate(x + this.endHeadLabelXY.getPosition().getX(), y
 					+ this.endHeadLabelXY.getPosition().getY())));
 		}
@@ -697,7 +726,7 @@ public class Line implements Moveable, Hideable {
 	}
 
 	public double getHorizontalDzeta(StringBounder stringBounder) {
-		if (startUid.equals(endUid)) {
+		if (startUid.equalsId(endUid)) {
 			return getDecorDzeta();
 		}
 		final ArithmeticStrategy strategy;
@@ -723,7 +752,7 @@ public class Line implements Moveable, Hideable {
 	}
 
 	public double getVerticalDzeta(StringBounder stringBounder) {
-		if (startUid.equals(endUid)) {
+		if (startUid.equalsId(endUid)) {
 			return getDecorDzeta();
 		}
 		if (isHorizontal()) {

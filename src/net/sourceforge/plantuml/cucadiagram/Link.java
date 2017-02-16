@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19635 $
  *
  */
 package net.sourceforge.plantuml.cucadiagram;
@@ -49,6 +46,7 @@ import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.USymbolInterface;
 import net.sourceforge.plantuml.graphic.color.Colors;
+import net.sourceforge.plantuml.svek.Bibliotekon;
 import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.utils.UniqueSequence;
 
@@ -56,6 +54,10 @@ public class Link implements Hideable, Removeable {
 
 	final private IEntity cl1;
 	final private IEntity cl2;
+
+	private String port1;
+	private String port2;
+
 	private LinkType type;
 	final private Display label;
 
@@ -67,6 +69,7 @@ public class Link implements Hideable, Removeable {
 	private Display note;
 	private Position notePosition;
 	private Colors noteColors;
+	private NoteLinkStrategy noteLinkStrategy;
 
 	private boolean invis = false;
 	private double weight = 1.0;
@@ -113,9 +116,9 @@ public class Link implements Hideable, Removeable {
 			this.label = Display.NULL;
 		} else if (doWeHaveToRemoveUrlAtStart(label)) {
 			this.url = label.initUrl();
-			this.label = label.removeHeadingUrl(url);
+			this.label = label.removeHeadingUrl(url).manageGuillemet();
 		} else {
-			this.label = label;
+			this.label = label.manageGuillemet();
 		}
 		this.length = length;
 		this.qualifier1 = qualifier1;
@@ -153,6 +156,8 @@ public class Link implements Hideable, Removeable {
 		final Link result = new Link(cl2, cl1, getType().getInversed(), label, length, qualifier2, qualifier1,
 				labeldistance, labelangle, specificColor);
 		result.inverted = true;
+		result.port1 = this.port2;
+		result.port2 = this.port1;
 		return result;
 	}
 
@@ -224,6 +229,14 @@ public class Link implements Hideable, Removeable {
 
 	public IEntity getEntity2() {
 		return cl2;
+	}
+
+	public EntityPort getEntityPort1(Bibliotekon bibliotekon) {
+		return new EntityPort(bibliotekon.getShapeUid((ILeaf) cl1), port1);
+	}
+
+	public EntityPort getEntityPort2(Bibliotekon bibliotekon) {
+		return new EntityPort(bibliotekon.getShapeUid((ILeaf) cl2), port2);
 	}
 
 	public LinkType getType() {
@@ -316,6 +329,10 @@ public class Link implements Hideable, Removeable {
 		return note;
 	}
 
+	public final NoteLinkStrategy getNoteLinkStrategy() {
+		return noteLinkStrategy;
+	}
+
 	public final Colors getNoteColors() {
 		return noteColors;
 	}
@@ -328,13 +345,15 @@ public class Link implements Hideable, Removeable {
 		this.note = note;
 		this.notePosition = position;
 		this.noteColors = colors;
+		this.noteLinkStrategy = NoteLinkStrategy.NORMAL;
 	}
 
-	// public final void addNote(String n, Position position, Colors colors) {
-	// this.note = Display.getWithNewlines(n);
-	// this.notePosition = position;
-	// this.noteColors = colors;
-	// }
+	public final void addNoteFrom(Link other, NoteLinkStrategy strategy) {
+		this.note = other.note;
+		this.notePosition = other.notePosition;
+		this.noteColors = other.noteColors;
+		this.noteLinkStrategy = strategy;
+	}
 
 	public boolean isAutoLinkOfAGroup() {
 		if (getEntity1().isGroup() == false) {
@@ -520,6 +539,17 @@ public class Link implements Hideable, Removeable {
 
 	public final Colors getColors() {
 		return colors;
+	}
+
+	public void setPortMembers(String port1, String port2) {
+		this.port1 = port1;
+		this.port2 = port2;
+		if (port1 != null) {
+			((ILeaf) cl1).addPortShortName(port1);
+		}
+		if (port2 != null) {
+			((ILeaf) cl2).addPortShortName(port2);
+		}
 	}
 
 }

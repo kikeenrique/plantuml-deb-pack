@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 5207 $
  * 
  */
 package net.sourceforge.plantuml;
@@ -55,8 +52,8 @@ import net.sourceforge.plantuml.donors.PSystemDonorsFactory;
 import net.sourceforge.plantuml.eggs.PSystemAppleTwoFactory;
 import net.sourceforge.plantuml.eggs.PSystemCharlieFactory;
 import net.sourceforge.plantuml.eggs.PSystemEggFactory;
+import net.sourceforge.plantuml.eggs.PSystemEmptyFactory;
 import net.sourceforge.plantuml.eggs.PSystemLostFactory;
-import net.sourceforge.plantuml.eggs.PSystemMemorialFactory;
 import net.sourceforge.plantuml.eggs.PSystemPathFactory;
 import net.sourceforge.plantuml.eggs.PSystemRIPFactory;
 import net.sourceforge.plantuml.flowdiagram.FlowDiagramFactory;
@@ -64,17 +61,20 @@ import net.sourceforge.plantuml.font.PSystemListFontsFactory;
 import net.sourceforge.plantuml.jcckit.PSystemJcckitFactory;
 import net.sourceforge.plantuml.jungle.PSystemTreeFactory;
 import net.sourceforge.plantuml.logo.PSystemLogoFactory;
+import net.sourceforge.plantuml.math.PSystemLatexFactory;
+import net.sourceforge.plantuml.math.PSystemMathFactory;
 import net.sourceforge.plantuml.openiconic.PSystemListOpenIconicFactory;
 import net.sourceforge.plantuml.openiconic.PSystemOpenIconicFactory;
 import net.sourceforge.plantuml.oregon.PSystemOregonFactory;
 import net.sourceforge.plantuml.postit.PostIdDiagramFactory;
 import net.sourceforge.plantuml.printskin.PrintSkinFactory;
-import net.sourceforge.plantuml.project2.PSystemProjectFactory2;
+import net.sourceforge.plantuml.project3.GanttDiagramFactory;
 import net.sourceforge.plantuml.salt.PSystemSaltFactory;
 import net.sourceforge.plantuml.sequencediagram.SequenceDiagramFactory;
 import net.sourceforge.plantuml.statediagram.StateDiagramFactory;
+import net.sourceforge.plantuml.stats.StatsUtilsIncrement;
 import net.sourceforge.plantuml.sudoku.PSystemSudokuFactory;
-import net.sourceforge.plantuml.turing.PSystemTuringFactory;
+import net.sourceforge.plantuml.timingdiagram.TimingDiagramFactory;
 import net.sourceforge.plantuml.ugraphic.sprite.PSystemListInternalSpritesFactory;
 import net.sourceforge.plantuml.version.License;
 import net.sourceforge.plantuml.version.PSystemLicenseFactory;
@@ -86,34 +86,41 @@ public class PSystemBuilder {
 
 	final public Diagram createPSystem(final List<CharSequence2> strings2) {
 
-		final List<PSystemFactory> factories = getAllFactories();
+		final long now = System.currentTimeMillis();
+		Diagram result = null;
+		try {
+			final List<PSystemFactory> factories = getAllFactories();
+			final DiagramType type = DiagramType.getTypeFromArobaseStart(strings2.get(0).toString2());
 
-		final DiagramType type = DiagramType.getTypeFromArobaseStart(strings2.get(0).toString2());
+			final UmlSource umlSource = new UmlSource(strings2, type == DiagramType.UML);
+			final DiagramType diagramType = umlSource.getDiagramType();
+			final List<PSystemError> errors = new ArrayList<PSystemError>();
+			for (PSystemFactory systemFactory : factories) {
+				if (diagramType != systemFactory.getDiagramType()) {
+					continue;
+				}
+				final Diagram sys = systemFactory.createSystem(umlSource);
+				if (isOk(sys)) {
+					result = sys;
+					return sys;
+				}
+				errors.add((PSystemError) sys);
+			}
 
-		final UmlSource umlSource = new UmlSource(strings2, type == DiagramType.UML);
-		final DiagramType diagramType = umlSource.getDiagramType();
-		final List<PSystemError> errors = new ArrayList<PSystemError>();
-		for (PSystemFactory systemFactory : factories) {
-			if (diagramType != systemFactory.getDiagramType()) {
-				continue;
+			final PSystemError err = PSystemError.merge(errors);
+			result = err;
+			return err;
+		} finally {
+			if (result != null && OptionFlags.getInstance().isEnableStats()) {
+				StatsUtilsIncrement.onceMoreParse(System.currentTimeMillis() - now, result.getClass());
 			}
-			final Diagram sys = systemFactory.createSystem(umlSource);
-			if (isOk(sys)) {
-				return sys;
-			}
-			errors.add((PSystemError) sys);
 		}
-
-		final PSystemError err = PSystemError.merge(errors);
-		// if (OptionFlags.getInstance().isQuiet() == false) {
-		// err.print(System.err);
-		// }
-		return err;
 
 	}
 
 	private List<PSystemFactory> getAllFactories() {
 		final List<PSystemFactory> factories = new ArrayList<PSystemFactory>();
+		factories.add(new PSystemEmptyFactory());
 		factories.add(new SequenceDiagramFactory());
 		factories.add(new ClassDiagramFactory());
 		factories.add(new ActivityDiagramFactory());
@@ -135,15 +142,17 @@ public class PSystemBuilder {
 		factories.add(new PSystemSaltFactory(DiagramType.UML));
 		factories.add(new PSystemDotFactory(DiagramType.DOT));
 		factories.add(new PSystemDotFactory(DiagramType.UML));
-		if (License.getCurrent() == License.GPL) {
+		if (License.getCurrent() == License.GPL || License.getCurrent() == License.GPLV2) {
 			factories.add(new PSystemDitaaFactory(DiagramType.DITAA));
 			factories.add(new PSystemDitaaFactory(DiagramType.UML));
 			factories.add(new PSystemJcckitFactory(DiagramType.JCCKIT));
 			factories.add(new PSystemJcckitFactory(DiagramType.UML));
 			factories.add(new PSystemLogoFactory());
 			factories.add(new PSystemSudokuFactory());
-			factories.add(new PSystemTuringFactory());
 		}
+		factories.add(new PSystemMathFactory(DiagramType.MATH));
+		factories.add(new PSystemLatexFactory(DiagramType.LATEX));
+		// factories.add(new PSystemStatsFactory());
 		factories.add(new PSystemCreoleFactory());
 		factories.add(new PSystemEggFactory());
 		factories.add(new PSystemAppleTwoFactory());
@@ -152,15 +161,15 @@ public class PSystemBuilder {
 		factories.add(new PSystemPathFactory());
 		factories.add(new PSystemOregonFactory());
 		factories.add(new PSystemCharlieFactory());
-		factories.add(new PSystemMemorialFactory());
-		if (License.getCurrent() == License.GPL) {
+		if (License.getCurrent() == License.GPL || License.getCurrent() == License.GPLV2) {
 			factories.add(new PSystemXearthFactory());
 		}
-		factories.add(new PSystemProjectFactory2());
+		factories.add(new GanttDiagramFactory());
 		factories.add(new FlowDiagramFactory());
 		factories.add(new PSystemTreeFactory(DiagramType.JUNGLE));
 		factories.add(new PSystemCuteFactory(DiagramType.CUTE));
 		factories.add(new PSystemDedicationFactory());
+		factories.add(new TimingDiagramFactory());
 		return factories;
 	}
 

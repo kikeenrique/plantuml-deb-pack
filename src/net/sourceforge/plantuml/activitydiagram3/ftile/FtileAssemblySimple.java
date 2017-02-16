@@ -23,26 +23,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile;
 
 import java.awt.geom.Dimension2D;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
 import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
+import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 public class FtileAssemblySimple extends AbstractTextBlock implements Ftile {
@@ -132,8 +134,22 @@ public class FtileAssemblySimple extends AbstractTextBlock implements Ftile {
 		return Collections.unmodifiableSet(result);
 	}
 
-	public boolean shadowing() {
-		return tile1.shadowing() || tile2.shadowing();
+	public ISkinParam skinParam() {
+		return tile1.skinParam();
+	}
+
+	public UStroke getThickness() {
+		return tile1.getThickness();
+	}
+
+	public List<WeldingPoint> getWeldingPoints() {
+		final List<WeldingPoint> result = new ArrayList<WeldingPoint>(tile1.getWeldingPoints());
+		result.addAll(tile2.getWeldingPoints());
+		return Collections.unmodifiableList(result);
+	}
+
+	public Collection<Ftile> getMyChildren() {
+		return Arrays.asList(tile1, tile2);
 	}
 
 }

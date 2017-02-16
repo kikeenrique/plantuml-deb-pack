@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 6577 $
  *
  */
 package net.sourceforge.plantuml.graphic;
@@ -39,15 +36,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
+import net.sourceforge.plantuml.svek.Ports;
+import net.sourceforge.plantuml.svek.WithPorts;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class TextBlockVertical2 extends AbstractTextBlock implements TextBlock {
+public class TextBlockVertical2 extends AbstractTextBlock implements TextBlock, WithPorts {
 
 	private final List<TextBlock> blocks = new ArrayList<TextBlock>();
 	private final HorizontalAlignment horizontalAlignment;
 
-	public TextBlockVertical2(TextBlock b1, TextBlock b2, HorizontalAlignment horizontalAlignment) {
+	TextBlockVertical2(TextBlock b1, TextBlock b2, HorizontalAlignment horizontalAlignment) {
 		this.blocks.add(b1);
 		this.blocks.add(b2);
 		this.horizontalAlignment = horizontalAlignment;
@@ -87,6 +86,19 @@ public class TextBlockVertical2 extends AbstractTextBlock implements TextBlock {
 			}
 			y += dimb.getHeight();
 		}
+	}
+
+	public Ports getPorts(StringBounder stringBounder) {
+		double y = 0;
+		// final Dimension2D dimtotal = calculateDimension(stringBounder);
+		final Ports result = new Ports();
+		for (TextBlock block : blocks) {
+			final Dimension2D dimb = block.calculateDimension(stringBounder);
+			final Ports tmp = ((WithPorts) block).getPorts(stringBounder).translateY(y);
+			result.addThis(tmp);
+			y += dimb.getHeight();
+		}
+		return result;
 	}
 
 	@Override

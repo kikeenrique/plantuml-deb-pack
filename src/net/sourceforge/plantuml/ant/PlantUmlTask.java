@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 19636 $
  *
  */
 package net.sourceforge.plantuml.ant;
@@ -51,6 +48,7 @@ import net.sourceforge.plantuml.OptionFlags;
 import net.sourceforge.plantuml.SourceFileReader;
 import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
 import net.sourceforge.plantuml.preproc.Defines;
+import net.sourceforge.plantuml.stats.StatsUtils;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
@@ -301,6 +299,9 @@ public class PlantUmlTask extends Task {
 		if ("eps".equalsIgnoreCase(s)) {
 			option.setFileFormat(FileFormat.EPS);
 		}
+		if ("braille".equalsIgnoreCase(s)) {
+			option.setFileFormat(FileFormat.BRAILLE_PNG);
+		}
 		if ("pdf".equalsIgnoreCase(s)) {
 			option.setFileFormat(FileFormat.PDF);
 		}
@@ -368,6 +369,30 @@ public class PlantUmlTask extends Task {
 	public void setOverwrite(String s) {
 		final boolean flag = "true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s) || "on".equalsIgnoreCase(s);
 		OptionFlags.getInstance().setOverwrite(flag);
+	}
+
+	public void setFileSeparator(String s) {
+		OptionFlags.getInstance().setFileSeparator(s);
+	}
+
+	public void setHtmlStats(String s) {
+		final boolean flag = "true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s) || "on".equalsIgnoreCase(s);
+		StatsUtils.setHtmlStats(flag);
+	}
+
+	public void setXmlStats(String s) {
+		final boolean flag = "true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s) || "on".equalsIgnoreCase(s);
+		StatsUtils.setXmlStats(flag);
+	}
+
+	public void setRealTimeStats(String s) {
+		final boolean flag = "true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s) || "on".equalsIgnoreCase(s);
+		StatsUtils.setRealTimeStats(flag);
+	}
+
+	public void setEnableStats(String s) {
+		final boolean flag = "true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s) || "on".equalsIgnoreCase(s);
+		OptionFlags.getInstance().setEnableStats(flag);
 	}
 
 }

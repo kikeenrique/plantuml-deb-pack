@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19885 $
  *
  */
 package net.sourceforge.plantuml.sequencediagram.graphic;
@@ -45,6 +42,7 @@ import java.util.Set;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.LineParam;
 import net.sourceforge.plantuml.SkinParamBackcolored;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -61,7 +59,9 @@ import net.sourceforge.plantuml.skin.SimpleContext2D;
 import net.sourceforge.plantuml.skin.Skin;
 import net.sourceforge.plantuml.ugraphic.UClip;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
+import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
+import net.sourceforge.plantuml.ugraphic.txt.UGraphicTxt;
 
 public class DrawableSet {
 
@@ -138,7 +138,7 @@ public class DrawableSet {
 	public double getHeadAndEngloberHeight(Participant p, StringBounder stringBounder) {
 		final LivingParticipantBox box = participants.get(p);
 		final double height = box.getParticipantBox().getHeadHeight(stringBounder);
-		final Englober englober = getParticipantEnglober(p);
+		final Englober englober = getParticipantEnglober(p, stringBounder);
 		if (englober == null) {
 			return height;
 		}
@@ -148,7 +148,7 @@ public class DrawableSet {
 		return height + heightEnglober;
 	}
 
-	public List<Englober> getExistingParticipantEnglober() {
+	public List<Englober> getExistingParticipantEnglober(StringBounder stringBounder) {
 		final List<Englober> result = new ArrayList<Englober>();
 		Englober pending = null;
 		for (Map.Entry<Participant, ParticipantEnglober> ent : participantEnglobers2.entrySet()) {
@@ -162,7 +162,7 @@ public class DrawableSet {
 				pending.add(ent.getKey());
 				continue;
 			}
-			pending = new Englober(englober, ent.getKey(), getSkinParam(), skin);
+			pending = new Englober(englober, ent.getKey(), getSkinParam(), skin, stringBounder);
 			result.add(pending);
 		}
 		return Collections.unmodifiableList(result);
@@ -170,7 +170,7 @@ public class DrawableSet {
 
 	public double getOffsetForEnglobers(StringBounder stringBounder) {
 		double result = 0;
-		for (Englober englober : getExistingParticipantEnglober()) {
+		for (Englober englober : getExistingParticipantEnglober(stringBounder)) {
 			final Component comp = skin.createComponent(ComponentType.ENGLOBER, null, skinParam, englober
 					.getParticipantEnglober().getTitle());
 			final double height = comp.getPreferredHeight(stringBounder);
@@ -185,7 +185,8 @@ public class DrawableSet {
 	static private final int MARGIN_FOR_ENGLOBERS1 = 2;
 
 	public double getTailHeight(StringBounder stringBounder, boolean showTail) {
-		final double marginForEnglobers = getExistingParticipantEnglober().size() > 0 ? MARGIN_FOR_ENGLOBERS : 0;
+		final double marginForEnglobers = getExistingParticipantEnglober(stringBounder).size() > 0 ? MARGIN_FOR_ENGLOBERS
+				: 0;
 
 		if (showTail == false) {
 			return 1 + marginForEnglobers;
@@ -265,6 +266,8 @@ public class DrawableSet {
 	}
 
 	private void drawLineU22(UGraphic ug, boolean showTail, Page page) {
+		// http://plantuml.sourceforge.net/qa/?qa=4826/lifelines-broken-for-txt-seq-diagrams-when-create-is-used
+		final boolean isTxt = ug instanceof UGraphicTxt;
 		for (LivingParticipantBox box : getAllLivingParticipantBox()) {
 			final double create = box.getCreate();
 			final double startMin = page.getBodyRelativePosition() - box.magicMargin(ug.getStringBounder());
@@ -275,11 +278,15 @@ public class DrawableSet {
 					continue;
 				}
 				if (create >= page.getNewpage1() && create < page.getNewpage2()) {
-					start += create - page.getNewpage1() + 2 * box.magicMargin(ug.getStringBounder());
+					if (isTxt) {
+						start = (int) create;
+					} else {
+						start += create - page.getNewpage1() + 2 * box.magicMargin(ug.getStringBounder());
+					}
 				}
 			}
 			final double myDelta = page.getNewpage1() - page.getHeaderHeight();
-			box.drawLineU22(ug, start,  endMax, showTail, myDelta);
+			box.drawLineU22(ug, start, endMax, showTail, myDelta);
 		}
 	}
 
@@ -327,7 +334,7 @@ public class DrawableSet {
 	}
 
 	private void drawEnglobers(UGraphic ug, double height, Context2D context) {
-		for (Englober englober : getExistingParticipantEnglober()) {
+		for (Englober englober : getExistingParticipantEnglober(ug.getStringBounder())) {
 			double x1 = getX1(englober);
 			final double x2 = getX2(ug.getStringBounder(), englober);
 
@@ -378,8 +385,8 @@ public class DrawableSet {
 		line.drawU(ug, getSkin(), skinParam);
 	}
 
-	private Englober getParticipantEnglober(Participant p) {
-		for (Englober pe : getExistingParticipantEnglober()) {
+	private Englober getParticipantEnglober(Participant p, StringBounder stringBounder) {
+		for (Englober pe : getExistingParticipantEnglober(stringBounder)) {
 			if (pe.contains(p)) {
 				return pe;
 			}
@@ -415,6 +422,14 @@ public class DrawableSet {
 			}
 		}
 		return list.get(max);
+	}
+
+	public double getArrowThickness() {
+		final UStroke result = skinParam.getThickness(LineParam.sequenceArrow, null);
+		if (result == null) {
+			return 1;
+		}
+		return result.getThickness();
 	}
 
 }

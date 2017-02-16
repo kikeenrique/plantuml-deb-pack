@@ -23,8 +23,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
@@ -292,7 +290,7 @@ public class CommandLinkElement extends SingleLineCommand2<DescriptionDiagram> {
 		colors = CommandLinkClass.applyStyle(arg.getLazzy("ARROW_STYLE", 0), link, colors);
 		if (arg.get("STEREOTYPE", 0) != null) {
 			final Stereotype stereotype = new Stereotype(arg.get("STEREOTYPE", 0));
-			colors = colors.applyStereotype(stereotype, diagram.getSkinParam(), ColorParam.componentArrow);
+			colors = colors.applyStereotype(stereotype, diagram.getSkinParam(), ColorParam.arrow);
 		}
 
 		link.setColors(colors);

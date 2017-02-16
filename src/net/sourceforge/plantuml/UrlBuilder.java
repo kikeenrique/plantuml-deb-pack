@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 6396 $
  *
  */
 package net.sourceforge.plantuml;
@@ -55,7 +52,7 @@ public class UrlBuilder {
 	}
 
 	private static final String URL_PATTERN_OLD = "\\[\\[([%g][^%g]+[%g]|[^{}%s\\]\\[]*)(?:[%s]*\\{((?:[^{}]|\\{[^{}]*\\})+)\\})?(?:[%s]*([^\\]\\[]+))?\\]\\]";
-	private static final String URL_PATTERN = "\\[\\[([%g][^%g]+[%g])?([\\w\\W]*)\\]\\]";
+	private static final String URL_PATTERN = "\\[\\[([%g][^%g]+[%g])?([\\w\\W]*?)\\]\\]";
 
 	private static final String URL_PATTERN_BAD = "\\[\\[([%g][^%g]+[%g]|[^{}%s\\]\\[]*)(?:[%s]*\\{" + "(" + levelN(3)
 			+ ")" + "\\})?(?:[%s]*([^\\]\\[]+))?\\]\\]";
@@ -145,7 +142,7 @@ public class UrlBuilder {
 		final Pattern2 p = MyPattern.cmpile("[%s]*" + URL_PATTERN + "[%s]*");
 		final Matcher2 m = p.matcher(label);
 		if (m.find() == false) {
-			throw new IllegalStateException();
+			return label;
 		}
 		final String url = m.group(0);
 		final int x = label.indexOf(url);

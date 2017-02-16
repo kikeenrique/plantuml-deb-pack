@@ -23,18 +23,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 19462 $
  *
  */
 package net.sourceforge.plantuml;
 
 import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -63,6 +63,7 @@ import net.sourceforge.plantuml.png.MetadataTag;
 import net.sourceforge.plantuml.preproc.Defines;
 import net.sourceforge.plantuml.sequencediagram.SequenceDiagramFactory;
 import net.sourceforge.plantuml.statediagram.StateDiagramFactory;
+import net.sourceforge.plantuml.stats.StatsUtils;
 import net.sourceforge.plantuml.swing.MainWindow2;
 import net.sourceforge.plantuml.ugraphic.sprite.SpriteGrayLevel;
 import net.sourceforge.plantuml.ugraphic.sprite.SpriteUtils;
@@ -73,6 +74,18 @@ public class Run {
 	public static void main(String[] argsArray) throws IOException, InterruptedException {
 		final long start = System.currentTimeMillis();
 		final Option option = new Option(argsArray);
+		if (OptionFlags.getInstance().isDumpStats()) {
+			StatsUtils.dumpStats();
+			return;
+		}
+		if (OptionFlags.getInstance().isLoopStats()) {
+			StatsUtils.loopStats();
+			return;
+		}
+		if (OptionFlags.getInstance().isDumpHtmlStats()) {
+			StatsUtils.outHtml();
+			return;
+		}
 		if (OptionFlags.getInstance().isEncodesprite()) {
 			encodeSprite(option.getResult());
 			return;
@@ -97,6 +110,7 @@ public class Run {
 			return;
 		}
 
+		forceOpenJdkResourceLoad();
 		boolean error = false;
 		boolean forceQuit = false;
 		if (option.isPattern()) {
@@ -115,7 +129,7 @@ public class Run {
 				}
 			}
 			new MainWindow2(option, dir);
-		} else if (option.isPipe() || option.isSyntax()) {
+		} else if (option.isPipe() || option.isPipeMap() || option.isSyntax()) {
 			managePipe(option);
 			forceQuit = true;
 		} else if (option.isFailfast2()) {
@@ -149,6 +163,15 @@ public class Run {
 		if (forceQuit && OptionFlags.getInstance().isSystemExit()) {
 			System.exit(0);
 		}
+	}
+
+	public static void forceOpenJdkResourceLoad() {
+		final BufferedImage imDummy = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+		final Graphics2D gg = imDummy.createGraphics();
+		final String text = "Alice";
+		final Font font = new Font("SansSerif", Font.PLAIN, 12);
+		final FontMetrics fm = gg.getFontMetrics(font);
+		final Rectangle2D rect = fm.getStringBounds(text, gg);
 	}
 
 	private static void encodeSprite(List<String> result) throws IOException {
@@ -273,6 +296,9 @@ public class Run {
 				ps.println("OTHER");
 				ps.println(system.getDescription());
 			}
+		} else if (option.isPipeMap()) {
+			final String result = sourceStringReader.getCMapData(0, option.getFileFormatOption());
+			ps.println(result);
 		} else if (option.isPipe()) {
 			final String result = sourceStringReader.generateImage(ps, 0, option.getFileFormatOption());
 			if ("(error)".equalsIgnoreCase(result)) {

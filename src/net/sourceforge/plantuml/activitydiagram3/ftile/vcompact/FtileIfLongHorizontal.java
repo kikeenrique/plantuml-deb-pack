@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile.vcompact;
@@ -36,6 +33,8 @@ package net.sourceforge.plantuml.activitydiagram3.ftile.vcompact;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -55,10 +54,12 @@ import net.sourceforge.plantuml.activitydiagram3.ftile.FtileFactory;
 import net.sourceforge.plantuml.activitydiagram3.ftile.FtileGeometry;
 import net.sourceforge.plantuml.activitydiagram3.ftile.FtileMinWidth;
 import net.sourceforge.plantuml.activitydiagram3.ftile.FtileUtils;
+import net.sourceforge.plantuml.activitydiagram3.ftile.MergeStrategy;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Snake;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vcompact.cond.FtileIfWithLinks;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vertical.FtileDiamondInside2;
+import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
@@ -80,13 +81,16 @@ class FtileIfLongHorizontal extends AbstractFtile {
 
 	private final Rainbow arrowColor;
 
-	private FtileIfLongHorizontal(List<Ftile> diamonds, List<Ftile> tiles, Ftile tile2, Rainbow arrowColor) {
-		super(tiles.get(0).shadowing() || tile2.shadowing());
+	private FtileIfLongHorizontal(List<Ftile> diamonds, List<Double> inlabelSizes, List<Ftile> tiles, Ftile tile2,
+			Rainbow arrowColor) {
+		super(tiles.get(0).skinParam());
 		if (diamonds.size() != tiles.size()) {
 			throw new IllegalArgumentException();
 		}
 		for (int i = 0; i < diamonds.size(); i++) {
-			couples.add(new FtileAssemblySimple(diamonds.get(i), tiles.get(i)));
+			final Ftile diamond = diamonds.get(i);
+			final FtileAssemblySimple tmp = new FtileAssemblySimple(diamond, tiles.get(i));
+			couples.add(FtileUtils.addHorizontalMargin(tmp, inlabelSizes.get(i), 0));
 		}
 		this.tile2 = tile2;
 		this.diamonds = new ArrayList<Ftile>(diamonds);
@@ -147,22 +151,35 @@ class FtileIfLongHorizontal extends AbstractFtile {
 		final Ftile tile2 = new FtileMinWidth(branch2.getFtile(), 30);
 
 		List<Ftile> diamonds = new ArrayList<Ftile>();
+		List<Double> inlabelSizes = new ArrayList<Double>();
 		for (Branch branch : thens) {
-			final TextBlock tb1 = branch.getLabelPositive().create(fc, HorizontalAlignment.LEFT, ftileFactory);
-			final TextBlock tbTest = branch.getLabelTest().create(fc, HorizontalAlignment.LEFT, ftileFactory);
-			FtileDiamondInside2 diamond = new FtileDiamondInside2(branch.shadowing(), backColor, borderColor, swimlane,
-					tbTest);
+			final TextBlock tb1 = branch.getLabelPositive().create(fc, HorizontalAlignment.LEFT,
+					ftileFactory.skinParam());
+			final TextBlock tbTest = branch.getLabelTest().create(fc, HorizontalAlignment.LEFT,
+					ftileFactory.skinParam());
+			final HtmlColor diamondColor = branch.getColor() == null ? backColor : branch.getColor();
+
+			FtileDiamondInside2 diamond = new FtileDiamondInside2(branch.skinParam(), diamondColor, borderColor,
+					swimlane, tbTest);
+			TextBlock tbInlabel = null;
+			if (Display.isNull(branch.getInlabel())) {
+				inlabelSizes.add(0.0);
+			} else {
+				tbInlabel = branch.getInlabel().create(fc, HorizontalAlignment.LEFT, ftileFactory.skinParam());
+				inlabelSizes.add(tbInlabel.calculateDimension(ftileFactory.getStringBounder()).getWidth());
+				diamond = diamond.withWest(tbInlabel);
+			}
 			diamond = diamond.withNorth(tb1);
 			diamonds.add(diamond);
 		}
 
-		final TextBlock tb2 = branch2.getLabelPositive().create(fc, HorizontalAlignment.LEFT, ftileFactory);
+		final TextBlock tb2 = branch2.getLabelPositive().create(fc, HorizontalAlignment.LEFT, ftileFactory.skinParam());
 		final int last = diamonds.size() - 1;
 		diamonds.set(last, ((FtileDiamondInside2) diamonds.get(last)).withEast(tb2));
 
 		diamonds = alignDiamonds(diamonds, ftileFactory.getStringBounder());
 
-		final FtileIfLongHorizontal result = new FtileIfLongHorizontal(diamonds, tiles, tile2, arrowColor);
+		final FtileIfLongHorizontal result = new FtileIfLongHorizontal(diamonds, inlabelSizes, tiles, tile2, arrowColor);
 		final List<Connection> conns = new ArrayList<Connection>();
 
 		for (int i = 0; i < thens.size(); i++) {
@@ -180,7 +197,7 @@ class FtileIfLongHorizontal extends AbstractFtile {
 		for (int i = 0; i < diamonds.size() - 1; i++) {
 			final Ftile diam1 = diamonds.get(i);
 			final Ftile diam2 = diamonds.get(i + 1);
-			conns.add(result.new ConnectionHorizontal(diam1, diam2, topInColor));
+			conns.add(result.new ConnectionHorizontal(diam1, diam2, arrowColor));
 		}
 		conns.add(result.new ConnectionIn(topInColor));
 		conns.add(result.new ConnectionLastElseIn(FtileIfWithLinks.getInColor(branch2, arrowColor)));
@@ -441,7 +458,7 @@ class FtileIfLongHorizontal extends AbstractFtile {
 			}
 
 			final Snake s = new Snake(arrowColor);
-			s.goUnmergeable();
+			s.goUnmergeable(MergeStrategy.NONE);
 			final double height = totalDim.getHeight();
 			s.addPoint(minX, height);
 			s.addPoint(maxX, height);
@@ -450,12 +467,23 @@ class FtileIfLongHorizontal extends AbstractFtile {
 	}
 
 	@Override
+	public Collection<Ftile> getMyChildren() {
+		final List<Ftile> result = new ArrayList<Ftile>(tiles);
+		result.add(tile2);
+		return Collections.unmodifiableList(result);
+	}
+
+
+	@Override
 	public UTranslate getTranslateFor(Ftile child, StringBounder stringBounder) {
 		if (child == tile2) {
 			return getTranslate2(stringBounder);
 		}
 		if (couples.contains(child)) {
 			return getTranslateCouple1(child, stringBounder);
+		}
+		if (tiles.contains(child)) {
+			return getTranslate1(child, stringBounder);
 		}
 		throw new UnsupportedOperationException();
 	}

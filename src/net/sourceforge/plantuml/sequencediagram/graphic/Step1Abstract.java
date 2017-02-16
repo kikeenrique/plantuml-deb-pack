@@ -23,19 +23,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4683 $
  *
  */
 package net.sourceforge.plantuml.sequencediagram.graphic;
 
-import net.sourceforge.plantuml.Url;
+import java.util.ArrayList;
+import java.util.List;
+
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.sequencediagram.AbstractMessage;
+import net.sourceforge.plantuml.sequencediagram.NoteOnMessage;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 import net.sourceforge.plantuml.skin.ArrowConfiguration;
 import net.sourceforge.plantuml.skin.Component;
@@ -50,10 +50,9 @@ abstract class Step1Abstract {
 
 	private Frontier freeY2;
 
-	// private ComponentType type;
 	private ArrowConfiguration config;
 
-	private Component note;
+	private final List<Component> notes = new ArrayList<Component>();
 
 	private ParticipantRange range;
 
@@ -80,15 +79,15 @@ abstract class Step1Abstract {
 	}
 
 	protected final void setConfig(ArrowConfiguration config) {
-		this.config = config;
+		this.config = config.withThickness(drawingSet.getArrowThickness());
 	}
 
-	protected final Component getNote() {
-		return note;
+	protected final List<Component> getNotes() {
+		return notes;
 	}
 
-	protected final void setNote(Component note) {
-		this.note = note;
+	protected final void addNote(Component note) {
+		this.notes.add(note);
 	}
 
 	protected final StringBounder getStringBounder() {
@@ -112,11 +111,12 @@ abstract class Step1Abstract {
 	}
 
 	protected final NoteBox createNoteBox(StringBounder stringBounder, Arrow arrow, Component noteComp,
-			NotePosition notePosition, Url url) {
-		final LivingParticipantBox p = arrow.getParticipantAt(stringBounder, notePosition);
-		final NoteBox noteBox = new NoteBox(arrow.getStartingY(), noteComp, p, null, notePosition, url);
+			NoteOnMessage noteOnMessage) {
+		final LivingParticipantBox p = arrow.getParticipantAt(stringBounder, noteOnMessage.getNotePosition());
+		final NoteBox noteBox = new NoteBox(arrow.getStartingY(), noteComp, p, null, noteOnMessage.getNotePosition(),
+				noteOnMessage.getUrlNote());
 
-		if (arrow instanceof MessageSelfArrow && notePosition == NotePosition.RIGHT) {
+		if (arrow instanceof MessageSelfArrow && noteOnMessage.getNotePosition() == NotePosition.RIGHT) {
 			noteBox.pushToRight(arrow.getPreferredWidth(stringBounder));
 		}
 		// if (arrow instanceof MessageExoArrow) {

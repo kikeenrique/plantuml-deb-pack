@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4167 $
  *
  */
 package net.sourceforge.plantuml.postit;
@@ -110,7 +107,7 @@ public class PostIt {
 		final HtmlColor noteBackgroundColor = new HtmlColorSetSimple().getColorIfValid("#FBFB77");
 		final HtmlColor borderColor = HtmlColorUtils.MY_RED;
 
-		final SkinParam param = SkinParam.noShadowing();
+		final SkinParam param = SkinParam.noShadowing(null);
 		final UFont fontNote = param.getFont(null, false, FontParam.NOTE);
 		final FontConfiguration font2 = fontNote.toFont2(HtmlColorUtils.BLACK, true, HtmlColorUtils.BLUE, 8);
 		final ComponentRoseNote note = new ComponentRoseNote(

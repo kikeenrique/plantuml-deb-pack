@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 4762 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.command;
@@ -55,7 +52,7 @@ public class CommandWhile3 extends SingleLineCommand2<ActivityDiagram3> {
 				new RegexLeaf("^"), //
 				ColorParser.exp4(), //
 				new RegexLeaf("while"), //
-				new RegexLeaf("TEST", "[%s]*\\((.+?)\\)"), //
+				new RegexLeaf("TEST", "[%s]*\\((.*?)\\)"), //
 				new RegexOptional(new RegexConcat(//
 						new RegexLeaf("[%s]*(is|equals?)[%s]*"), //
 						new RegexLeaf("YES", "\\((.+?)\\)"))), //

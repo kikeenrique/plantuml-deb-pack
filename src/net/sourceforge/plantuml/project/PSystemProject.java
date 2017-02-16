@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 6104 $
  *
  */
 package net.sourceforge.plantuml.project;
@@ -50,7 +47,7 @@ import net.sourceforge.plantuml.core.DiagramDescriptionImpl;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.eps.EpsStrategy;
 import net.sourceforge.plantuml.png.PngIO;
-import net.sourceforge.plantuml.project.graphic.GanttDiagram;
+import net.sourceforge.plantuml.project.graphic.GanttDiagramUnused;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
 import net.sourceforge.plantuml.ugraphic.ColorMapperIdentity;
 import net.sourceforge.plantuml.ugraphic.eps.UGraphicEps;
@@ -71,14 +68,17 @@ public class PSystemProject extends AbstractPSystem {
 		return new DiagramDescriptionImpl("(Project)", getClass());
 	}
 
-	public ImageData exportDiagram(OutputStream os, int num, FileFormatOption fileFormatOption) throws IOException {
-		final GanttDiagram diagram = new GanttDiagram(project);
+	@Override
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormatOption)
+			throws IOException {
+		final GanttDiagramUnused diagram = new GanttDiagramUnused(project);
 		final FileFormat fileFormat = fileFormatOption.getFileFormat();
 		if (fileFormat == FileFormat.PNG) {
 			final BufferedImage im = createImage(diagram);
 			PngIO.write(im, os, fileFormatOption.isWithMetadata() ? getMetadata() : null, 96);
 		} else if (fileFormat == FileFormat.SVG) {
-			final UGraphicSvg svg = new UGraphicSvg(colorMapper, StringUtils.getAsHtml(background), false, 1.0, fileFormatOption.getSvgLinkTarget());
+			final UGraphicSvg svg = new UGraphicSvg(colorMapper, StringUtils.getAsHtml(background), false, 1.0,
+					fileFormatOption.getSvgLinkTarget(), fileFormatOption.getHoverColor());
 			diagram.draw(svg, 0, 0);
 			svg.createXml(os);
 		} else if (fileFormat == FileFormat.EPS) {
@@ -95,7 +95,7 @@ public class PSystemProject extends AbstractPSystem {
 		return new ImageDataSimple();
 	}
 
-	private BufferedImage createImage(GanttDiagram diagram) {
+	private BufferedImage createImage(GanttDiagramUnused diagram) {
 		EmptyImageBuilder builder = new EmptyImageBuilder(10, 10, background);
 		Graphics2D g2d = builder.getGraphics2D();
 		UGraphicG2d ug = new UGraphicG2d(colorMapper, g2d, 1.0);

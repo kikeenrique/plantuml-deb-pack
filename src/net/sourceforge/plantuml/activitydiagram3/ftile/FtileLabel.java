@@ -23,22 +23,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile;
+
+import net.sourceforge.plantuml.ISkinParam;
 
 public class FtileLabel extends FtileEmpty {
 
 	private final String name;
 
-	public FtileLabel(boolean shadowing, Swimlane swimlane, String name) {
-		super(shadowing, swimlane);
+	public FtileLabel(ISkinParam skinParam, Swimlane swimlane, String name) {
+		super(skinParam, swimlane);
 		this.name = name;
 	}
 

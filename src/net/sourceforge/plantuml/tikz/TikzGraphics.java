@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 12561 $
  *
  */
 package net.sourceforge.plantuml.tikz;
@@ -61,12 +58,14 @@ public class TikzGraphics {
 	private Color color = Color.BLACK;
 	private Color fillcolor = Color.BLACK;
 	private double thickness = 1.0;
+	private final double scale;
 	private String dash = null;
 
 	private final Map<Color, String> colornames = new LinkedHashMap<Color, String>();
 
-	public TikzGraphics(boolean withPreamble) {
+	public TikzGraphics(double scale, boolean withPreamble) {
 		this.withPreamble = withPreamble;
+		this.scale = scale;
 	}
 
 	private String getColorName(Color c) {
@@ -133,11 +132,17 @@ public class TikzGraphics {
 			out(os, definecolor(ent.getValue(), ent.getKey()));
 
 		}
+		if (scale != 1) {
+			out(os, "\\scalebox{" + format(scale) + "}{");
+		}
 		out(os, "\\begin{tikzpicture}[yscale=-1]");
 		for (String s : cmd) {
 			out(os, s);
 		}
 		out(os, "\\end{tikzpicture}");
+		if (scale != 1) {
+			out(os, "}");
+		}
 		if (withPreamble) {
 			out(os, "\\end{document}");
 		}

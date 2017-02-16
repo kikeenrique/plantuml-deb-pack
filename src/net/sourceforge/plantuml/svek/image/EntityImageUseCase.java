@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 5183 $
  *
  */
 package net.sourceforge.plantuml.svek.image;
@@ -77,7 +74,7 @@ public class EntityImageUseCase extends AbstractEntityImage {
 		final Stereotype stereotype = entity.getStereotype();
 
 		final TextBlock tmp = new BodyEnhanced(entity.getDisplay(), FontParam.USECASE, skinParam,
-				HorizontalAlignment.CENTER, stereotype, true, false, false);
+				HorizontalAlignment.CENTER, stereotype, true, false, false, entity);
 
 		if (stereotype == null || stereotype.getLabel(false) == null) {
 			this.desc = tmp;
@@ -106,8 +103,12 @@ public class EntityImageUseCase extends AbstractEntityImage {
 			ug.startUrl(url);
 		}
 
-		ug = ug.apply(stroke).apply(
-				new UChangeColor(SkinParamUtils.getColor(getSkinParam(), ColorParam.usecaseBorder, getStereo())));
+		ug = ug.apply(stroke);
+		HtmlColor linecolor = getEntity().getColors(getSkinParam()).getColor(ColorType.LINE);
+		if (linecolor == null) {
+			linecolor = SkinParamUtils.getColor(getSkinParam(), ColorParam.usecaseBorder, getStereo());
+		}
+		ug = ug.apply(new UChangeColor(linecolor));
 		HtmlColor backcolor = getEntity().getColors(getSkinParam()).getColor(ColorType.BACK);
 		if (backcolor == null) {
 			backcolor = SkinParamUtils.getColor(getSkinParam(), ColorParam.usecaseBackground, getStereo());

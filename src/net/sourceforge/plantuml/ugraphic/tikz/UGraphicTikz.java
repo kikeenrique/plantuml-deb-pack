@@ -23,8 +23,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
@@ -34,10 +32,10 @@ package net.sourceforge.plantuml.ugraphic.tikz;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.creole.AtomText;
 import net.sourceforge.plantuml.graphic.StringBounder;
-import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.posimo.DotPath;
 import net.sourceforge.plantuml.tikz.TikzGraphics;
 import net.sourceforge.plantuml.ugraphic.AbstractCommonUGraphic;
@@ -61,13 +59,13 @@ public class UGraphicTikz extends AbstractUGraphic<TikzGraphics> implements Clip
 
 	private UGraphicTikz(ColorMapper colorMapper, TikzGraphics tikz) {
 		super(colorMapper, tikz);
-		this.stringBounder = TextBlockUtils.getDummyStringBounder();
+		this.stringBounder = FileFormat.PNG.getDefaultStringBounder();
 		register();
 
 	}
 
-	public UGraphicTikz(ColorMapper colorMapper, boolean withPreamble) {
-		this(colorMapper, new TikzGraphics(withPreamble));
+	public UGraphicTikz(ColorMapper colorMapper, double scale, boolean withPreamble) {
+		this(colorMapper, new TikzGraphics(scale, withPreamble));
 
 	}
 
@@ -116,8 +114,12 @@ public class UGraphicTikz extends AbstractUGraphic<TikzGraphics> implements Clip
 		getGraphicObject().createData(os);
 	}
 
-	public boolean isSpecialTxt() {
-		return true;
+	@Override
+	public boolean matchesProperty(String propertyName) {
+		if ("SPECIALTXT".equalsIgnoreCase(propertyName)) {
+			return true;
+		}
+		return false;
 	}
 
 }

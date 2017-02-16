@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4041 $
  *
  */
 package net.sourceforge.plantuml.cute;
@@ -62,7 +59,7 @@ public class PSystemCute extends AbstractPSystem {
 
 	public void doCommandLine(String line) {
 		line = StringUtils.trin(line);
-		if (line.length()==0 || line.startsWith("'")) {
+		if (line.length() == 0 || line.startsWith("'")) {
 			return;
 		}
 		if (line.startsWith("group ")) {
@@ -82,8 +79,11 @@ public class PSystemCute extends AbstractPSystem {
 		}
 	}
 
-	public ImageData exportDiagram(OutputStream os, int num, FileFormatOption fileFormat) throws IOException {
-		final ImageBuilder builder = new ImageBuilder(new ColorMapperIdentity(), 1.0, null, null, null, 10, 10, null, false);
+	@Override
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat)
+			throws IOException {
+		final ImageBuilder builder = new ImageBuilder(new ColorMapperIdentity(), 1.0, null, null, null, 10, 10, null,
+				false);
 		builder.setUDrawable(root);
 		return builder.writeImageTOBEMOVED(fileFormat, os);
 	}

@@ -23,15 +23,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 19109 $
  */
 package net.sourceforge.plantuml;
 
+import java.awt.geom.Dimension2D;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -47,9 +45,17 @@ import net.sourceforge.plantuml.core.DiagramDescription;
 import net.sourceforge.plantuml.core.DiagramDescriptionImpl;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.core.UmlSource;
+import net.sourceforge.plantuml.eggs.PSystemEmpty;
 import net.sourceforge.plantuml.graphic.GraphicStrings;
+import net.sourceforge.plantuml.graphic.UDrawable;
+import net.sourceforge.plantuml.svek.TextBlockBackcolored;
 import net.sourceforge.plantuml.ugraphic.ColorMapperIdentity;
 import net.sourceforge.plantuml.ugraphic.ImageBuilder;
+import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
+import net.sourceforge.plantuml.ugraphic.UChangeColor;
+import net.sourceforge.plantuml.ugraphic.UGraphic;
+import net.sourceforge.plantuml.ugraphic.URectangle;
+import net.sourceforge.plantuml.ugraphic.UTranslate;
 import net.sourceforge.plantuml.ugraphic.txt.UGraphicTxt;
 
 public class PSystemError extends AbstractPSystem {
@@ -101,7 +107,9 @@ public class PSystemError extends AbstractPSystem {
 		return "red";
 	}
 
-	public ImageData exportDiagram(OutputStream os, int num, FileFormatOption fileFormat) throws IOException {
+	@Override
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat)
+			throws IOException {
 		if (fileFormat.getFileFormat() == FileFormat.ATXT || fileFormat.getFileFormat() == FileFormat.UTXT) {
 			final UGraphicTxt ugt = new UGraphicTxt();
 			final UmlCharArea area = ugt.getCharArea();
@@ -111,10 +119,29 @@ public class PSystemError extends AbstractPSystem {
 
 		}
 		final boolean useRed = fileFormat.isUseRedForError();
-		final GraphicStrings result = GraphicStrings.createDefault(getHtmlStrings(useRed), useRed);
+		final TextBlockBackcolored result = GraphicStrings.createForError(getHtmlStrings(useRed), useRed);
+
+		final UDrawable udrawable;
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, result.getBackcolor(),
 				getMetadata(), null, 0, 0, null, false);
-		imageBuilder.setUDrawable(result);
+		if (getSource().getTotalLineCount() < 4) {
+			final TextBlockBackcolored welcome = new PSystemEmpty(false).getGraphicStrings();
+			udrawable = new UDrawable() {
+				public void drawU(UGraphic ug) {
+					final Dimension2D dim1 = welcome.calculateDimension(ug.getStringBounder());
+					final Dimension2D dim2 = result.calculateDimension(ug.getStringBounder());
+					final URectangle frame = new URectangle(Math.max(dim1.getWidth(), dim2.getWidth()),
+							dim1.getHeight());
+					ug.apply(new UChangeBackColor(welcome.getBackcolor())).apply(new UTranslate(1, 1)).draw(frame);
+					welcome.drawU(ug);
+					ug = ug.apply(new UTranslate(0, dim1.getHeight()));
+					result.drawU(ug);
+				}
+			};
+		} else {
+			udrawable = result;
+		}
+		imageBuilder.setUDrawable(udrawable);
 		return imageBuilder.writeImageTOBEMOVED(fileFormat, os);
 	}
 

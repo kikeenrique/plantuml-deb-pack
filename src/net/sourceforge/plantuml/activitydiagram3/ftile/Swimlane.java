@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile;
@@ -39,6 +36,7 @@ import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.graphic.color.Colors;
+import net.sourceforge.plantuml.ugraphic.MinMax;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 public class Swimlane implements SpecificBackcolorable {
@@ -101,4 +99,14 @@ public class Swimlane implements SpecificBackcolorable {
 		this.colors = colors;
 	}
 
+	private MinMax minMax;
+
+	public void setMinMax(MinMax minMax) {
+		this.minMax = minMax;
+
+	}
+
+	public MinMax getMinMax() {
+		return minMax;
+	}
 }

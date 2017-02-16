@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 5183 $
  *
  */
 package net.sourceforge.plantuml.svek.image;
@@ -45,7 +42,9 @@ import net.sourceforge.plantuml.SkinParamUtils;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.creole.Stencil;
 import net.sourceforge.plantuml.cucadiagram.Display;
+import net.sourceforge.plantuml.cucadiagram.EntityPortion;
 import net.sourceforge.plantuml.cucadiagram.ILeaf;
+import net.sourceforge.plantuml.cucadiagram.PortionShower;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
@@ -79,26 +78,31 @@ public class EntityImageObject extends AbstractEntityImage implements Stencil {
 
 	final private LineConfigurable lineConfig;
 
-	public EntityImageObject(ILeaf entity, ISkinParam skinParam) {
+	public EntityImageObject(ILeaf entity, ISkinParam skinParam, PortionShower portionShower) {
 		super(entity, skinParam);
 		this.lineConfig = entity;
 		final Stereotype stereotype = entity.getStereotype();
-		this.roundCorner = skinParam.getRoundCorner();
+		this.roundCorner = skinParam.getRoundCorner("", null);
 		this.name = TextBlockUtils.withMargin(
 				entity.getDisplay().create(new FontConfiguration(getSkinParam(), FontParam.OBJECT, stereotype),
 						HorizontalAlignment.CENTER, skinParam), 2, 2);
-		if (stereotype == null || stereotype.getLabel(false) == null) {
+		if (stereotype == null || stereotype.getLabel(false) == null
+				|| portionShower.showPortion(EntityPortion.STEREOTYPE, entity) == false) {
 			this.stereo = null;
 		} else {
-			this.stereo = Display.getWithNewlines(stereotype.getLabel(getSkinParam().useGuillemet())).create(
+			this.stereo = Display.create(stereotype.getLabels(skinParam.useGuillemet())).create(
 					new FontConfiguration(getSkinParam(), FontParam.OBJECT_STEREOTYPE, stereotype),
 					HorizontalAlignment.CENTER, skinParam);
 		}
 
+		// final boolean showMethods = portionShower.showPortion(EntityPortion.METHOD, entity);
+		final boolean showFields = portionShower.showPortion(EntityPortion.FIELD, entity);
+
 		if (entity.getBodier().getFieldsToDisplay().size() == 0) {
 			this.fields = new TextBlockLineBefore(new TextBlockEmpty(10, 16));
 		} else {
-			this.fields = entity.getBodier().getBody(FontParam.OBJECT_ATTRIBUTE, skinParam, false, true, entity.getStereotype());
+			this.fields = entity.getBodier().getBody(FontParam.OBJECT_ATTRIBUTE, skinParam, false, showFields,
+					entity.getStereotype());
 		}
 		this.url = entity.getUrl99();
 
@@ -147,7 +151,7 @@ public class EntityImageObject extends AbstractEntityImage implements Stencil {
 		header.add(name);
 		header.drawU(ug, dimTotal.getWidth(), dimTitle.getHeight());
 
-		final UGraphic ug2 = new UGraphicStencil(ug, this, stroke);
+		final UGraphic ug2 = UGraphicStencil.create(ug, this, stroke);
 		fields.drawU(ug2.apply(new UTranslate(0, dimTitle.getHeight())));
 
 		if (url != null) {

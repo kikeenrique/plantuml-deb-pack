@@ -23,23 +23,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 5749 $
  *
  */
 package net.sourceforge.plantuml;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -106,6 +106,28 @@ public class FileUtils {
 		final OutputStream fos = new BufferedOutputStream(new FileOutputStream(dest));
 		fos.write(src);
 		fos.close();
+	}
+
+	static public String readSvg(File svgFile) throws IOException {
+		final BufferedReader br = new BufferedReader(new FileReader(svgFile));
+		return readSvg(br, true);
+	}
+
+	static public String readSvg(InputStream is) throws IOException {
+		final BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		return readSvg(br, false);
+	}
+
+	private static String readSvg(final BufferedReader br, boolean withClose) throws IOException {
+		final StringBuilder sb = new StringBuilder();
+		String s;
+		while ((s = br.readLine()) != null) {
+			sb.append(s);
+		}
+		if (withClose) {
+			br.close();
+		}
+		return sb.toString();
 	}
 
 }

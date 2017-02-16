@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 4041 $
  *
  */
 package net.sourceforge.plantuml.logo;
@@ -59,7 +56,9 @@ public class PSystemLogo extends AbstractPSystem {
 	public PSystemLogo() {
 	}
 
-	public ImageData exportDiagram(OutputStream os, int num, FileFormatOption fileFormat) throws IOException {
+	@Override
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat)
+			throws IOException {
 		final int width = 640;
 		final int height = 480;
 		final EmptyImageBuilder builder = new EmptyImageBuilder(width, height, Color.WHITE);
@@ -77,7 +76,6 @@ public class PSystemLogo extends AbstractPSystem {
 		return new ImageDataSimple(im.getWidth(), im.getHeight());
 	}
 
-
 	// private GraphicStrings getGraphicStrings() throws IOException {
 	// final UFont font = new UFont("SansSerif", Font.PLAIN, 12);
 	// final GraphicStrings result = new GraphicStrings(strings, font, HtmlColorUtils.BLACK, HtmlColorUtils.WHITE,
@@ -94,6 +92,5 @@ public class PSystemLogo extends AbstractPSystem {
 	public void doCommandLine(String line) {
 		lines.add(line);
 	}
-
 
 }

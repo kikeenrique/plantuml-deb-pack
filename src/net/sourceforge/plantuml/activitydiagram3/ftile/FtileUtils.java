@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile;
@@ -78,11 +75,11 @@ public class FtileUtils {
 	// return new FtileMarged(ftile, margin);
 	// }
 
-	private static Ftile neverNull(Ftile ftile) {
-		if (ftile == null) {
-			return new FtileEmpty(false);
-		}
-		return ftile;
-	}
+	// private static Ftile neverNull(Ftile ftile, ISkinParam skinParam) {
+	// if (ftile == null) {
+	// return new FtileEmpty(skinParam);
+	// }
+	// return ftile;
+	// }
 
 }

@@ -23,23 +23,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 6711 $
  *
  */
 package net.sourceforge.plantuml.svek;
 
-import java.awt.Font;
 import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
+import net.sourceforge.plantuml.OptionPrint;
+import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
 import net.sourceforge.plantuml.flashcode.FlashCodeFactory;
 import net.sourceforge.plantuml.flashcode.FlashCodeUtils;
@@ -51,8 +49,6 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.QuoteUtils;
 import net.sourceforge.plantuml.graphic.StringBounder;
-import net.sourceforge.plantuml.ugraphic.UAntiAliasing;
-import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UImage;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
@@ -60,16 +56,14 @@ import net.sourceforge.plantuml.version.Version;
 
 public class GraphvizCrash extends AbstractTextBlock implements IEntityImage {
 
-	private static final UFont font = new UFont("SansSerif", Font.PLAIN, 12);
-
-	private final GraphicStrings graphicStrings;
+	private final TextBlockBackcolored graphicStrings;
 	private final BufferedImage flashCode;
 
 	public GraphvizCrash(String text) {
 		final FlashCodeUtils utils = FlashCodeFactory.getFlashCodeUtils();
 		flashCode = utils.exportFlashcode(text);
-		this.graphicStrings = new GraphicStrings(init(), font, HtmlColorUtils.BLACK, HtmlColorUtils.WHITE,
-				UAntiAliasing.ANTI_ALIASING_ON, IconLoader.getRandom(), GraphicPosition.BACKGROUND_CORNER_TOP_RIGHT);
+		this.graphicStrings = GraphicStrings.createBlackOnWhite(init(), IconLoader.getRandom(),
+				GraphicPosition.BACKGROUND_CORNER_TOP_RIGHT);
 	}
 
 	public static List<String> anErrorHasOccured(Throwable exception) {
@@ -79,7 +73,7 @@ public class GraphvizCrash extends AbstractTextBlock implements IEntityImage {
 		} else {
 			strings.add("An error has occured : " + exception);
 		}
-		final String quote = QuoteUtils.getSomeQuote();
+		final String quote = StringUtils.rot(QuoteUtils.getSomeQuote());
 		strings.add("<i>" + quote);
 		strings.add(" ");
 		return strings;
@@ -104,13 +98,12 @@ public class GraphvizCrash extends AbstractTextBlock implements IEntityImage {
 		strings.add("post to <b>http://plantuml.com/qa</b> to solve this issue.");
 		strings.add("You can try to turn arround this issue by simplifing your diagram.");
 	}
-	
+
 	public static void thisMayBeCaused(final List<String> strings) {
 		strings.add("This may be caused by :");
 		strings.add(" - a bug in PlantUML");
 		strings.add(" - a problem in GraphViz");
 	}
-
 
 	private List<String> init() {
 		final List<String> strings = anErrorHasOccured(null);
@@ -141,17 +134,13 @@ public class GraphvizCrash extends AbstractTextBlock implements IEntityImage {
 	}
 
 	public static void addProperties(final List<String> strings) {
-		addTextProperty(strings, "os.version");
-		addTextProperty(strings, "os.name");
-		addTextProperty(strings, "java.vm.vendor");
-		addTextProperty(strings, "java.vm.version");
-		addTextProperty(strings, "java.version");
-		addTextProperty(strings, "user.language");
+		strings.addAll(OptionPrint.interestingProperties());
+		strings.addAll(OptionPrint.interestingValues());
 	}
 
-	private static void addTextProperty(final List<String> strings, String prop) {
-		strings.add(prop + ": " + System.getProperty(prop));
-	}
+	// private static void addTextProperty(final List<String> strings, String prop) {
+	// strings.add(prop + ": " + System.getProperty(prop));
+	// }
 
 	public boolean isHidden() {
 		return false;

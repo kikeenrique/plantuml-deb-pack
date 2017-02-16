@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 8218 $
  *
  */
 package net.sourceforge.plantuml.cucadiagram;
@@ -86,7 +83,5 @@ public interface IEntity extends SpecificBackcolorable, Hideable, Removeable, Li
 
 	public Map<String, Display> getTips();
 
-	@Deprecated
-	public void applyStroke(String s);
-
+	public void setRemoved(boolean removed);
 }

@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3.ftile;
@@ -54,10 +51,10 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 public class Snake implements UShape {
 
 	private final Worm worm = new Worm();
-	private final UPolygon endDecoration;
+	private UPolygon endDecoration;
 	private final Rainbow color;
 	private TextBlock textBlock;
-	private boolean mergeable = true;
+	private MergeStrategy mergeable = MergeStrategy.FULL;
 	private Direction emphasizeDirection;
 
 	public Snake transformX(CompressionTransform compressionTransform) {
@@ -71,6 +68,10 @@ public class Snake implements UShape {
 			result.addPoint(x, y);
 		}
 		return result;
+	}
+
+	public void removeEndDecoration() {
+		this.endDecoration = null;
 	}
 
 	public Snake(Rainbow color, UPolygon endDecoration) {
@@ -135,8 +136,11 @@ public class Snake implements UShape {
 		final int colorArrowSeparationSpace = color.getColorArrowSeparationSpace();
 		final double move = 2 + colorArrowSeparationSpace;
 		final WormMutation mutation = WormMutation.create(worm, move);
-		ug = ug.apply(mutation.getGlobalTranslate(colors.size()));
-		Worm current = worm;
+		final double globalMove = -1.0 * (colors.size() - 1) / 2.0;
+		Worm current = worm.moveFirstPoint(mutation.getFirst().multiplyBy(globalMove));
+		if (mutation.size() > 2) {
+			current = current.moveLastPoint(mutation.getLast().multiplyBy(globalMove));
+		}
 		for (int i = 0; i < colors.size(); i++) {
 			double stroke = 1.5;
 			if (colorArrowSeparationSpace == 0) {
@@ -149,34 +153,9 @@ public class Snake implements UShape {
 		drawInternalLabel(ug.apply(textTranslate));
 	}
 
-	// private void drawRainbowOld(UGraphic ug) {
-	// final HtmlColorRainbow rainbow = (HtmlColorRainbow) color;
-	// final List<HtmlColor> colors = rainbow.getColors();
-	// final int colorArrowSeparationSpace = rainbow.getColorArrowSeparationSpace();
-	// final double move = 2 + colorArrowSeparationSpace;
-	// ug = ug.apply(new UTranslate(-move * (colors.size() - 1) / 2.0, 0));
-	// double dx = -move;
-	// for (int i = 0; i < colors.size(); i++) {
-	// dx += move;
-	// double stroke = 1.5;
-	// if (colorArrowSeparationSpace == 0) {
-	// stroke = i == colors.size() - 1 ? 2.0 : 3.0;
-	// }
-	// worm.drawInternalOneColor(ug.apply(new UTranslate(dx, 0)), colors.get(i), stroke, emphasizeDirection,
-	// endDecoration);
-	// }
-	// drawInternalLabel(ug.apply(new UTranslate(dx, 0)));
-	// }
-
 	private void drawInternalLabel(UGraphic ug) {
 		if (textBlock != null) {
 			final Point2D position = getTextBlockPosition(ug.getStringBounder());
-			// final double max = getMaxX(ug.getStringBounder());
-			// ug.apply(new UChangeBackColor(HtmlColorUtils.LIGHT_GRAY))
-			// .apply(new UTranslate(position.getX(), position.getY()))
-			// .draw(new URectangle(textBlock.calculateDimension(ug.getStringBounder())));
-			// ug.apply(new UChangeBackColor(HtmlColorUtils.RED)).apply(new UTranslate(0, position.getY() + 10))
-			// .draw(new URectangle(max, 10));
 			textBlock.drawU(ug.apply(new UTranslate(position)));
 		}
 	}
@@ -198,6 +177,10 @@ public class Snake implements UShape {
 		final Point2D pt1 = worm.get(0);
 		final Point2D pt2 = worm.get(1);
 		final Dimension2D dim = textBlock.calculateDimension(stringBounder);
+		// if (worm.getDirectionsCode().startsWith("LD")) {
+		// final double y = pt1.getY() - dim.getHeight();
+		// return new Point2D.Double(Math.max(pt1.getX(), pt2.getX()) - dim.getWidth(), y);
+		// }
 		final double y = (pt1.getY() + pt2.getY()) / 2 - dim.getHeight() / 2;
 		return new Point2D.Double(Math.max(pt1.getX(), pt2.getX()) + 4, y);
 	}
@@ -228,32 +211,44 @@ public class Snake implements UShape {
 		return pt1.distance(pt2) < 0.001;
 	}
 
-	public Snake merge(Snake other) {
-		if (mergeable == false || other.mergeable == false) {
+	public Snake merge(Snake other, StringBounder stringBounder) {
+		final MergeStrategy strategy = this.mergeable.max(other.mergeable);
+		if (strategy == MergeStrategy.NONE) {
 			return null;
 		}
-		if (TextBlockUtils.isEmpty(other.textBlock) == false) {
-			return null;
+		final boolean emptyOther = TextBlockUtils.isEmpty(other.textBlock, stringBounder);
+		// final boolean emptyThis = TextBlockUtils.isEmpty(this.textBlock, stringBounder);
+		if (emptyOther == false /* || emptyThis == false */) {
 			// System.err.println("merge other.textBlock="+other.textBlock+" "+other.textBlock.calculateDimension(TextBlockUtils.getDummyStringBounder()));
+			return null;
 		}
-		// if (other.textBlock != null) {
-		// return null;
-		// }
 		if (same(this.getLast(), other.getFirst())) {
-			final UPolygon oneOf = endDecoration == null ? other.endDecoration : endDecoration;
+			final UPolygon oneOf = other.endDecoration == null ? endDecoration : other.endDecoration;
 			final Snake result = new Snake(color, oneOf);
+			// result.textBlock = oneOf(this.textBlock, other.textBlock, stringBounder);
 			result.emphasizeDirection = emphasizeDirection == null ? other.emphasizeDirection : emphasizeDirection;
-			result.worm.addAll(this.worm.merge(other.worm));
+			result.worm.addAll(this.worm.merge(other.worm, strategy));
+			result.mergeable = strategy;
 			return result;
 		}
 		if (same(this.getFirst(), other.getLast())) {
-			return other.merge(this);
+			return other.merge(this, stringBounder);
 		}
 		return null;
 	}
 
-	public void goUnmergeable() {
-		this.mergeable = false;
+	public boolean touches(Snake other) {
+		if (other.mergeable != MergeStrategy.FULL) {
+			return false;
+		}
+		if (other.worm.isPureHorizontal()) {
+			return false;
+		}
+		return same(this.getLast(), other.getFirst());
+	}
+
+	public void goUnmergeable(MergeStrategy strategy) {
+		this.mergeable = strategy;
 	}
 
 	public void emphasizeDirection(Direction direction) {

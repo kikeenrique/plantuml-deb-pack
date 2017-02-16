@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 11025 $
  *
  */
 package net.sourceforge.plantuml.creole;
@@ -64,6 +61,22 @@ public class SheetBlock1 extends AbstractTextBlock implements TextBlock, Atom, S
 		this.sheet = sheet;
 		this.maxWidth = maxWidth;
 		this.padding = padding;
+	}
+	
+	@Override
+	public String toString() {
+		return sheet.toString();
+	}
+
+	public HorizontalAlignment getCellAlignment() {
+		if (stripes.size() != 1) {
+			return HorizontalAlignment.LEFT;
+		}
+		final Stripe simple = stripes.get(0);
+		if (simple instanceof StripeSimple) {
+			return ((StripeSimple) simple).getCellAlignment();
+		}
+		return HorizontalAlignment.LEFT;
 	}
 
 	private void initMap(StringBounder stringBounder) {
@@ -130,12 +143,11 @@ public class SheetBlock1 extends AbstractTextBlock implements TextBlock, Atom, S
 		initMap(stringBounder);
 		return Dimension2DDouble.delta(minMax.getDimension(), 2 * padding);
 	}
-	
+
 	@Override
 	public Rectangle2D getInnerPosition(String member, StringBounder stringBounder) {
 		return null;
 	}
-
 
 	public void drawU(UGraphic ug) {
 		initMap(ug.getStringBounder());
@@ -162,5 +174,5 @@ public class SheetBlock1 extends AbstractTextBlock implements TextBlock, Atom, S
 	public double getEndingX(StringBounder stringBounder, double y) {
 		return calculateDimension(stringBounder).getWidth();
 	}
-	
+
 }

@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 11025 $
  *
  */
 package net.sourceforge.plantuml.creole;
@@ -57,6 +54,11 @@ public class SheetBlock2 extends AbstractTextBlock implements TextBlock, Atom {
 			throw new IllegalArgumentException();
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return block.toString();
+	}
 
 	public Dimension2D calculateDimension(StringBounder stringBounder) {
 		return block.calculateDimension(stringBounder);
@@ -64,7 +66,7 @@ public class SheetBlock2 extends AbstractTextBlock implements TextBlock, Atom {
 
 	public void drawU(UGraphic ug) {
 		if (stencil != null) {
-			ug = new UGraphicStencil(ug, stencil, defaultStroke);
+			ug = UGraphicStencil.create(ug, stencil, defaultStroke);
 		}
 		block.drawU(ug);
 	}

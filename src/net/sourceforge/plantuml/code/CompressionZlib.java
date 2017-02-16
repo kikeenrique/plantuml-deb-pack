@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 3827 $
  *
  */
 package net.sourceforge.plantuml.code;
@@ -40,8 +37,17 @@ import java.util.zip.Inflater;
 
 public class CompressionZlib implements Compression {
 
+	private static final int COMPRESSION_LEVEL = 9;
+	// private static final int COMPRESSION_LEVEL = 1;
+
 	public byte[] compress(byte[] in) {
+		if (in.length == 0) {
+			return null;
+		}
 		int len = in.length * 2;
+		if (len < 100) {
+			len = 100;
+		}
 		byte[] result = null;
 		while (result == null) {
 			result = tryCompress(in, len);
@@ -52,7 +58,7 @@ public class CompressionZlib implements Compression {
 
 	private byte[] tryCompress(byte[] in, final int len) {
 		// Compress the bytes
-		final Deflater compresser = new Deflater(9, true);
+		final Deflater compresser = new Deflater(COMPRESSION_LEVEL, true);
 		compresser.setInput(in);
 		compresser.finish();
 

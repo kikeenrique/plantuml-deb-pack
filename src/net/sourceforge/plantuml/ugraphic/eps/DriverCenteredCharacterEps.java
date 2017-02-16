@@ -23,8 +23,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
@@ -56,7 +54,7 @@ public class DriverCenteredCharacterEps implements UDriver<EpsGraphics> {
 
 		final TextLayout t = new TextLayout("" + c, font.getFont(), TextBlockUtils.getFontRenderContext());
 		eps.setStrokeColor(mapper.getMappedColor(param.getColor()));
-		DriverTextEps.drawPathIterator(eps, xpos, ypos, t.getOutline(null).getPathIterator(null));
+		DriverTextEps.drawPathIterator(eps, xpos, ypos, t.getOutline(null));
 
 	}
 

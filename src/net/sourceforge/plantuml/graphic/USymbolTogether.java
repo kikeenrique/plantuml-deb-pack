@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 8066 $
  *
  */
 package net.sourceforge.plantuml.graphic;
@@ -47,7 +44,7 @@ class USymbolTogether extends USymbol {
 
 	public TextBlock asSmall(TextBlock name, final TextBlock label, final TextBlock stereotype,
 			final SymbolContext symbolContext) {
-		throw new UnsupportedOperationException();
+		return TextBlockUtils.empty(10, 10);
 	}
 
 	public TextBlock asBig(final TextBlock title, final TextBlock stereotype, final double width, final double height,

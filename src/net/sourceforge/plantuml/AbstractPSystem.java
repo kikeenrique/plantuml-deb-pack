@@ -23,28 +23,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19886 $
  *
  */
 package net.sourceforge.plantuml;
 
-import java.util.Properties;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import net.sourceforge.plantuml.command.BlocLines;
 import net.sourceforge.plantuml.command.Command;
 import net.sourceforge.plantuml.command.CommandExecutionResult;
 import net.sourceforge.plantuml.command.ProtectedCommand;
 import net.sourceforge.plantuml.core.Diagram;
+import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.core.UmlSource;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.DisplayPositionned;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.VerticalAlignment;
+import net.sourceforge.plantuml.stats.StatsUtilsIncrement;
 import net.sourceforge.plantuml.version.License;
 import net.sourceforge.plantuml.version.Version;
 
@@ -58,15 +58,10 @@ public abstract class AbstractPSystem implements Diagram {
 		toAppend.append(Version.versionString());
 		toAppend.append("(" + Version.compileTimeString() + ")\n");
 		toAppend.append("(" + License.getCurrent() + " source distribution)\n");
-		final Properties p = System.getProperties();
-		toAppend.append(p.getProperty("java.runtime.name"));
-		toAppend.append('\n');
-		toAppend.append(p.getProperty("java.vm.name"));
-		toAppend.append('\n');
-		toAppend.append(p.getProperty("java.runtime.version"));
-		toAppend.append('\n');
-		toAppend.append(p.getProperty("os.name"));
-
+		for (String name : OptionPrint.interestingProperties()) {
+			toAppend.append(name);
+			toAppend.append('\n');
+		}
 		return toAppend.toString();
 	}
 
@@ -99,11 +94,10 @@ public abstract class AbstractPSystem implements Diagram {
 	public String getWarningOrError() {
 		return null;
 	}
-	
+
 	public String checkFinalError() {
 		return null;
 	}
-
 
 	public void makeDiagramReady() {
 	}
@@ -120,5 +114,21 @@ public abstract class AbstractPSystem implements Diagram {
 	public boolean hasUrl() {
 		return false;
 	}
+
+	final public ImageData exportDiagram(OutputStream os, int index, FileFormatOption fileFormatOption)
+			throws IOException {
+		final long now = System.currentTimeMillis();
+		try {
+			return exportDiagramNow(os, index, fileFormatOption);
+		} finally {
+			if (OptionFlags.getInstance().isEnableStats()) {
+				StatsUtilsIncrement.onceMoreGenerate(System.currentTimeMillis() - now, getClass(),
+						fileFormatOption.getFileFormat());
+			}
+		}
+	}
+
+	protected abstract ImageData exportDiagramNow(OutputStream os, int index, FileFormatOption fileFormatOption)
+			throws IOException;
 
 }

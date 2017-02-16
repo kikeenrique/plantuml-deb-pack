@@ -23,18 +23,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 19885 $
  *
  */
 package net.sourceforge.plantuml;
 
 import java.io.File;
+import java.net.InetAddress;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
@@ -97,7 +102,8 @@ public class OptionPrint {
 		System.out.println("    -testdot\t\tTo test the installation of graphviz");
 		System.out.println("    -graphvizdot \"exe\"\tTo specify dot executable");
 		System.out.println("    -p[ipe]\t\tTo use stdin for PlantUML source and stdout for PNG/SVG/EPS generation");
-		System.out.println("    -encodesprite 4|8|16[z] \"file\"\tTo encode a sprite at gray level (z for compression) from an image");
+		System.out
+				.println("    -encodesprite 4|8|16[z] \"file\"\tTo encode a sprite at gray level (z for compression) from an image");
 		System.out.println("    -computeurl|-encodeurl\tTo compute the encoded URL of a PlantUML source file");
 		System.out.println("    -decodeurl\t\tTo retrieve the PlantUML source from an encoded URL");
 		System.out.println("    -syntax\t\tTo report any syntax error from standard input without generating images");
@@ -113,6 +119,12 @@ public class OptionPrint {
 		System.out.println("    -author[s]\t\tTo print information about PlantUML authors");
 		System.out.println("    -overwrite\t\tTo allow to overwrite read only files");
 		System.out.println("    -printfonts\t\tTo print fonts available on your system");
+		System.out.println("    -enablestats\tTo enable statistics computation");
+		System.out.println("    -disablestats\tTo disable statistics computation (default)");
+		System.out.println("    -htmlstats\t\tTo output general statistics in file plantuml-stats.html");
+		System.out.println("    -xmlstats\t\tTo output general statistics in file plantuml-stats.xml");
+		System.out.println("    -realtimestats\tTo generate statistics on the fly rather than at the end");
+		System.out.println("    -loopstats\t\tTo continuously print statistics about usage");
 		System.out.println();
 		System.out.println("If needed, you can setup the environment variable GRAPHVIZ_DOT.");
 		exit();
@@ -133,14 +145,14 @@ public class OptionPrint {
 	}
 
 	public static void printVersion() throws InterruptedException {
-		System.out
-				.println("PlantUML version " + Version.versionString() + " (" + Version.compileTimeString() + ")");
+		System.out.println("PlantUML version " + Version.versionString() + " (" + Version.compileTimeString() + ")");
 		System.out.println("(" + License.getCurrent() + " source distribution)");
-		final Properties p = System.getProperties();
-		System.out.println(p.getProperty("java.runtime.name"));
-		System.out.println(p.getProperty("java.vm.name"));
-		System.out.println(p.getProperty("java.runtime.version"));
-		System.out.println(p.getProperty("os.name"));
+		for (String v : interestingProperties()) {
+			System.out.println(v);
+		}
+		for (String v : interestingValues()) {
+			System.out.println(v);
+		}
 		System.out.println();
 		for (String s : GraphvizUtils.getTestDotStrings(false)) {
 			System.out.println(s);
@@ -148,9 +160,75 @@ public class OptionPrint {
 		exit();
 	}
 
+	public static Collection<String> interestingProperties() {
+		final Properties p = System.getProperties();
+		final List<String> all = withIp() ? Arrays.asList("java.runtime.name", "Java Runtime", "java.vm.name", "JVM",
+				"java.runtime.version", "Java Version", "os.name", "Operating System", "file.encoding",
+				"Default Encoding", "user.language", "Language", "user.country", "Country") : Arrays.asList(
+				"java.runtime.name", "Java Runtime", "java.vm.name", "JVM", "java.runtime.version", "Java Version",
+				"os.name", "Operating System", "os.version", "OS Version", "file.encoding", "Default Encoding",
+				"user.language", "Language", "user.country", "Country");
+		final List<String> result = new ArrayList<String>();
+		for (int i = 0; i < all.size(); i += 2) {
+			result.add(all.get(i + 1) + ": " + p.getProperty(all.get(i)));
+		}
+		return result;
+	}
+
+	public static Collection<String> interestingValues() {
+		final List<String> strings = new ArrayList<String>();
+		if (withIp() == false) {
+			strings.add("Machine: " + getHostName());
+		}
+		strings.add("PLANTUML_LIMIT_SIZE: " + GraphvizUtils.getenvImageLimit());
+		strings.add("Processors: " + Runtime.getRuntime().availableProcessors());
+		final long freeMemory = Runtime.getRuntime().freeMemory();
+		final long maxMemory = Runtime.getRuntime().maxMemory();
+		final long totalMemory = Runtime.getRuntime().totalMemory();
+		final long usedMemory = totalMemory - freeMemory;
+		final int threadActiveCount = Thread.activeCount();
+		strings.add("Max Memory: " + format(maxMemory));
+		strings.add("Total Memory: " + format(totalMemory));
+		strings.add("Free Memory: " + format(freeMemory));
+		strings.add("Used Memory: " + format(usedMemory));
+		strings.add("Thread Active Count: " + threadActiveCount);
+		return Collections.unmodifiableCollection(strings);
+	}
+
+	private static boolean withIp() {
+		return getHostName().startsWith("ip-");
+	}
+
+	private static String hostname;
+
+	public static synchronized String getHostName() {
+		if (hostname == null) {
+			hostname = getHostNameSlow();
+		}
+		return hostname;
+	}
+
+	private static String getHostNameSlow() {
+		try {
+			final InetAddress addr = InetAddress.getLocalHost();
+			return addr.getHostName();
+		} catch (Throwable e) {
+			final Map<String, String> env = System.getenv();
+			if (env.containsKey("COMPUTERNAME")) {
+				return env.get("COMPUTERNAME");
+			} else if (env.containsKey("HOSTNAME")) {
+				return env.get("HOSTNAME");
+			}
+		}
+		return "Unknown Computer";
+	}
+
+	private static String format(final long value) {
+		return String.format(Locale.US, "%,d", value);
+	}
+
 	public static void checkVersion() throws InterruptedException {
-		System.out
-				.println("PlantUML version " + Version.versionString() + " (" + Version.compileTimeString() + ")");
+		System.out.println("PlantUML version " + Version.versionString() + " (" + Version.compileTimeString() + ")");
 		System.out.println();
 		final int lastversion = PSystemVersion.extractDownloadableVersion(null, null);
 		if (lastversion == -1) {
@@ -174,20 +252,10 @@ public class OptionPrint {
 	}
 
 	public static void printAbout() throws InterruptedException {
-		// Duplicate in PSystemVersion
-		System.out
-				.println("PlantUML version " + Version.versionString() + " (" + Version.compileTimeString() + ")");
-		System.out.println();
-		System.out.println("Original idea: Arnaud Roques");
-		System.out.println("Word Macro: Alain Bertucat & Matthieu Sabatier");
-		System.out.println("Word Add-in: Adriaan van den Brand");
-		System.out.println("Eclipse Plugin: Claude Durif & Anne Pecoil");
-		System.out.println("Servlet & XWiki: Maxime Sinclair");
-		System.out.println("Site design: Raphael Cotisson");
-		System.out.println("Logo: Benjamin Croizet");
-		System.out.println();
-		System.out.println("http://plantuml.sourceforge.net");
-		exit();
+		for (String s : PSystemVersion.getAuthorsStrings(false)) {
+			System.out.println(s);
+		}
+		OptionPrint.exit();
 	}
 
 	public static void printLanguage() throws InterruptedException {

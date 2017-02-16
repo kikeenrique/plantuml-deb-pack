@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 8475 $
  *
  */
 package net.sourceforge.plantuml.jungle;
@@ -71,7 +68,7 @@ public class GTileNode extends AbstractTextBlock implements GTile {
 
 	public static SheetBlock1 getTextBlock(final Display display) {
 		final Rose rose = new Rose();
-		final SkinParam skinParam = new SkinParam();
+		final SkinParam skinParam = SkinParam.create(null);
 		final HtmlColor fontColor = rose.getFontColor(skinParam, FontParam.NOTE);
 		final UFont fontNote = skinParam.getFont(null, false, FontParam.NOTE);
 

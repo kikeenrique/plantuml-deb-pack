@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 8218 $
  *
  */
 package net.sourceforge.plantuml.cucadiagram;
@@ -247,16 +244,11 @@ public class GroupRoot implements IGroup {
 		throw new UnsupportedOperationException();
 	}
 
-	public void applyStroke(String s) {
-		throw new UnsupportedOperationException();
-	}
-
-	public void applyStroke(Colors colors) {
-		throw new UnsupportedOperationException();
-	}
-
 	public FontConfiguration getFontConfigurationForTitle(ISkinParam skinParam) {
 		throw new UnsupportedOperationException();
 	}
 
+	public void setRemoved(boolean removed) {
+		throw new UnsupportedOperationException();
+	}
 }

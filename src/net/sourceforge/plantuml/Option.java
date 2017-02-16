@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 19880 $
  *
  */
 package net.sourceforge.plantuml;
@@ -49,6 +46,7 @@ import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.command.regex.Pattern2;
 import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
 import net.sourceforge.plantuml.preproc.Defines;
+import net.sourceforge.plantuml.stats.StatsUtils;
 
 public class Option {
 
@@ -59,6 +57,7 @@ public class Option {
 	private boolean computeurl = false;
 	private boolean decodeurl = false;
 	private boolean pipe = false;
+	private boolean pipeMap = false;
 	private boolean syntax = false;
 	private boolean checkOnly = false;
 	private boolean failfast = false;
@@ -113,6 +112,8 @@ public class Option {
 				setFileFormat(FileFormat.ATXT);
 			} else if (s.equalsIgnoreCase("-tutxt") || s.equalsIgnoreCase("-utxt")) {
 				setFileFormat(FileFormat.UTXT);
+			} else if (s.equalsIgnoreCase("-braille") || s.equalsIgnoreCase("-tbraille")) {
+				setFileFormat(FileFormat.BRAILLE_PNG);
 			} else if (s.equalsIgnoreCase("-png") || s.equalsIgnoreCase("-tpng")) {
 				setFileFormat(FileFormat.PNG);
 			} else if (s.equalsIgnoreCase("-vdx") || s.equalsIgnoreCase("-tvdx")) {
@@ -194,6 +195,8 @@ public class Option {
 				OptionFlags.getInstance().setVerbose(true);
 			} else if (s.equalsIgnoreCase("-pipe") || s.equalsIgnoreCase("-p")) {
 				pipe = true;
+			} else if (s.equalsIgnoreCase("-pipemap")) {
+				pipeMap = true;
 			} else if (s.equalsIgnoreCase("-pattern")) {
 				pattern = true;
 			} else if (s.equalsIgnoreCase("-syntax")) {
@@ -247,6 +250,24 @@ public class Option {
 				OptionFlags.getInstance().setUseSuggestEngine(false);
 			} else if (s.equalsIgnoreCase("-printfonts")) {
 				OptionFlags.getInstance().setPrintFonts(true);
+			} else if (s.equalsIgnoreCase("-dumphtmlstats")) {
+				OptionFlags.getInstance().setDumpHtmlStats(true);
+			} else if (s.equalsIgnoreCase("-dumpstats")) {
+				OptionFlags.getInstance().setDumpStats(true);
+			} else if (s.equalsIgnoreCase("-loopstats")) {
+				OptionFlags.getInstance().setLoopStats(true);
+			} else if (s.equalsIgnoreCase("-enablestats")) {
+				OptionFlags.getInstance().setEnableStats(true);
+			} else if (s.equalsIgnoreCase("-disablestats")) {
+				OptionFlags.getInstance().setEnableStats(false);
+			} else if (s.equalsIgnoreCase("-htmlstats")) {
+				StatsUtils.setHtmlStats(true);
+			} else if (s.equalsIgnoreCase("-xmlstats")) {
+				StatsUtils.setXmlStats(true);
+			} else if (s.equalsIgnoreCase("-realtimestats")) {
+				StatsUtils.setRealTimeStats(true);
+			} else if (s.equalsIgnoreCase("-useseparatorminus")) {
+				OptionFlags.getInstance().setFileSeparator("-");
 			} else if (StringUtils.goLowerCase(s).startsWith("-ftp")) {
 				final int x = s.indexOf(':');
 				if (x == -1) {
@@ -361,6 +382,10 @@ public class Option {
 
 	public final boolean isPipe() {
 		return pipe;
+	}
+
+	public final boolean isPipeMap() {
+		return pipeMap;
 	}
 
 	public final boolean isSyntax() {

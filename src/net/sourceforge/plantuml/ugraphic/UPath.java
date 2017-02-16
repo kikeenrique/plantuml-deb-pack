@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 3837 $
  *
  */
 package net.sourceforge.plantuml.ugraphic;
@@ -46,16 +43,37 @@ public class UPath extends AbstractShadowable implements Iterable<USegment> {
 	private boolean isOpenIconic;
 
 	public void add(double[] coord, USegmentType pathType) {
-		segments.add(new USegment(coord, pathType));
-		if (pathType == USegmentType.SEG_ARCTO) {
+		addInternal(new USegment(coord, pathType));
+	}
+
+	private void addInternal(USegment segment) {
+		segments.add(segment);
+		final double coord[] = segment.getCoord();
+		if (segment.getSegmentType() == USegmentType.SEG_ARCTO) {
 			minmax = minmax.addPoint(coord[5], coord[6]);
-//			minmax = minmax.addPoint(coord[5] + coord[0], coord[6] + coord[1]);
-//			minmax = minmax.addPoint(coord[5] - coord[0], coord[6] - coord[1]);
+			// minmax = minmax.addPoint(coord[5] + coord[0], coord[6] + coord[1]);
+			// minmax = minmax.addPoint(coord[5] - coord[0], coord[6] - coord[1]);
 		} else {
 			for (int i = 0; i < coord.length; i += 2) {
 				minmax = minmax.addPoint(coord[i], coord[i + 1]);
 			}
 		}
+	}
+
+	public UPath translate(double dx, double dy) {
+		final UPath result = new UPath();
+		for (USegment seg : segments) {
+			result.addInternal(seg.translate(dx, dy));
+		}
+		return result;
+	}
+
+	public UPath rotate(double theta) {
+		final UPath result = new UPath();
+		for (USegment seg : segments) {
+			result.addInternal(seg.rotate(theta));
+		}
+		return result;
 	}
 
 	public void moveTo(Point2D pt) {

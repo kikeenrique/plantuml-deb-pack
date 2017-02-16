@@ -23,13 +23,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * Modified by : Arno Peterson
  * 
- * Revision $Revision: 4236 $
  * 
  */
 package net.sourceforge.plantuml.svek;
@@ -83,12 +80,13 @@ public class ClusterDecoration {
 	public final static int marginTitleY1 = 3;
 	public final static int marginTitleY2 = 3;
 
-	public void drawU(UGraphic ug, HtmlColor backColor, HtmlColor borderColor, boolean shadowing) {
+	public void drawU(UGraphic ug, HtmlColor backColor, HtmlColor borderColor, boolean shadowing, double roundCorner) {
 		final SymbolContext biColor = new SymbolContext(backColor, borderColor);
 		if (symbol == null) {
 			throw new UnsupportedOperationException();
 		}
-		final SymbolContext symbolContext = biColor.withShadow(shadowing).withStroke(defaultStroke);
+		final SymbolContext symbolContext = biColor.withShadow(shadowing).withStroke(defaultStroke)
+				.withRoundCorner(roundCorner);
 		symbol.asBig(title, stereo, maxX - minX, maxY - minY, symbolContext)
 				.drawU(ug.apply(new UTranslate(minX, minY)));
 		// return;

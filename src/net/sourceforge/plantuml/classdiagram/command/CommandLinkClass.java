@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 5436 $
  *
  */
 package net.sourceforge.plantuml.classdiagram.command;
@@ -64,6 +61,9 @@ import net.sourceforge.plantuml.objectdiagram.AbstractClassOrObjectDiagram;
 
 final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrObjectDiagram> {
 
+	private static final String SINGLE = "[.\\\\]{0,2}[\\p{L}0-9_]+(?:[.\\\\]{1,2}[\\p{L}0-9_]+)*";
+	private static final String COUPLE = "\\([%s]*(" + SINGLE + ")[%s]*,[%s]*(" + SINGLE + ")[%s]*\\)";
+
 	public CommandLinkClass(UmlDiagramType umlDiagramType) {
 		super(getRegexConcat(umlDiagramType));
 	}
@@ -71,18 +71,17 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 	static private RegexConcat getRegexConcat(UmlDiagramType umlDiagramType) {
 		return new RegexConcat(
 				new RegexLeaf("HEADER", "^(?:@([\\d.]+)[%s]+)?"), //
-				new RegexOr(//
+				new RegexOr( //
 						new RegexLeaf("ENT1", "(?:" + optionalKeywords(umlDiagramType) + "[%s]+)?"
-								+ getClassIdentifier()),
-						new RegexLeaf("COUPLE1",
-								"\\([%s]*(\\.?[\\p{L}0-9_]+(?:\\.[\\p{L}0-9_]+)*)[%s]*,[%s]*(\\.?[\\p{L}0-9_]+(?:\\.[\\p{L}0-9_]+)*)[%s]*\\)")),
+								+ getClassIdentifier()),//
+						new RegexLeaf("COUPLE1", COUPLE)),
 				new RegexLeaf("[%s]*"), //
 				new RegexLeaf("FIRST_LABEL", "(?:[%g]([^%g]+)[%g])?"), //
 				new RegexLeaf("[%s]*"), //
 
 				new RegexConcat(
 						//
-						new RegexLeaf("ARROW_HEAD1", "([%s]+o|[#\\[<*+^]|[<\\[]\\|)?"), //
+						new RegexLeaf("ARROW_HEAD1", "([%s]+[ox]|[#\\[<*+^}]|[<\\[]\\||\\}o|\\}\\||\\|o|\\|\\|)?"), //
 						new RegexLeaf("ARROW_BODY1", "([-=.]+)"), //
 						new RegexLeaf("ARROW_STYLE1",
 								"(?:\\[((?:#\\w+|dotted|dashed|plain|bold|hidden|norank)(?:,#\\w+|,dotted|,dashed|,plain|,bold|,hidden|,norank)*)\\])?"),
@@ -91,16 +90,14 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 						new RegexLeaf("ARROW_STYLE2",
 								"(?:\\[((?:#\\w+|dotted|dashed|plain|bold|hidden|norank)(?:,#\\w+|,dotted|,dashed|,plain|,bold|,hidden|,norank)*)\\])?"),
 						new RegexLeaf("ARROW_BODY2", "([-=.]*)"), //
-						new RegexLeaf("ARROW_HEAD2", "(o[%s]+|[#\\]>*+^]|\\|[>\\]])?")), //
+						new RegexLeaf("ARROW_HEAD2", "([ox][%s]+|[#\\]>*+^\\{]|\\|[>\\]]|o\\{|\\|\\{|o\\||\\|\\|)?")), //
 
 				new RegexLeaf("[%s]*"), //
-				new RegexLeaf("SECOND_LABEL", "(?:[%g]([^%g]+)[%g])?"),
-				new RegexLeaf("[%s]*"), //
-				new RegexOr(
+				new RegexLeaf("SECOND_LABEL", "(?:[%g]([^%g]+)[%g])?"), new RegexLeaf("[%s]*"), //
+				new RegexOr( //
 						new RegexLeaf("ENT2", "(?:" + optionalKeywords(umlDiagramType) + "[%s]+)?"
-								+ getClassIdentifier()),
-						new RegexLeaf("COUPLE2",
-								"\\([%s]*(\\.?[\\p{L}0-9_]+(?:\\.[\\p{L}0-9_]+)*)[%s]*,[%s]*(\\.?[\\p{L}0-9_]+(?:\\.[\\p{L}0-9_]+)*)[%s]*\\)")),
+								+ getClassIdentifier()), //
+						new RegexLeaf("COUPLE2", COUPLE)), //
 				new RegexLeaf("[%s]*"), //
 				color().getRegex(), //
 				new RegexLeaf("[%s]*"), //
@@ -122,7 +119,7 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 
 	private static String optionalKeywords(UmlDiagramType type) {
 		if (type == UmlDiagramType.CLASS) {
-			return "(interface|enum|annotation|abstract[%s]+class|abstract|class|object)";
+			return "(interface|enum|annotation|abstract[%s]+class|abstract|class|object|entity)";
 		}
 		if (type == UmlDiagramType.OBJECT) {
 			return "(object)";
@@ -139,6 +136,7 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 
 	@Override
 	protected CommandExecutionResult executeArg(AbstractClassOrObjectDiagram diagram, RegexResult arg) {
+
 		Code ent1 = Code.of(arg.get("ENT1", 1));
 		Code ent2 = Code.of(arg.get("ENT2", 1));
 
@@ -150,14 +148,26 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 		}
 		ent1 = ent1.eventuallyRemoveStartingAndEndingDoubleQuote("\"");
 		ent2 = ent2.eventuallyRemoveStartingAndEndingDoubleQuote("\"");
-		if (diagram.isGroup(ent1) && diagram.isGroup(ent2)) {
+		if (isGroupButNotTheCurrentGroup(diagram, ent1) && isGroupButNotTheCurrentGroup(diagram, ent2)) {
 			return executePackageLink(diagram, arg);
+		}
+
+		String port1 = null;
+		String port2 = null;
+
+		if (removeMemberPart(diagram, ent1) != null) {
+			port1 = ent1.getPortMember();
+			ent1 = removeMemberPart(diagram, ent1);
+		}
+		if (removeMemberPart(diagram, ent2) != null) {
+			port2 = ent2.getPortMember();
+			ent2 = removeMemberPart(diagram, ent2);
 		}
 
 		final String type1 = arg.get("ENT1", 0);
 		final LeafType typeIfObject1 = getTypeIfObject(type1);
 
-		final IEntity cl1 = diagram.isGroup(ent1) ? diagram.getGroup(Code.of(StringUtils
+		final IEntity cl1 = isGroupButNotTheCurrentGroup(diagram, ent1) ? diagram.getGroup(Code.of(StringUtils
 				.eventuallyRemoveStartingAndEndingDoubleQuote(arg.get("ENT1", 1), "\""))) : diagram.getOrCreateLeaf(
 				ent1, typeIfObject1, null);
 
@@ -167,7 +177,7 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 			typeIfObject2 = LeafType.OBJECT;
 		}
 
-		final IEntity cl2 = diagram.isGroup(ent2) ? diagram.getGroup(Code.of(StringUtils
+		final IEntity cl2 = isGroupButNotTheCurrentGroup(diagram, ent2) ? diagram.getGroup(Code.of(StringUtils
 				.eventuallyRemoveStartingAndEndingDoubleQuote(arg.get("ENT2", 1), "\""))) : diagram.getOrCreateLeaf(
 				ent2, typeIfObject2, null);
 
@@ -183,16 +193,6 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 				((ILeaf) cl2).muteToType(type, null);
 			}
 		}
-		// if (arg.get("ENT1", 2) != null) {
-		// cl1.setStereotype(new Stereotype(arg.get("ENT1", 2), diagram.getSkinParam().getCircledCharacterRadius(),
-		// diagram.getSkinParam().getFont(FontParam.CIRCLED_CHARACTER, null, false), diagram.getSkinParam()
-		// .getIHtmlColorSet()));
-		// }
-		// if (arg.get("ENT2", 2) != null) {
-		// cl2.setStereotype(new Stereotype(arg.get("ENT2", 2), diagram.getSkinParam().getCircledCharacterRadius(),
-		// diagram.getSkinParam().getFont(FontParam.CIRCLED_CHARACTER, null, false), diagram.getSkinParam()
-		// .getIHtmlColorSet()));
-		// }
 
 		Colors colors = color().getColor(arg, diagram.getSkinParam().getIHtmlColorSet());
 
@@ -266,6 +266,7 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 
 		Link link = new Link(cl1, cl2, linkType, Display.getWithNewlines(labelLink), queue, firstLabel, secondLabel,
 				diagram.getLabeldistance(), diagram.getLabelangle());
+		link.setPortMembers(port1, port2);
 
 		if (dir == Direction.LEFT || dir == Direction.UP) {
 			link = link.getInv();
@@ -278,6 +279,33 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 
 		return CommandExecutionResult.ok();
 	}
+
+	private boolean isGroupButNotTheCurrentGroup(AbstractClassOrObjectDiagram diagram, Code code) {
+		if (diagram.getCurrentGroup().getCode().equals(code)) {
+			return false;
+		}
+		return diagram.isGroup(code);
+	}
+
+	private Code removeMemberPart(AbstractClassOrObjectDiagram diagram, Code code) {
+		if (diagram.leafExist(code)) {
+			return null;
+		}
+		final Code before = code.removeMemberPart();
+		if (before == null) {
+			return null;
+		}
+		if (diagram.leafExist(before) == false) {
+			return null;
+		}
+		return before;
+	}
+
+	// private CommandExecutionResult executeLinkFields(AbstractClassOrObjectDiagram diagram, RegexResult arg) {
+	// System.err.println("field1=" + arg.get("ENT1", 1));
+	// System.err.println("field2=" + arg.get("ENT2", 1));
+	// return CommandExecutionResult.error("not working yet");
+	// }
 
 	private void addLink(AbstractClassOrObjectDiagram diagram, Link link, String weight) {
 		diagram.addLink(link);
@@ -393,6 +421,21 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 		if ("<|".equals(s)) {
 			return LinkDecor.EXTENDS;
 		}
+		if ("}".equals(s)) {
+			return LinkDecor.CROWFOOT;
+		}
+		if ("}o".equals(s)) {
+			return LinkDecor.CIRCLE_CROWFOOT;
+		}
+		if ("}|".equals(s)) {
+			return LinkDecor.LINE_CROWFOOT;
+		}
+		if ("|o".equals(s)) {
+			return LinkDecor.CIRCLE_LINE;
+		}
+		if ("||".equals(s)) {
+			return LinkDecor.DOUBLE_LINE;
+		}
 		if ("<".equals(s)) {
 			return LinkDecor.ARROW;
 		}
@@ -404,6 +447,9 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 		}
 		if ("o".equals(s)) {
 			return LinkDecor.AGREGATION;
+		}
+		if ("x".equals(s)) {
+			return LinkDecor.NOT_NAVIGABLE;
 		}
 		if ("*".equals(s)) {
 			return LinkDecor.COMPOSITION;
@@ -425,6 +471,21 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 		if (">".equals(s)) {
 			return LinkDecor.ARROW;
 		}
+		if ("{".equals(s)) {
+			return LinkDecor.CROWFOOT;
+		}
+		if ("o{".equals(s)) {
+			return LinkDecor.CIRCLE_CROWFOOT;
+		}
+		if ("|{".equals(s)) {
+			return LinkDecor.LINE_CROWFOOT;
+		}
+		if ("o|".equals(s)) {
+			return LinkDecor.CIRCLE_LINE;
+		}
+		if ("||".equals(s)) {
+			return LinkDecor.DOUBLE_LINE;
+		}
 		if ("^".equals(s)) {
 			return LinkDecor.EXTENDS;
 		}
@@ -433,6 +494,9 @@ final public class CommandLinkClass extends SingleLineCommand2<AbstractClassOrOb
 		}
 		if ("o".equals(s)) {
 			return LinkDecor.AGREGATION;
+		}
+		if ("x".equals(s)) {
+			return LinkDecor.NOT_NAVIGABLE;
 		}
 		if ("*".equals(s)) {
 			return LinkDecor.COMPOSITION;

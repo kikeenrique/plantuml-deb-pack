@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 11025 $
  *
  */
 package net.sourceforge.plantuml.creole;
@@ -42,7 +39,9 @@ import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.FontPosition;
 import net.sourceforge.plantuml.graphic.FontStyle;
+import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.ImgValign;
+import net.sourceforge.plantuml.math.ScientificEquationSafe;
 import net.sourceforge.plantuml.openiconic.OpenIcon;
 import net.sourceforge.plantuml.ugraphic.sprite.Sprite;
 import net.sourceforge.plantuml.utils.CharHidder;
@@ -51,11 +50,25 @@ public class StripeSimple implements Stripe {
 
 	final private List<Atom> atoms = new ArrayList<Atom>();
 	final private List<Command> commands = new ArrayList<Command>();
+	private HorizontalAlignment align = HorizontalAlignment.LEFT;
+
+	public void setCellAlignment(HorizontalAlignment align) {
+		this.align = align;
+	}
+
+	public HorizontalAlignment getCellAlignment() {
+		return align;
+	}
 
 	private FontConfiguration fontConfiguration;
 
 	final private StripeStyle style;
 	final private ISkinSimple skinParam;
+
+	@Override
+	public String toString() {
+		return super.toString() + " " + atoms.toString();
+	}
 
 	public StripeSimple(FontConfiguration fontConfiguration, StripeStyle style, CreoleContext context,
 			ISkinSimple skinParam, CreoleMode modeSimpleLine) {
@@ -70,6 +83,8 @@ public class StripeSimple implements Stripe {
 		this.commands.add(CommandCreoleStyle.createCreole(FontStyle.ITALIC));
 		this.commands.add(CommandCreoleStyle.createLegacy(FontStyle.ITALIC));
 		this.commands.add(CommandCreoleStyle.createLegacyEol(FontStyle.ITALIC));
+		this.commands.add(CommandCreoleStyle.createLegacy(FontStyle.PLAIN));
+		this.commands.add(CommandCreoleStyle.createLegacyEol(FontStyle.PLAIN));
 		if (modeSimpleLine == CreoleMode.FULL) {
 			this.commands.add(CommandCreoleStyle.createCreole(FontStyle.UNDERLINE));
 		}
@@ -93,6 +108,9 @@ public class StripeSimple implements Stripe {
 		this.commands.add(CommandCreoleExposantChange.create(FontPosition.INDICE));
 		this.commands.add(CommandCreoleImg.create());
 		this.commands.add(CommandCreoleOpenIcon.create());
+		final double scale = skinParam.getDpi() / 96.0;
+		this.commands.add(CommandCreoleMath.create(scale));
+		this.commands.add(CommandCreoleLatex.create(scale));
 		this.commands.add(CommandCreoleSprite.create());
 		this.commands.add(CommandCreoleSpace.create());
 		this.commands.add(CommandCreoleFontFamilyChange.create());
@@ -161,6 +179,10 @@ public class StripeSimple implements Stripe {
 		if (openIcon != null) {
 			atoms.add(new AtomOpenIcon(openIcon, fontConfiguration));
 		}
+	}
+
+	public void addMath(ScientificEquationSafe math, double scale) {
+		atoms.add(new AtomMath(math, fontConfiguration.getColor(), fontConfiguration.getExtendedColor(), scale));
 	}
 
 	private void modifyStripe(String line) {

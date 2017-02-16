@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 9786 $
  *
  */
 package net.sourceforge.plantuml.ugraphic;
@@ -92,6 +89,10 @@ public class UTranslate implements UChange {
 
 	public Rectangle2D apply(Rectangle2D rect) {
 		return new Rectangle2D.Double(rect.getX() + dx, rect.getY() + dy, rect.getWidth(), rect.getHeight());
+	}
+
+	public UTranslate multiplyBy(double v) {
+		return new UTranslate(dx * v, dy * v);
 	}
 
 }

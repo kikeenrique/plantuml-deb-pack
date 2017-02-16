@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 7637 $
  *
  */
 package net.sourceforge.plantuml.cucadiagram;
@@ -55,9 +52,11 @@ import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockLineBefore;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.TextBlockVertical2;
+import net.sourceforge.plantuml.svek.Ports;
+import net.sourceforge.plantuml.svek.WithPorts;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 
-public class BodyEnhanced extends AbstractTextBlock implements TextBlock {
+public class BodyEnhanced extends AbstractTextBlock implements TextBlock, WithPorts {
 
 	private TextBlock area2;
 	private final FontConfiguration titleConfig;
@@ -71,9 +70,10 @@ public class BodyEnhanced extends AbstractTextBlock implements TextBlock {
 	private final List<Url> urls = new ArrayList<Url>();
 	private final boolean manageUrl;
 	private final Stereotype stereotype;
+	private final ILeaf entity;
 
 	public BodyEnhanced(List<String> rawBody, FontParam fontParam, ISkinParam skinParam, boolean manageModifier,
-			Stereotype stereotype) {
+			Stereotype stereotype, ILeaf entity) {
 		this.rawBody = new ArrayList<String>(rawBody);
 		this.stereotype = stereotype;
 		this.fontParam = fontParam;
@@ -85,10 +85,12 @@ public class BodyEnhanced extends AbstractTextBlock implements TextBlock {
 		this.align = HorizontalAlignment.LEFT;
 		this.manageHorizontalLine = true;
 		this.manageModifier = manageModifier;
+		this.entity = entity;
 	}
 
 	public BodyEnhanced(Display display, FontParam fontParam, ISkinParam skinParam, HorizontalAlignment align,
-			Stereotype stereotype, boolean manageHorizontalLine, boolean manageModifier, boolean manageUrl) {
+			Stereotype stereotype, boolean manageHorizontalLine, boolean manageModifier, boolean manageUrl, ILeaf entity) {
+		this.entity = entity;
 		this.manageUrl = manageUrl;
 		this.stereotype = stereotype;
 		this.rawBody = new ArrayList<String>();
@@ -137,14 +139,14 @@ public class BodyEnhanced extends AbstractTextBlock implements TextBlock {
 			final String s = it.next();
 			if (manageHorizontalLine && isBlockSeparator(s)) {
 				blocks.add(decorate(stringBounder, new MethodsOrFieldsArea(members, fontParam, skinParam, align,
-						stereotype), separator, title));
+						stereotype, entity), separator, title));
 				separator = s.charAt(0);
 				title = getTitle(s, skinParam);
 				members = new ArrayList<Member>();
 			} else if (CreoleParser.isTreeStart(s)) {
 				if (members.size() > 0) {
 					blocks.add(decorate(stringBounder, new MethodsOrFieldsArea(members, fontParam, skinParam, align,
-							stereotype), separator, title));
+							stereotype, entity), separator, title));
 				}
 				members = new ArrayList<Member>();
 				final List<String> allTree = buildAllTree(s, it);
@@ -159,7 +161,7 @@ public class BodyEnhanced extends AbstractTextBlock implements TextBlock {
 				}
 			}
 		}
-		blocks.add(decorate(stringBounder, new MethodsOrFieldsArea(members, fontParam, skinParam, align, stereotype),
+		blocks.add(decorate(stringBounder, new MethodsOrFieldsArea(members, fontParam, skinParam, align, stereotype, entity),
 				separator, title));
 
 		if (blocks.size() == 1) {
@@ -209,6 +211,14 @@ public class BodyEnhanced extends AbstractTextBlock implements TextBlock {
 		}
 		s = StringUtils.trin(s.substring(2, s.length() - 2));
 		return Display.getWithNewlines(s).create(titleConfig, HorizontalAlignment.LEFT, spriteContainer);
+	}
+
+	public Ports getPorts(StringBounder stringBounder) {
+		final TextBlock area = getArea(stringBounder);
+		if (area instanceof WithPorts) {
+			return ((WithPorts) area).getPorts(stringBounder);
+		}
+		return new Ports();
 	}
 
 	public void drawU(UGraphic ug) {

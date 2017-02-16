@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  *
- * Revision $Revision: 9786 $
  *
  */
 package net.sourceforge.plantuml.activitydiagram3;
@@ -40,6 +37,7 @@ import net.sourceforge.plantuml.activitydiagram3.ftile.FtileFactory;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 import net.sourceforge.plantuml.sequencediagram.NoteType;
 
@@ -50,13 +48,15 @@ public class InstructionGroup implements Instruction, InstructionCollection {
 	private final HtmlColor backColor;
 	private final HtmlColor borderColor;
 	private final HtmlColor titleColor;
+	private final LinkRendering linkRendering;
 
 	private final Display test;
-	private Display headerNote = Display.NULL;
+	private PositionedNote note = null;
 
 	public InstructionGroup(Instruction parent, Display test, HtmlColor backColor, HtmlColor titleColor,
-			Swimlane swimlane, HtmlColor borderColor) {
+			Swimlane swimlane, HtmlColor borderColor, LinkRendering linkRendering) {
 		this.list = new InstructionList(swimlane);
+		this.linkRendering = linkRendering;
 		this.parent = parent;
 		this.test = test;
 		this.borderColor = borderColor;
@@ -69,7 +69,7 @@ public class InstructionGroup implements Instruction, InstructionCollection {
 	}
 
 	public Ftile createFtile(FtileFactory factory) {
-		return factory.createGroup(list.createFtile(factory), test, backColor, titleColor, headerNote, borderColor);
+		return factory.createGroup(list.createFtile(factory), test, backColor, titleColor, note, borderColor);
 	}
 
 	public Instruction getParent() {
@@ -81,15 +81,15 @@ public class InstructionGroup implements Instruction, InstructionCollection {
 	}
 
 	public LinkRendering getInLinkRendering() {
-		return LinkRendering.none();
+		return linkRendering;
 	}
 
-	public boolean addNote(Display note, NotePosition position, NoteType type) {
+	public boolean addNote(Display note, NotePosition position, NoteType type, Colors colors) {
 		if (list.isEmpty()) {
-			this.headerNote = note;
+			this.note = new PositionedNote(note, position, type, colors);
 			return true;
 		}
-		return list.addNote(note, position, type);
+		return list.addNote(note, position, type, colors);
 	}
 
 	public Set<Swimlane> getSwimlanes() {

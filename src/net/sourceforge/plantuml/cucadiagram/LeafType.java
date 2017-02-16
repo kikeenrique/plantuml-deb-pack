@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19109 $
  *
  */
 package net.sourceforge.plantuml.cucadiagram;
@@ -51,7 +48,7 @@ public enum LeafType {
 
 	STATE, STATE_CONCURRENT, PSEUDO_STATE, STATE_CHOICE, STATE_FORK_JOIN,
 
-	BLOCK,
+	BLOCK, ENTITY,
 
 	STILL_UNKNOWN;
 
@@ -65,7 +62,7 @@ public enum LeafType {
 
 	public boolean isLikeClass() {
 		return this == LeafType.ANNOTATION || this == LeafType.ABSTRACT_CLASS || this == LeafType.CLASS
-				|| this == LeafType.INTERFACE || this == LeafType.ENUM;
+				|| this == LeafType.INTERFACE || this == LeafType.ENUM || this == LeafType.ENTITY;
 	}
 
 	public String toHtml() {
@@ -75,7 +72,7 @@ public enum LeafType {
 
 	public boolean manageModifier() {
 		if (this == ANNOTATION || this == ABSTRACT_CLASS || this == CLASS || this == INTERFACE || this == ENUM
-				|| this == OBJECT) {
+				|| this == OBJECT || this == ENTITY) {
 			return true;
 		}
 		return false;

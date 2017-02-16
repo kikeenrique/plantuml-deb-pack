@@ -23,12 +23,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Java is a trademark or registered trademark of Sun Microsystems, Inc.
- * in the United States and other countries.]
  *
  * Original Author:  Arnaud Roques
  * 
- * Revision $Revision: 19873 $
  *
  */
 package net.sourceforge.plantuml.skin.bluemodern;
@@ -56,7 +53,8 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 public class ComponentBlueModernArrow extends AbstractComponentBlueModernArrow {
 
-	public ComponentBlueModernArrow(HtmlColor foregroundColor, boolean useUnderlineForHyperlink, FontConfiguration font, Display stringsToDisplay, ArrowConfiguration arrowConfiguration,
+	public ComponentBlueModernArrow(HtmlColor foregroundColor, boolean useUnderlineForHyperlink,
+			FontConfiguration font, Display stringsToDisplay, ArrowConfiguration arrowConfiguration,
 			ISkinSimple spriteContainer) {
 		super(foregroundColor, font, stringsToDisplay, arrowConfiguration, spriteContainer);
 	}
@@ -76,7 +74,7 @@ public class ComponentBlueModernArrow extends AbstractComponentBlueModernArrow {
 		final int x2 = (int) dimensionToUse.getWidth();
 
 		if (getArrowConfiguration().isDotted()) {
-			ug = stroke(ug, 5, 2);
+			ug = ArrowConfiguration.stroke(ug, 5, 2, 1);
 		} else {
 			ug = ug.apply(new UStroke(2));
 		}
@@ -91,21 +89,21 @@ public class ComponentBlueModernArrow extends AbstractComponentBlueModernArrow {
 			ug = ug.apply(new UStroke(1.5));
 			if (direction == 1) {
 				if (getArrowConfiguration().getPart() != ArrowPart.BOTTOM_PART) {
-					ug.apply(new UTranslate(x2 - getArrowDeltaX2(), textHeight - getArrowDeltaY2())).draw(new ULine(getArrowDeltaX2(),
-					getArrowDeltaY2()));
+					ug.apply(new UTranslate(x2 - getArrowDeltaX2(), textHeight - getArrowDeltaY2())).draw(
+							new ULine(getArrowDeltaX2(), getArrowDeltaY2()));
 				}
 				if (getArrowConfiguration().getPart() != ArrowPart.TOP_PART) {
-					ug.apply(new UTranslate(x2 - getArrowDeltaX2(), textHeight + getArrowDeltaY2())).draw(new ULine(getArrowDeltaX2(),
-					-getArrowDeltaY2()));
+					ug.apply(new UTranslate(x2 - getArrowDeltaX2(), textHeight + getArrowDeltaY2())).draw(
+							new ULine(getArrowDeltaX2(), -getArrowDeltaY2()));
 				}
 			} else {
 				if (getArrowConfiguration().getPart() != ArrowPart.BOTTOM_PART) {
-					ug.apply(new UTranslate(getArrowDeltaX2(), textHeight - getArrowDeltaY2())).draw(new ULine(-getArrowDeltaX2(),
-					getArrowDeltaY2()));
+					ug.apply(new UTranslate(getArrowDeltaX2(), textHeight - getArrowDeltaY2())).draw(
+							new ULine(-getArrowDeltaX2(), getArrowDeltaY2()));
 				}
 				if (getArrowConfiguration().getPart() != ArrowPart.TOP_PART) {
-					ug.apply(new UTranslate(getArrowDeltaX2(), textHeight + getArrowDeltaY2())).draw(new ULine(-getArrowDeltaX2(),
-					-getArrowDeltaY2()));
+					ug.apply(new UTranslate(getArrowDeltaX2(), textHeight + getArrowDeltaY2())).draw(
+							new ULine(-getArrowDeltaX2(), -getArrowDeltaY2()));
 				}
 			}
 			ug = ug.apply(new UStroke());
