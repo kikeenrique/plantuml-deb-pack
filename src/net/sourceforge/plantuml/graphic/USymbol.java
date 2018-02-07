@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -57,6 +62,8 @@ public abstract class USymbol {
 	public final static USymbol FILE = record("FILE", SkinParameter.FILE, new USymbolFile());
 	public final static USymbol RECTANGLE = record("RECTANGLE", SkinParameter.RECTANGLE, new USymbolRect(
 			SkinParameter.RECTANGLE, HorizontalAlignment.CENTER));
+	public final static USymbol COLLECTIONS = record("COLLECTIONS", SkinParameter.COLLECTIONS, new USymbolCollections(
+			SkinParameter.RECTANGLE, HorizontalAlignment.CENTER));
 	public final static USymbol AGENT = record("AGENT", SkinParameter.AGENT, new USymbolRect(SkinParameter.AGENT,
 			HorizontalAlignment.CENTER));
 	public final static USymbol ACTOR = record("ACTOR", SkinParameter.ACTOR, new USymbolActor());
@@ -69,6 +76,7 @@ public abstract class USymbol {
 	public final static USymbol CONTROL = record("CONTROL", SkinParameter.CONTROL, new USymbolControl(2));
 	public final static USymbol INTERFACE = record("INTERFACE", SkinParameter.INTERFACE, new USymbolInterface());
 	public final static USymbol QUEUE = record("QUEUE", SkinParameter.QUEUE, new USymbolQueue());
+	public final static USymbol STACK = record("STACK", SkinParameter.STACK, new USymbolStack());
 	public final static USymbol TOGETHER = record("TOGETHER", SkinParameter.QUEUE, new USymbolTogether());
 
 	abstract public SkinParameter getSkinParameter();
@@ -103,6 +111,9 @@ public abstract class USymbol {
 			if (s.equalsIgnoreCase("component")) {
 				return COMPONENT2;
 			}
+			if (s.equalsIgnoreCase("entity")) {
+				return ENTITY_DOMAIN;
+			}
 			return null;
 		}
 		return result;
@@ -115,8 +126,8 @@ public abstract class USymbol {
 
 	public abstract TextBlock asSmall(TextBlock name, TextBlock label, TextBlock stereotype, SymbolContext symbolContext);
 
-	public abstract TextBlock asBig(TextBlock label, TextBlock stereotype, double width, double height,
-			SymbolContext symbolContext);
+	public abstract TextBlock asBig(TextBlock label, HorizontalAlignment labelAlignment, TextBlock stereotype,
+			double width, double height, SymbolContext symbolContext);
 
 	static class Margin {
 		private final double x1;
@@ -176,7 +187,7 @@ public abstract class USymbol {
 		};
 	}
 
-	public static USymbol getFoo1(String symbol, boolean useUml2ForComponent) {
+	public static USymbol getFromString(String symbol, boolean useUml2ForComponent) {
 		USymbol usymbol = null;
 		if (symbol.equalsIgnoreCase("artifact")) {
 			usymbol = USymbol.ARTIFACT;
@@ -188,6 +199,8 @@ public abstract class USymbol {
 			usymbol = USymbol.PACKAGE;
 		} else if (symbol.equalsIgnoreCase("rectangle")) {
 			usymbol = USymbol.RECTANGLE;
+		} else if (symbol.equalsIgnoreCase("collections")) {
+			usymbol = USymbol.COLLECTIONS;
 		} else if (symbol.equalsIgnoreCase("node")) {
 			usymbol = USymbol.NODE;
 		} else if (symbol.equalsIgnoreCase("frame")) {
@@ -198,6 +211,8 @@ public abstract class USymbol {
 			usymbol = USymbol.DATABASE;
 		} else if (symbol.equalsIgnoreCase("queue")) {
 			usymbol = USymbol.QUEUE;
+		} else if (symbol.equalsIgnoreCase("stack")) {
+			usymbol = USymbol.STACK;
 		} else if (symbol.equalsIgnoreCase("storage")) {
 			usymbol = USymbol.STORAGE;
 		} else if (symbol.equalsIgnoreCase("agent")) {

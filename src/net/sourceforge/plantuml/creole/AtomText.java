@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -36,15 +41,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.BackSlash;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.LineBreakStrategy;
 import net.sourceforge.plantuml.Log;
 import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.Url;
+import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
+import net.sourceforge.plantuml.graphic.Splitter;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlockUtils;
+import net.sourceforge.plantuml.openiconic.OpenIcon;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UText;
@@ -75,7 +86,48 @@ public class AtomText implements Atom {
 
 	public static Atom createUrl(Url url, FontConfiguration fontConfiguration) {
 		fontConfiguration = fontConfiguration.hyperlink();
-		return new AtomText(url.getLabel(), fontConfiguration, url, ZERO, ZERO);
+		final Display display = Display.getWithNewlines(url.getLabel());
+		if (display.size() > 1) {
+			final List<Atom> all = new ArrayList<Atom>();
+			for (CharSequence s : display.as()) {
+				all.add(createAtomText(s.toString(), url, fontConfiguration));
+			}
+			return new AtomVerticalTexts(all);
+
+		}
+		return createAtomText(url.getLabel(), url, fontConfiguration);
+	}
+
+	private static Atom createAtomText(final String text, Url url, FontConfiguration fontConfiguration) {
+		final Pattern p = Pattern.compile(Splitter.openiconPattern);
+		final Matcher m = p.matcher(text);
+		final List<Atom> result = new ArrayList<Atom>();
+
+		while (m.find()) {
+			final String val = m.group(1);
+			final StringBuffer sb = new StringBuffer();
+			m.appendReplacement(sb, "");
+			if (sb.length() > 0) {
+				result.add(new AtomText(sb.toString(), fontConfiguration, url, ZERO, ZERO));
+			}
+			final OpenIcon openIcon = OpenIcon.retrieve(val);
+			if (openIcon != null) {
+				result.add(new AtomOpenIcon(openIcon, fontConfiguration, url));
+			}
+		}
+		final StringBuffer sb = new StringBuffer();
+		m.appendTail(sb);
+		if (sb.length() > 0) {
+			result.add(new AtomText(sb.toString(), fontConfiguration, url, ZERO, ZERO));
+		}
+		if (result.size() == 1) {
+			return result.get(0);
+		}
+		return new AtomHorizontalTexts(result);
+	}
+
+	private static Atom createAtomTextOld(final String text, Url url, FontConfiguration fontConfiguration) {
+		return new AtomText(text, fontConfiguration, url, ZERO, ZERO);
 	}
 
 	public static AtomText createHeading(String text, FontConfiguration fontConfiguration, int order) {
@@ -113,6 +165,9 @@ public class AtomText implements Atom {
 	}
 
 	private AtomText(String text, FontConfiguration style, Url url, DelayedDouble marginLeft, DelayedDouble marginRight) {
+		if (text.contains("" + BackSlash.hiddenNewLine())) {
+			throw new IllegalArgumentException(text);
+		}
 		this.marginLeft = marginLeft;
 		this.marginRight = marginRight;
 		// this.text = StringUtils.showComparatorCharacters(StringUtils.manageBackslash(text));

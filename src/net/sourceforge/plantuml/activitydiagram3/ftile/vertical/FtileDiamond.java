@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -142,7 +147,8 @@ public class FtileDiamond extends AbstractFtile {
 				+ Diamond.diamondHalfSize)));
 	}
 
-	public FtileGeometry calculateDimension(StringBounder stringBounder) {
+	@Override
+	protected FtileGeometry calculateDimensionFtile(StringBounder stringBounder) {
 		final double suppY1 = north.calculateDimension(stringBounder).getHeight();
 		final Dimension2D dim = new Dimension2DDouble(Diamond.diamondHalfSize * 2, Diamond.diamondHalfSize * 2 + suppY1);
 		return new FtileGeometry(dim, dim.getWidth() / 2, suppY1, dim.getHeight());

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -151,7 +156,7 @@ final class EntityImpl implements ILeaf, IGroup {
 		this.parentContainer = container;
 	}
 
-	public LeafType getEntityType() {
+	public LeafType getLeafType() {
 		return leafType;
 	}
 
@@ -161,6 +166,9 @@ final class EntityImpl implements ILeaf, IGroup {
 			throw new IllegalArgumentException();
 		}
 		if (leafType != LeafType.STILL_UNKNOWN) {
+			if (newType == this.leafType) {
+				return true;
+			}
 			if (leafType != LeafType.ANNOTATION && leafType != LeafType.ABSTRACT_CLASS && leafType != LeafType.CLASS
 					&& leafType != LeafType.ENUM && leafType != LeafType.INTERFACE) {
 				return false;
@@ -412,7 +420,7 @@ final class EntityImpl implements ILeaf, IGroup {
 
 	// ---- other
 
-	public void overideImage(IEntityImage img, LeafType leafType) {
+	public void overrideImage(IEntityImage img, LeafType leafType) {
 		checkGroup();
 		this.svekImage = img;
 		this.url = null;
@@ -457,6 +465,9 @@ final class EntityImpl implements ILeaf, IGroup {
 	}
 
 	public USymbol getUSymbol() {
+		if (getLeafType() == LeafType.CIRCLE) {
+			return USymbol.INTERFACE;
+		}
 		if (symbol != null && stereotype != null && stereotype.getSprite() != null) {
 			return symbol.withStereoAlignment(HorizontalAlignment.RIGHT);
 		}

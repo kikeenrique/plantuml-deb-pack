@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -45,7 +50,7 @@ public class DataSourceImpl implements DataSource {
 	private final List<Terminated<String>> data = new ArrayList<Terminated<String>>();
 
 	public DataSourceImpl(List<String> data) {
-		final Pattern2 p = MyPattern.cmpile("\\{[-+#!*/]?");
+		final Pattern2 p = MyPattern.cmpile("\\{[-+^#!*/]?");
 		for (String s : data) {
 			final StringTokenizer st = new StringTokenizer(s, "|}", true);
 			while (st.hasMoreTokens()) {

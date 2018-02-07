@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -173,7 +178,7 @@ public class SequenceDiagramFileMakerTeoz implements FileMaker {
 
 			}
 		});
-		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, os);
+		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, diagram.seed(), os);
 
 	}
 
@@ -203,7 +208,7 @@ public class SequenceDiagramFileMakerTeoz implements FileMaker {
 	private MainTile createMainTile() {
 		final RealOrigin origin = RealUtils.createOrigin();
 		Real currentPos = origin.addAtLeast(0);
-		for (Participant p : diagram.participants().values()) {
+		for (Participant p : diagram.participants()) {
 			final LivingSpace livingSpace = new LivingSpace(p, diagram.getEnglober(p), skin, getSkinParam(),
 					currentPos, diagram.events());
 			livingSpaces.put(p, livingSpace);

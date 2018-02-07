@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -36,7 +41,6 @@ import java.util.HashMap;
 import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
-import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
@@ -54,7 +58,8 @@ public class TextBlockInterceptorUDrawable extends AbstractTextBlock implements 
 	}
 
 	public Dimension2D calculateDimension(StringBounder stringBounder) {
-		return TextBlockUtils.getMinMax(this, stringBounder).getDimension();
+		// return TextBlockUtils.getMinMax(this, stringBounder).getDimension();
+		throw new UnsupportedOperationException();
 	}
 
 }

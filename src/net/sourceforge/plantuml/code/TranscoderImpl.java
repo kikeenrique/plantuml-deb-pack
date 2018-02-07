@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -40,6 +45,10 @@ public class TranscoderImpl implements Transcoder {
 
 	public TranscoderImpl() {
 		this(new AsciiEncoder(), new StringCompressorNone(), new CompressionHuffman());
+	}
+
+	public TranscoderImpl(Compression compression) {
+		this(new AsciiEncoder(), new StringCompressorNone(), compression);
 	}
 
 	public TranscoderImpl(URLEncoder urlEncoder, Compression compression) {

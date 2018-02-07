@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -39,7 +44,9 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import net.sourceforge.plantuml.AbstractPSystem;
+import net.sourceforge.plantuml.BackSlash;
 import net.sourceforge.plantuml.FileFormatOption;
+import net.sourceforge.plantuml.code.CompressionBrotli;
 import net.sourceforge.plantuml.code.Transcoder;
 import net.sourceforge.plantuml.code.TranscoderImpl;
 import net.sourceforge.plantuml.core.DiagramDescription;
@@ -58,28 +65,28 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 import net.sourceforge.plantuml.version.PSystemVersion;
 
 public class PSystemDonors extends AbstractPSystem {
-
-	public static final String DONORS = "UDfbL4jksp0GtSyfk1RIGoXsxDI_17QQ0jcDfR75c29TKd8ghOAUeK3NlKABB8eMsVG2oeqwSYkJIWa8"
-			+ "q8Z3uNipxobMqRz55gwf82jYNHWjCO4RYlmoESoC3ws3k3kAQnXRlqKLh6YDhf2enS9a6cAT6Yl6XegQ"
-			+ "sjVDXZEwTDGmm-0YNS1GTe5K4FlIvW2hqaEeO2oZ_j869XtAqi6ge7r6MWoCsJE_ONSFEPZchuuQ2mEZ"
-			+ "f1PBKpg2IVbgFxetJAGBzXBc0MhCmv2lYXLzH9roEmUPvAfRj1KpNPvewoqiGlH53LTA7lZ0K2OxHdxQ"
-			+ "aHektAcq3a14T81XdSl2LcA6cKaH9ctJxpBaya5UHCgFYzUkuZPfB3YFyJ6koL_mjEknqYc7Dk6UZ71j"
-			+ "gvrvS3l9XHGVkxA5hE7IPwS6vZB9I8bpbAeA6QWw1ECSJ0Zrcmac7qfoObYkBV8ibUTxQ-uBIZ8njUZG"
-			+ "GzeIIpIOs4EhB4uHKtEGeL2EKddd2Kk4PI3UzegGPtJFf_U1hCokxSoviQXHxS_47HLezWwMJ11jAgQo"
-			+ "7IsCbB5jl-U_Vobr7BeNX0h4oNAQdUHaiUjsE_MipyZ1DNRoMCeUu5X9iK9CsJfsI-8zwItPCp6FRzwk"
-			+ "OY_jo6WOKyyo8NETi4HoSSkeXopQgS-qr4wMpJ8ZWej3gFm3mi8NeRm36GKqngLaNPGvYP4fgV3zJHoC"
-			+ "miaSkNWrw3fi6yDTo2rhQ2LpRq46n4xUj9r6TdK0Eb8Aci_DKr2-UMf-m23hMRjYuvNhuu_0QlR2fUd1"
-			+ "6PFPR2nLOY5p7jm4__-hB763IimhfzWZpTVcwUMn-TvU9PelpNFpitb--SJF8t_w1XUMQZ55bREpBiDP"
-			+ "jt8brkivgNPJmny9r86N";
+	public static final String DONORS = "6-860AmER5DRWVz05mqtRsdC3wE5OekdFiA99Jtd00yCChUnCxOWUAuehg02v8LOSzl-wuP5HI5qgCA_"
+			+ "ggpzBTFN3kjWmEMYEWvoSaK1Cfs8SH6qMc-nrEca90_odEvgROGc6Whp7KzqIYH-9gGNJuX8r4WIYxya"
+			+ "Q99kIF-42Y5hIz2iaM2fNV3h4EVWF3XDLej3CUmhKhpjIJUlLtOy56inEI8Fr1nyeswQcytLB1Lv4eXp"
+			+ "b1IwVXvj7WTj_Y79naykn8P70Io06icBLc3iEAZWk0HOoA_9PcoKSUU93Iw2q8dxyKLPCBobAciwjd3S"
+			+ "Ne30wmz10EczYbhORFese4XBQz6qfAAEZoynbTaaJadrqd2Cjd6pH0pace3y1xtWtTkgBQzdl0mRITqX"
+			+ "-HutXKQkzGRVuK2Vo094no00zSHC7y-FwjbIKgtsERxpR82xfLBDzaDFySe98SUVXr0M6mlW3T2XiR2M"
+			+ "l5iTDmlT8LwjRADUd3EJTnC1SLEcWONU9fjhqbUwoD5GENOJ5gQs3iURKO6Mk2ho1lX5Ay97dHEGihJu"
+			+ "t7GzRNmcjYRYmjwNa6zMirJu_zoBp7890MqDuqjqCM6rO0wi6fCi4O4rGFy6tDGaBvhhxLgEjzTDuUgc"
+			+ "WNYhaecosWnW_rJSs7HDXRWwRknicGF0ojwAs3WUMqH8Q0Tq7bIUKMKHzjzTakMBnkYna7DyY8anY2RT"
+			+ "NNaHStkefQjXH5sRfOFQAreJS846XKZBgMqL3HW8HC-cUZsCWNgb1vhkCyfv7ELRCTq2AyloMDLbeN16"
+			+ "-CdFGrT-rDsYBX8ztVOFwOjwlv97bFxavDqIpMzAP4KlCsWVWIYrV1qYbd4RN1zCzjHY6iTb1ScniqKJ"
+			+ "FcD38ByKS4kFzRmUwRHcKrpLTNKJ2kE7-A85ge1D867dV4VR6OQZijusxqWQs-8rX7aNK3872PxIYTKO"
+			+ "ANIahoLaPDpiwRTEEtvPamLwZSgCFCXGk4AYY0C0";
 
 	@Override
-	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat)
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat, long seed)
 			throws IOException {
 		final UDrawable result = getGraphicStrings();
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, HtmlColorUtils.WHITE,
 				getMetadata(), null, 0, 0, null, false);
 		imageBuilder.setUDrawable(result);
-		return imageBuilder.writeImageTOBEMOVED(fileFormat, os);
+		return imageBuilder.writeImageTOBEMOVED(fileFormat, seed, os);
 	}
 
 	private UDrawable getGraphicStrings() throws IOException {
@@ -119,9 +126,9 @@ public class PSystemDonors extends AbstractPSystem {
 
 	private List<String> getDonors() throws IOException {
 		final List<String> lines = new ArrayList<String>();
-		final Transcoder t = new TranscoderImpl();
+		final Transcoder t = new TranscoderImpl(new CompressionBrotli());
 		final String s = t.decode(DONORS).replace('*', '.');
-		final StringTokenizer st = new StringTokenizer(s, "\n");
+		final StringTokenizer st = new StringTokenizer(s, BackSlash.NEWLINE);
 		while (st.hasMoreTokens()) {
 			lines.add(st.nextToken());
 		}

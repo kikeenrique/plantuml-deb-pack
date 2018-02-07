@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -58,25 +63,27 @@ import net.sourceforge.plantuml.graphic.color.Colors;
 
 public class CommandLinkElement extends SingleLineCommand2<DescriptionDiagram> {
 
+	static private final String KEY1 = "dotted|dashed|plain|bold|hidden|norank|thickness=\\d+";
+	static private final String KEY2 = ",dotted|,dashed|,plain|,bold|,hidden|,norank|,thickness=\\d+";
+	static public final String LINE_STYLE = "(?:#\\w+|" + CommandLinkElement.KEY1 + ")(?:,#\\w+|"
+			+ CommandLinkElement.KEY2 + ")*";
+
 	public CommandLinkElement() {
 		super(getRegexConcat());
 	}
 
 	static RegexConcat getRegexConcat() {
-		return new RegexConcat(
-				new RegexLeaf("^"), //
+		return new RegexConcat(new RegexLeaf("^"), //
 				getGroup("ENT1"), //
 				new RegexLeaf("[%s]*"), //
 				new RegexLeaf("LABEL1", "(?:[%g]([^%g]+)[%g])?"), //
 				new RegexLeaf("[%s]*"), //
 				new RegexLeaf("HEAD2", "(0\\)|<<|[<^*+#0)]|<\\||[%s]+o)?"), //
 				new RegexLeaf("BODY1", "([-=.~]+)"), //
-				new RegexLeaf("ARROW_STYLE1",
-						"(?:\\[((?:#\\w+|dotted|dashed|plain|bold|hidden|norank)(?:,#\\w+|,dotted|,dashed|,plain|,bold|,hidden|,norank)*)\\])?"),
+				new RegexLeaf("ARROW_STYLE1", "(?:\\[(" + CommandLinkElement.LINE_STYLE + ")\\])?"), //
 				new RegexLeaf("DIRECTION", "(?:(left|right|up|down|le?|ri?|up?|do?)(?=[-=.~0()]))?"), //
 				new RegexLeaf("INSIDE", "(?:(0|\\(0\\)|\\(0|0\\))(?=[-=.~]))?"), //
-				new RegexLeaf("ARROW_STYLE2",
-						"(?:\\[((?:#\\w+|dotted|dashed|plain|bold|hidden|norank)(?:,#\\w+|,dotted|,dashed|,plain|,bold|,hidden|,norank)*)\\])?"),
+				new RegexLeaf("ARROW_STYLE2", "(?:\\[(" + CommandLinkElement.LINE_STYLE + ")\\])?"), //
 				new RegexLeaf("BODY2", "([-=.~]*)"), //
 				new RegexLeaf("HEAD1", "(\\(0|>>|[>^*+#0(]|\\|>|o[%s]+)?"), //
 				new RegexLeaf("[%s]*"), //
@@ -104,7 +111,7 @@ public class CommandLinkElement extends SingleLineCommand2<DescriptionDiagram> {
 		if (head1.equals("(0")) {
 			d1 = LinkDecor.CIRCLE_CONNECT;
 		} else if (head1.equals("#")) {
-			d1 = LinkDecor.SQUARRE;
+			d1 = LinkDecor.SQUARE;
 		} else if (head1.equals("0")) {
 			d1 = LinkDecor.CIRCLE;
 		} else if (head1.equals("(")) {
@@ -128,7 +135,7 @@ public class CommandLinkElement extends SingleLineCommand2<DescriptionDiagram> {
 		if (head2.equals("0)")) {
 			d2 = LinkDecor.CIRCLE_CONNECT;
 		} else if (head2.equals("#")) {
-			d2 = LinkDecor.SQUARRE;
+			d2 = LinkDecor.SQUARE;
 		} else if (head2.equals("0")) {
 			d2 = LinkDecor.CIRCLE;
 		} else if (head2.equals(")")) {
@@ -152,11 +159,11 @@ public class CommandLinkElement extends SingleLineCommand2<DescriptionDiagram> {
 		LinkType result = new LinkType(d1, d2);
 		final String queue = getQueue(arg);
 		if (queue.contains(".")) {
-			result = result.getDashed();
+			result = result.goDashed();
 		} else if (queue.contains("~")) {
-			result = result.getDotted();
+			result = result.goDotted();
 		} else if (queue.contains("=")) {
-			result = result.getBold();
+			result = result.goBold();
 		}
 
 		final String middle = arg.get("INSIDE", 0);

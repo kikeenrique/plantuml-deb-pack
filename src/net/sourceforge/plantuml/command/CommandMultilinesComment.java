@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -39,7 +44,7 @@ public class CommandMultilinesComment extends CommandMultilines<Diagram> {
 	public static final String COMMENT_SINGLE_LINE = "(?i)^[%s]*([%q].*||/[%q].*[%q]/[%s]*)$";
 	public static final String INNER_COMMENT = "/[%q].*?[%q]/";
 
-	public CommandMultilinesComment() {
+	private CommandMultilinesComment() {
 		super(COMMENT_MULTILINE_START);
 	}
 

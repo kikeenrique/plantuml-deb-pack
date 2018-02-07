@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -73,7 +78,7 @@ public abstract class PSystemBasicFactory<P extends AbstractPSystem> extends PSy
 			}
 			first = false;
 			if (StartUtils.isArobaseEndDiagram(s)) {
-				if (source.getTotalLineCount() == 2) {
+				if (source.getTotalLineCount() == 2 && source.isStartDef() == false) {
 					return buildEmptyError(source, s.getLocation());
 				}
 				if (system != null) {
@@ -83,8 +88,9 @@ public abstract class PSystemBasicFactory<P extends AbstractPSystem> extends PSy
 			}
 			system = executeLine(system, s.toString2());
 			if (system == null) {
-				return new PSystemError(source, new ErrorUml(ErrorUmlType.SYNTAX_ERROR, "Syntax Error?",
-						it.currentNum() - 1, s.getLocation()), null);
+				final ErrorUml err = new ErrorUml(ErrorUmlType.SYNTAX_ERROR, "Syntax Error?",
+				/* it.currentNum() - 1, */s.getLocation());
+				return new PSystemError(source, err, null);
 			}
 		}
 		if (system != null) {

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -83,7 +88,7 @@ public class HeaderLayout {
 		final Dimension2D circleDim = circledCharacter.calculateDimension(stringBounder);
 
 		final double widthStereoAndName = Math.max(stereoDim.getWidth(), nameDim.getWidth());
-		final double suppWith = width - circleDim.getWidth() - widthStereoAndName - genericDim.getWidth();
+		final double suppWith = Math.max(0, width - circleDim.getWidth() - widthStereoAndName - genericDim.getWidth());
 		assert suppWith >= 0;
 
 		final double h2 = Math.min(circleDim.getWidth() / 4, suppWith * 0.1);

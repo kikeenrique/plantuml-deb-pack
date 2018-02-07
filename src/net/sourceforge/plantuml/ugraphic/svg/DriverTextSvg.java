@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -106,7 +111,7 @@ public class DriverTextSvg implements UDriver<SvgGraphics> {
 				svg.setFillColor("url(#" + id + ")");
 				svg.setStrokeColor(null);
 				final double deltaPatch = 2;
-				svg.svgRectangle(x, y - height + deltaPatch, width, height, 0, 0, 0);
+				svg.svgRectangle(x, y - height + deltaPatch, width, height, 0, 0, 0, null);
 
 			} else {
 				backColor = StringUtils.getAsHtml(mapper.getMappedColor(back));

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -56,7 +61,7 @@ public class PostIt {
 	private final String id;
 	private final Display text;
 
-	private Dimension2D minimunDimension;
+	private Dimension2D minimumDimension;
 
 	public PostIt(String id, Display text) {
 		this.id = id;
@@ -71,23 +76,23 @@ public class PostIt {
 		return text;
 	}
 
-	public Dimension2D getMinimunDimension() {
-		return minimunDimension;
+	public Dimension2D getMinimumDimension() {
+		return minimumDimension;
 	}
 
-	public void setMinimunDimension(Dimension2D minimunDimension) {
-		this.minimunDimension = minimunDimension;
+	public void setMinimumDimension(Dimension2D minimumDimension) {
+		this.minimumDimension = minimumDimension;
 	}
 
 	public Dimension2D getDimension(StringBounder stringBounder) {
 		double width = getComponent().getPreferredWidth(stringBounder);
 		double height = getComponent().getPreferredHeight(stringBounder);
 
-		if (minimunDimension != null && width < minimunDimension.getWidth()) {
-			width = minimunDimension.getWidth();
+		if (minimumDimension != null && width < minimumDimension.getWidth()) {
+			width = minimumDimension.getWidth();
 		}
-		if (minimunDimension != null && height < minimunDimension.getHeight()) {
-			height = minimunDimension.getHeight();
+		if (minimumDimension != null && height < minimumDimension.getHeight()) {
+			height = minimumDimension.getHeight();
 		}
 
 		return new Dimension2DDouble(width, height);
@@ -112,7 +117,7 @@ public class PostIt {
 		final FontConfiguration font2 = fontNote.toFont2(HtmlColorUtils.BLACK, true, HtmlColorUtils.BLUE, 8);
 		final ComponentRoseNote note = new ComponentRoseNote(
 				new SymbolContext(noteBackgroundColor, borderColor).withStroke(new UStroke()), font2, text, 0, 0,
-				new SpriteContainerEmpty());
+				new SpriteContainerEmpty(), 0);
 		return note;
 	}
 }

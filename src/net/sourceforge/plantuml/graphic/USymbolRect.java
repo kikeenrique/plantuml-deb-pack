@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -71,6 +76,7 @@ class USymbolRect extends USymbol {
 		return new Margin(10, 10, 10, 10);
 	}
 
+	@Override
 	public TextBlock asSmall(TextBlock name, final TextBlock label, final TextBlock stereotype,
 			final SymbolContext symbolContext) {
 		return new AbstractTextBlock() {
@@ -94,8 +100,9 @@ class USymbolRect extends USymbol {
 		};
 	}
 
-	public TextBlock asBig(final TextBlock title, final TextBlock stereotype, final double width, final double height,
-			final SymbolContext symbolContext) {
+	@Override
+	public TextBlock asBig(final TextBlock title, final HorizontalAlignment labelAlignment, final TextBlock stereotype,
+			final double width, final double height, final SymbolContext symbolContext) {
 		return new AbstractTextBlock() {
 			public void drawU(UGraphic ug) {
 				final Dimension2D dim = calculateDimension(ug.getStringBounder());
@@ -114,7 +121,14 @@ class USymbolRect extends USymbol {
 				}
 				stereotype.drawU(ug.apply(new UTranslate(posStereoX, posStereoY)));
 				final Dimension2D dimTitle = title.calculateDimension(ug.getStringBounder());
-				final double posTitle = (width - dimTitle.getWidth()) / 2;
+				final double posTitle;
+				if (labelAlignment == HorizontalAlignment.LEFT) {
+					posTitle = 3;
+				} else if (labelAlignment == HorizontalAlignment.RIGHT) {
+					posTitle = width - dimTitle.getWidth() - 3;
+				} else {
+					posTitle = (width - dimTitle.getWidth()) / 2;
+				}
 				title.drawU(ug.apply(new UTranslate(posTitle, 2 + dimStereo.getHeight())));
 			}
 

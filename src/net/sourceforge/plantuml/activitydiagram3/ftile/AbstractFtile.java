@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -34,26 +39,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import net.sourceforge.plantuml.AlignParam;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.LineParam;
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
 import net.sourceforge.plantuml.graphic.AbstractTextBlock;
+import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.ugraphic.MinMax;
 import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
 public abstract class AbstractFtile extends AbstractTextBlock implements Ftile {
 
-	private final boolean shadowing;
 	private final ISkinParam skinParam;
 
-	private AbstractFtile(boolean shadowing) {
-		this.shadowing = shadowing;
-		this.skinParam = null;
-	}
-
 	public AbstractFtile(ISkinParam skinParam) {
-		this.shadowing = skinParam.shadowing();
 		this.skinParam = skinParam;
 	}
 
@@ -94,7 +95,31 @@ public abstract class AbstractFtile extends AbstractTextBlock implements Ftile {
 
 	public Collection<Ftile> getMyChildren() {
 		throw new UnsupportedOperationException("" + getClass());
-		// return Collections.emptyList();
 	}
+
+	public HorizontalAlignment arrowHorizontalAlignment() {
+		return skinParam.getHorizontalAlignment(AlignParam.ARROW_MESSAGE_ALIGN, null);
+	}
+
+	private FtileGeometry cachedGeometry;
+
+	final public FtileGeometry calculateDimension(StringBounder stringBounder) {
+		if (cachedGeometry == null) {
+			cachedGeometry = calculateDimensionFtile(stringBounder);
+		}
+		return cachedGeometry;
+	}
+
+	abstract protected FtileGeometry calculateDimensionFtile(StringBounder stringBounder);
+
+	@Override
+	final public MinMax getMinMax(StringBounder stringBounder) {
+		throw new UnsupportedOperationException();
+		// return getMinMaxFtile(stringBounder);
+	}
+
+	// protected MinMax getMinMaxFtile(StringBounder stringBounder) {
+	// throw new UnsupportedOperationException();
+	// }
 
 }

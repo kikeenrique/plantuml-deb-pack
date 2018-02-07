@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -29,20 +34,22 @@
  */
 package net.sourceforge.plantuml.timingdiagram;
 
+import java.math.BigDecimal;
+
 public class TimeTick implements Comparable<TimeTick> {
 
-	private final int time;
+	private final BigDecimal time;
 
-	public TimeTick(int time) {
+	public TimeTick(BigDecimal time) {
 		this.time = time;
 	}
 
-	public final int getTime() {
+	public final BigDecimal getTime() {
 		return time;
 	}
 
 	public int compareTo(TimeTick other) {
-		return this.time - other.time;
+		return this.time.compareTo(other.time);
 	}
 
 }

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -32,16 +37,17 @@ package net.sourceforge.plantuml.timingdiagram;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.UDrawable;
+import net.sourceforge.plantuml.graphic.color.Colors;
 
 public interface TimeDrawing extends TimeProjected, UDrawable {
 
-	public double getHeight();
+	public double getHeight(StringBounder stringBounder);
 
 	public void addChange(ChangeState change);
 
 	public TextBlock getWidthHeader(StringBounder stringBounder);
 
-	public void setInitialState(String initialState);
+	public void setInitialState(String initialState, Colors initialColors);
 
 	public void addConstraint(TimeConstraint constraint);
 

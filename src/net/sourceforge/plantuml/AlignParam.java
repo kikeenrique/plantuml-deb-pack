@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -35,9 +40,11 @@ import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 
 public enum AlignParam {
 	
+	ARROW_MESSAGE_ALIGN(HorizontalAlignment.LEFT),
 	SEQUENCE_MESSAGE_ALIGN(HorizontalAlignment.LEFT),
 	SEQUENCE_MESSAGETEXT_ALIGN(HorizontalAlignment.LEFT),
-	SEQUENCE_REFERENCE_ALIGN(HorizontalAlignment.CENTER);
+	SEQUENCE_REFERENCE_ALIGN(HorizontalAlignment.CENTER),
+	PACKAGE_TITLE_ALIGNMENT(HorizontalAlignment.CENTER);
 	
 	private final HorizontalAlignment defaultValue;
 	

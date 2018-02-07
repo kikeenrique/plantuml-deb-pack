@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -77,7 +82,7 @@ public class DirWatcher2 {
 				final FileWatcher watcher = modifieds.get(f);
 
 				if (watcher == null || watcher.hasChanged()) {
-					final SourceFileReader sourceFileReader = new SourceFileReader(option.getDefaultDefines(), f,
+					final SourceFileReader sourceFileReader = new SourceFileReader(option.getDefaultDefines(f), f,
 							option.getOutputDir(), option.getConfig(), option.getCharset(),
 							option.getFileFormatOption());
 					modifieds.put(f, new FileWatcher(Collections.singleton(f)));

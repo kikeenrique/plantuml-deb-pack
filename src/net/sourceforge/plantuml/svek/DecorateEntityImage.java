@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -39,6 +44,7 @@ import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.VerticalAlignment;
+import net.sourceforge.plantuml.ugraphic.MinMax;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
@@ -134,6 +140,11 @@ public class DecorateEntityImage extends AbstractTextBlock implements TextBlockB
 		final Dimension2D dimText = Dimension2DDouble.mergeTB(getTextDim(text1, stringBounder),
 				getTextDim(text2, stringBounder));
 		return Dimension2DDouble.mergeTB(dimOriginal, dimText);
+	}
+	
+	@Override
+	public MinMax getMinMax(StringBounder stringBounder) {
+		return MinMax.fromDim(calculateDimension(stringBounder));
 	}
 
 	public final double getDeltaX() {

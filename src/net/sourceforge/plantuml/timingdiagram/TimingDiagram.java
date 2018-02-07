@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -30,6 +35,7 @@
 package net.sourceforge.plantuml.timingdiagram;
 
 import java.awt.geom.Dimension2D;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -37,15 +43,25 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sourceforge.plantuml.AnnotatedWorker;
+import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FileFormatOption;
+import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.UmlDiagram;
 import net.sourceforge.plantuml.UmlDiagramType;
 import net.sourceforge.plantuml.core.DiagramDescription;
 import net.sourceforge.plantuml.core.ImageData;
+import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorUtils;
+import net.sourceforge.plantuml.graphic.InnerStrategy;
 import net.sourceforge.plantuml.graphic.StringBounder;
+import net.sourceforge.plantuml.graphic.TextBlock;
+import net.sourceforge.plantuml.graphic.TextBlockCompressed;
+import net.sourceforge.plantuml.graphic.TextBlockRecentred;
 import net.sourceforge.plantuml.graphic.UDrawable;
+import net.sourceforge.plantuml.svek.TextBlockBackcolored;
 import net.sourceforge.plantuml.ugraphic.ImageBuilder;
+import net.sourceforge.plantuml.ugraphic.MinMax;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULine;
@@ -77,15 +93,50 @@ public class TimingDiagram extends UmlDiagram implements Clock {
 		final ImageBuilder imageBuilder = new ImageBuilder(getSkinParam(), dpiFactor,
 				fileFormatOption.isWithMetadata() ? getMetadata() : null, getWarningOrError(), margin, margin,
 				getAnimation());
-		imageBuilder.setUDrawable(getUDrawable());
+		// imageBuilder.setUDrawable(getUDrawable());
 
-		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, os);
+		TextBlock result = getTextBlock();
+		// TextBlock result = new TextBlockCompressed(getTextBlock());
+		// result = new TextBlockRecentred(result);
+		final ISkinParam skinParam = getSkinParam();
+		result = new AnnotatedWorker(this, skinParam).addAdd(result);
+		imageBuilder.setUDrawable(result);
+
+		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, seed(), os);
 	}
 
 	private UDrawable getUDrawable() {
 		return new UDrawable() {
 			public void drawU(UGraphic ug) {
 				drawInternal(ug);
+			}
+		};
+	}
+
+	private TextBlockBackcolored getTextBlock() {
+		return new TextBlockBackcolored() {
+
+			public void drawU(UGraphic ug) {
+				drawInternal(ug);
+			}
+
+			public Rectangle2D getInnerPosition(String member, StringBounder stringBounder, InnerStrategy strategy) {
+				return null;
+			}
+
+			public Dimension2D calculateDimension(StringBounder stringBounder) {
+				final UTranslate lastTranslate = getUTranslateForPlayer(null, stringBounder);
+				final double withBeforeRuler = getWithBeforeRuler(stringBounder);
+				final double totalWith = withBeforeRuler + ruler.getWidth() + marginX1 + marginX2;
+				return new Dimension2DDouble(totalWith, lastTranslate.getDy() + ruler.getHeight(stringBounder));
+			}
+
+			public MinMax getMinMax(StringBounder stringBounder) {
+				throw new UnsupportedOperationException();
+			}
+
+			public HtmlColor getBackcolor() {
+				return null;
 			}
 		};
 	}
@@ -140,6 +191,10 @@ public class TimingDiagram extends UmlDiagram implements Clock {
 
 		final IntricatedPoint pt1 = player1.getTimeProjection(ug.getStringBounder(), message.getTick1());
 		final IntricatedPoint pt2 = player2.getTimeProjection(ug.getStringBounder(), message.getTick2());
+
+		if (pt1 == null || pt2 == null) {
+			return;
+		}
 
 		final TimeArrow timeArrow = TimeArrow.create(pt1.translated(translate1), pt2.translated(translate2),
 				message.getLabel(), getSkinParam());
@@ -200,6 +255,10 @@ public class TimingDiagram extends UmlDiagram implements Clock {
 
 	public Player getLastPlayer() {
 		return lastPlayer;
+	}
+
+	public void scaleInPixels(long tick, long pixel) {
+		ruler.scaleInPixels(tick, pixel);
 	}
 
 }

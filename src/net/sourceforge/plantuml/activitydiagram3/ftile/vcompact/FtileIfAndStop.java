@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -220,7 +225,7 @@ class FtileIfAndStop extends AbstractFtile {
 			final Point2D p1 = getP1(stringBounder);
 			final Point2D p2 = getP2(stringBounder);
 
-			final Snake snake = new Snake(color, Arrows.asToRight());
+			final Snake snake = new Snake(arrowHorizontalAlignment(), color, Arrows.asToRight());
 			snake.addPoint(p1);
 			snake.addPoint(p2);
 			ug.draw(snake);
@@ -266,7 +271,8 @@ class FtileIfAndStop extends AbstractFtile {
 		ug.apply(getTranslateStop(stringBounder)).draw(stop2);
 	}
 
-	public FtileGeometry calculateDimension(StringBounder stringBounder) {
+	@Override
+	protected FtileGeometry calculateDimensionFtile(StringBounder stringBounder) {
 		final Dimension2D dimStop2 = stop2.calculateDimension(stringBounder);
 		final FtileGeometry dim1 = tile1.calculateDimension(stringBounder).addDim(0,
 				getDiamondStopDistance() + dimStop2.getWidth());

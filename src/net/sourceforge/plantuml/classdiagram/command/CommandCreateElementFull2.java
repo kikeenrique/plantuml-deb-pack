@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -139,7 +144,7 @@ public class CommandCreateElementFull2 extends SingleLineCommand2<ClassDiagram> 
 			usymbol = null;
 		} else {
 			type = LeafType.DESCRIPTION;
-			usymbol = USymbol.getFoo1(symbol, diagram.getSkinParam().useUml2ForComponent());
+			usymbol = USymbol.getFromString(symbol, diagram.getSkinParam().useUml2ForComponent());
 			if (usymbol == null) {
 				throw new IllegalStateException();
 			}

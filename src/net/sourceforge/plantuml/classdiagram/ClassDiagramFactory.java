@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -64,7 +69,9 @@ import net.sourceforge.plantuml.command.note.FactoryNoteOnEntityCommand;
 import net.sourceforge.plantuml.command.note.FactoryNoteOnLinkCommand;
 import net.sourceforge.plantuml.command.note.FactoryTipOnEntityCommand;
 import net.sourceforge.plantuml.command.regex.RegexLeaf;
+import net.sourceforge.plantuml.descdiagram.command.CommandCreateElementMultilines;
 import net.sourceforge.plantuml.descdiagram.command.CommandNewpage;
+import net.sourceforge.plantuml.descdiagram.command.CommandPackageWithUSymbol;
 import net.sourceforge.plantuml.objectdiagram.command.CommandCreateEntityObject;
 import net.sourceforge.plantuml.objectdiagram.command.CommandCreateEntityObjectMultilines;
 
@@ -102,6 +109,7 @@ public class ClassDiagramFactory extends UmlDiagramFactory {
 		cmds.add(new CommandPackage());
 		cmds.add(new CommandEndPackage());
 		cmds.add(new CommandPackageEmpty());
+		cmds.add(new CommandPackageWithUSymbol());
 
 		cmds.add(new CommandNamespace());
 		cmds.add(new CommandStereotype());
@@ -112,7 +120,7 @@ public class ClassDiagramFactory extends UmlDiagramFactory {
 		cmds.add(new CommandImport());
 
 		final FactoryTipOnEntityCommand factoryTipOnEntityCommand = new FactoryTipOnEntityCommand(new RegexLeaf(
-				"ENTITY", "(" + CommandCreateClass.CODE_NO_DOTDOT + "|[%g][^%g]+[%g])::([^%s]+)"));
+				"ENTITY", "(" + CommandCreateClass.CODE_NO_DOTDOT + "|[%g][^%g]+[%g])::([%g][^%g]+[%g]|[^%s]+)"));
 		cmds.add(factoryTipOnEntityCommand.createMultiLine(true));
 		cmds.add(factoryTipOnEntityCommand.createMultiLine(false));
 
@@ -137,6 +145,9 @@ public class ClassDiagramFactory extends UmlDiagramFactory {
 		cmds.add(new CommandHideShowSpecificClass());
 
 		cmds.add(new CommandNamespaceSeparator());
+
+		cmds.add(new CommandCreateElementMultilines(0));
+		cmds.add(new CommandCreateElementMultilines(1));
 
 		return cmds;
 	}

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -65,15 +70,15 @@ public class Worm implements Iterable<Point2D.Double> {
 			throw new IllegalArgumentException();
 		}
 		final LinkStyle style = color.getStyle();
-		if (style == LinkStyle.INVISIBLE) {
+		if (style.isInvisible()) {
 			return;
 		}
 		ug = ug.apply(new UChangeColor(color2));
 		ug = ug.apply(new UChangeBackColor(color2));
-		if (style == LinkStyle.NORMAL) {
+		if (style.isNormal()) {
 			ug = ug.apply(new UStroke(stroke));
 		} else {
-			ug = ug.apply(LinkStyle.getStroke(style, stroke));
+			ug = ug.apply(style.goThickness(stroke).getStroke3());
 		}
 		boolean drawn = false;
 		for (int i = 0; i < points.size() - 1; i++) {

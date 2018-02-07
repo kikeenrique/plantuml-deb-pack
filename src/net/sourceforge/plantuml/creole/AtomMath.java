@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -35,6 +40,7 @@ import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
+import net.sourceforge.plantuml.SvgString;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorSimple;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -77,10 +83,15 @@ public class AtomMath implements Atom {
 
 	public void drawU(UGraphic ug) {
 		final boolean isSvg = ug.matchesProperty("SVG");
-		final Color back = getColor(background == null ? ug.getParam().getBackcolor() : background, Color.WHITE);
+		final Color back;
+		if (isSvg && background == null) {
+			back = null;
+		} else {
+			back = getColor(background == null ? ug.getParam().getBackcolor() : background, Color.WHITE);
+		}
 		final Color fore = getColor(foreground, Color.BLACK);
 		if (isSvg) {
-			final String svg = math.getSvg(fore, back);
+			final SvgString svg = math.getSvg(scale, fore, back);
 			ug.draw(new UImageSvg(svg));
 		} else {
 			ug.draw(new UImage(math.getImage(scale, fore, back)));

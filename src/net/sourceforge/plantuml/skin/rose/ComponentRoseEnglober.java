@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -48,17 +53,21 @@ import net.sourceforge.plantuml.ugraphic.UTranslate;
 public class ComponentRoseEnglober extends AbstractTextualComponent {
 
 	private final SymbolContext symbolContext;
+	private final double roundCorner;
 
-	public ComponentRoseEnglober(SymbolContext symbolContext, Display strings, FontConfiguration font, ISkinSimple spriteContainer) {
-		super(LineBreakStrategy.NONE, strings, font, HorizontalAlignment.CENTER, 3, 3, 1, spriteContainer, false, null, null);
+	public ComponentRoseEnglober(SymbolContext symbolContext, Display strings, FontConfiguration font,
+			ISkinSimple spriteContainer, double roundCorner) {
+		super(LineBreakStrategy.NONE, strings, font, HorizontalAlignment.CENTER, 3, 3, 1, spriteContainer, false, null,
+				null);
+		this.roundCorner = roundCorner;
 		this.symbolContext = symbolContext;
 	}
 
 	@Override
 	protected void drawBackgroundInternalU(UGraphic ug, Area area) {
 		final Dimension2D dimensionToUse = area.getDimensionToUse();
-		ug = symbolContext.apply(ug);
-		ug.draw(new URectangle(dimensionToUse.getWidth(), dimensionToUse.getHeight()));
+		ug = symbolContext.transparentBackColorToNull().apply(ug);
+		ug.draw(new URectangle(dimensionToUse.getWidth(), dimensionToUse.getHeight(), roundCorner, roundCorner));
 		final double xpos = (dimensionToUse.getWidth() - getPureTextWidth(ug.getStringBounder())) / 2;
 		getTextBlock().drawU(ug.apply(new UTranslate(xpos, 0)));
 	}

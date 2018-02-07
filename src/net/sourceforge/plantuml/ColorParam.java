@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -39,6 +44,8 @@ public enum ColorParam {
 	background(HtmlColorUtils.WHITE, true, ColorType.BACK),
 	hyperlink(HtmlColorUtils.BLUE),
 	
+	activityDiamondBackground(HtmlColorUtils.MY_YELLOW, true, ColorType.BACK),
+	activityDiamondBorder(HtmlColorUtils.MY_RED, ColorType.LINE),
 	activityBackground(HtmlColorUtils.MY_YELLOW, true, ColorType.BACK),
 	activityBorder(HtmlColorUtils.MY_RED, ColorType.LINE),
 	activityStart(HtmlColorUtils.BLACK),
@@ -119,6 +126,8 @@ public enum ColorParam {
 	cloudBorder(HtmlColorUtils.BLACK, ColorType.LINE),
 	queueBackground(HtmlColorUtils.MY_YELLOW, true, ColorType.BACK),
 	queueBorder(HtmlColorUtils.MY_RED, ColorType.LINE),
+	stackBackground(HtmlColorUtils.MY_YELLOW, true, ColorType.BACK),
+	stackBorder(HtmlColorUtils.MY_RED, ColorType.LINE),
 	databaseBackground(HtmlColorUtils.MY_YELLOW, true, ColorType.BACK),
 	databaseBorder(HtmlColorUtils.BLACK, ColorType.LINE),
 	folderBackground(HtmlColorUtils.MY_YELLOW, true, ColorType.BACK),
@@ -153,7 +162,9 @@ public enum ColorParam {
 	iconProtectedBackground(HtmlColorUtils.COL_FFFF44),
 	iconPublic(HtmlColorUtils.COL_038048),
 	iconPublicBackground(HtmlColorUtils.COL_84BE84),
-	iconIEMandatory(HtmlColorUtils.BLACK);
+	iconIEMandatory(HtmlColorUtils.BLACK),
+	
+	arrowLollipop(HtmlColorUtils.WHITE);
 
 	private final boolean isBackground;
 	private final HtmlColor defaultValue;

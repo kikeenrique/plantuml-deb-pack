@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -122,6 +127,7 @@ class USymbolQueue extends USymbol {
 		return new Margin(5, 15, 5, 5);
 	}
 
+	@Override
 	public TextBlock asSmall(TextBlock name, final TextBlock label, final TextBlock stereotype,
 			final SymbolContext symbolContext) {
 		return new AbstractTextBlock() {
@@ -145,8 +151,9 @@ class USymbolQueue extends USymbol {
 		};
 	}
 
-	public TextBlock asBig(final TextBlock title, final TextBlock stereotype, final double width, final double height,
-			final SymbolContext symbolContext) {
+	@Override
+	public TextBlock asBig(final TextBlock title, HorizontalAlignment labelAlignment, final TextBlock stereotype,
+			final double width, final double height, final SymbolContext symbolContext) {
 		throw new UnsupportedOperationException();
 		// return new TextBlock() {
 		//

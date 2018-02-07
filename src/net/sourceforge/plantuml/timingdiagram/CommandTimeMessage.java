@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -61,7 +66,13 @@ public class CommandTimeMessage extends SingleLineCommand2<TimingDiagram> {
 	@Override
 	final protected CommandExecutionResult executeArg(TimingDiagram diagram, RegexResult arg) {
 		final Player player1 = diagram.getPlayer(arg.get("PART1", 0));
+		if (player1 == null) {
+			return CommandExecutionResult.error("No such element: " + arg.get("PART1", 0));
+		}
 		final Player player2 = diagram.getPlayer(arg.get("PART2", 0));
+		if (player2 == null) {
+			return CommandExecutionResult.error("No such element: " + arg.get("PART2", 0));
+		}
 		final TimeTick tick1 = TimeTickBuilder.parseTimeTick("TIME1", arg, diagram);
 		final TimeTick tick2 = TimeTickBuilder.parseTimeTick("TIME2", arg, diagram);
 		diagram.createTimeMessage(player1, tick1, player2, tick2, arg.get("MESSAGE", 0));

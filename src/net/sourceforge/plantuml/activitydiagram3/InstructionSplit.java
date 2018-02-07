@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -100,8 +105,8 @@ public class InstructionSplit implements Instruction {
 		return inlinkRendering;
 	}
 
-	public boolean addNote(Display note, NotePosition position, NoteType type, Colors colors) {
-		return getLast().addNote(note, position, type, colors);
+	public boolean addNote(Display note, NotePosition position, NoteType type, Colors colors, Swimlane swimlaneNote) {
+		return getLast().addNote(note, position, type, colors, swimlaneNote);
 	}
 
 	public Set<Swimlane> getSwimlanes() {

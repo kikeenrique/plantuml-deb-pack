@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -37,6 +42,7 @@ import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.activitydiagram3.LinkRendering;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Arrows;
+import net.sourceforge.plantuml.activitydiagram3.ftile.BoxStyle;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Connection;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Ftile;
 import net.sourceforge.plantuml.activitydiagram3.ftile.FtileBreak;
@@ -53,6 +59,7 @@ import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.HtmlColorAndStyle;
 import net.sourceforge.plantuml.graphic.Rainbow;
+import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.svek.ConditionStyle;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
@@ -64,14 +71,15 @@ public class FtileFactoryDelegatorRepeat extends FtileFactoryDelegator {
 	}
 
 	@Override
-	public Ftile repeat(Swimlane swimlane, Swimlane swimlaneOut, final Ftile repeat, Display test, Display yes,
-			Display out, HtmlColor color, LinkRendering backRepeatLinkRendering) {
+	public Ftile repeat(Swimlane swimlane, Swimlane swimlaneOut, Display startLabel, final Ftile repeat, Display test,
+			Display yes, Display out, HtmlColor color, LinkRendering backRepeatLinkRendering, Ftile backward,
+			boolean noOut) {
 
 		final ConditionStyle conditionStyle = skinParam().getConditionStyle();
 
-		final HtmlColor borderColor = getRose().getHtmlColor(skinParam(), ColorParam.activityBorder);
-		final HtmlColor backColor = color == null ? getRose().getHtmlColor(skinParam(), ColorParam.activityBackground)
-				: color;
+		final HtmlColor borderColor = getRose().getHtmlColor(skinParam(), ColorParam.activityDiamondBorder);
+		final HtmlColor backColor = color == null ? getRose().getHtmlColor(skinParam(),
+				ColorParam.activityDiamondBackground) : color;
 		final Rainbow arrowColor = HtmlColorAndStyle.build(skinParam());
 
 		final LinkRendering endRepeatLinkRendering = repeat.getOutLinkRendering();
@@ -80,9 +88,12 @@ public class FtileFactoryDelegatorRepeat extends FtileFactoryDelegator {
 		final FontConfiguration fcDiamond = new FontConfiguration(skinParam(), FontParam.ACTIVITY_DIAMOND, null);
 		final FontConfiguration fcArrow = new FontConfiguration(skinParam(), FontParam.ARROW, null);
 
-		Ftile result = FtileRepeat.create(backRepeatLinkRendering, swimlane, swimlaneOut, repeat, test, yes, out,
-				borderColor, backColor, arrowColor, endRepeatLinkColor, conditionStyle, this.skinParam(), fcDiamond,
-				fcArrow);
+		final Ftile backStart = Display.isNull(startLabel) ? null : this.activity(startLabel, swimlane, BoxStyle.PLAIN,
+				Colors.empty());
+
+		Ftile result = FtileRepeat.create(backRepeatLinkRendering, swimlane, swimlaneOut, backStart, repeat, test, yes,
+				out, borderColor, backColor, arrowColor, endRepeatLinkColor, conditionStyle, this.skinParam(),
+				fcDiamond, fcArrow, backward, noOut);
 
 		final List<WeldingPoint> weldingPoints = repeat.getWeldingPoints();
 		if (weldingPoints.size() > 0) {
@@ -100,7 +111,8 @@ public class FtileFactoryDelegatorRepeat extends FtileFactoryDelegator {
 					final UTranslate tr2 = genealogy.getTranslate(diamondBreak, ug.getStringBounder());
 					final Dimension2D dimDiamond = diamondBreak.calculateDimension(ug.getStringBounder());
 
-					final Snake snake = new Snake(arrowColor, Arrows.asToRight());
+					final Snake snake = new Snake(getFtile1().arrowHorizontalAlignment(), arrowColor, Arrows
+							.asToRight());
 					snake.addPoint(tr1.getDx(), tr1.getDy());
 					snake.addPoint(0, tr1.getDy());
 					snake.addPoint(0, tr2.getDy() + dimDiamond.getHeight() / 2);

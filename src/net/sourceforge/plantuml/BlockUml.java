@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -30,14 +35,19 @@
  */
 package net.sourceforge.plantuml;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import net.sourceforge.plantuml.code.AsciiEncoder;
+import net.sourceforge.plantuml.code.Transcoder;
+import net.sourceforge.plantuml.code.TranscoderUtil;
 import net.sourceforge.plantuml.command.regex.Matcher2;
 import net.sourceforge.plantuml.core.Diagram;
+import net.sourceforge.plantuml.preproc.Defines;
 import net.sourceforge.plantuml.utils.StartUtils;
 import net.sourceforge.plantuml.version.Version;
 
@@ -46,9 +56,17 @@ public class BlockUml {
 	private final List<CharSequence2> data;
 	private final int startLine;
 	private Diagram system;
+	private final Defines localDefines;
 
 	BlockUml(String... strings) {
-		this(convert(strings), 0);
+		this(convert(strings), 0, Defines.createEmpty());
+	}
+
+	public String getEncodedUrl() throws IOException {
+		final Transcoder transcoder = TranscoderUtil.getDefaultTranscoder();
+		final String source = getDiagram().getSource().getPlainString();
+		final String encoded = transcoder.encode(source);
+		return encoded;
 	}
 
 	public String getFlashData() {
@@ -56,7 +74,7 @@ public class BlockUml {
 		for (CharSequence2 line : data) {
 			sb.append(line);
 			sb.append('\r');
-			sb.append('\n');
+			sb.append(BackSlash.CHAR_NEWLINE);
 		}
 		return sb.toString();
 	}
@@ -75,8 +93,9 @@ public class BlockUml {
 		return result;
 	}
 
-	public BlockUml(List<CharSequence2> strings, int startLine) {
+	public BlockUml(List<CharSequence2> strings, int startLine, Defines defines) {
 		this.startLine = startLine;
+		this.localDefines = defines;
 		final CharSequence2 s0 = strings.get(0).trin();
 		if (StartUtils.startsWithSymbolAnd("start", s0) == false) {
 			throw new IllegalArgumentException();
@@ -84,7 +103,7 @@ public class BlockUml {
 		this.data = new ArrayList<CharSequence2>(strings);
 	}
 
-	public String getFileOrDirname(FileFormat defaultFileFormat) {
+	public String getFileOrDirname() {
 		if (OptionFlags.getInstance().isWord()) {
 			return null;
 		}
@@ -107,15 +126,13 @@ public class BlockUml {
 		if (result.startsWith("file://")) {
 			result = result.substring("file://".length());
 		}
-		if (result.contains(".") == false) {
-			result = result + defaultFileFormat.getFileSuffix();
-		}
+		result = result.replaceAll("\\.\\w\\w\\w$", "");
 		return result;
 	}
 
 	public Diagram getDiagram() {
 		if (system == null) {
-			system = new PSystemBuilder().createPSystem(data);
+			system = new PSystemBuilder().createPSystem(data, startLine);
 		}
 		return system;
 	}
@@ -144,15 +161,27 @@ public class BlockUml {
 	}
 
 	public String etag() {
-		final StringBuilder result = new StringBuilder();
-		result.append(Integer.toString(Version.version(), 36));
-		result.append(Integer.toString(Version.beta(), 36));
-		result.append(internalEtag());
-		return result.toString();
+		return Version.etag() + internalEtag();
 	}
 
 	public long lastModified() {
 		return (Version.compileTime() / 1000L / 60) * 1000L * 60 + Version.beta() * 1000L * 3600;
+	}
+
+	public boolean isStartDef(String name) {
+		final String signature = "@startdef(id=" + name + ")";
+		return data.get(0).toString().equalsIgnoreCase(signature);
+	}
+
+	public List<? extends CharSequence> getDefinition() {
+		if (data.get(0).toString().startsWith("@startdef") == false) {
+			throw new IllegalStateException();
+		}
+		return Collections.unmodifiableList(data.subList(1, data.size() - 1));
+	}
+
+	public Defines getLocalDefines() {
+		return localDefines;
 	}
 
 }

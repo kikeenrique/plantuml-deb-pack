@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -54,8 +59,8 @@ public class FtileFactoryDelegatorWhile extends FtileFactoryDelegator {
 	@Override
 	public Ftile createWhile(Swimlane swimlane, Ftile whileBlock, Display test, Display yes, Display out,
 			LinkRendering afterEndwhile, HtmlColor color, Instruction specialOut) {
-		final HtmlColor borderColor = getRose().getHtmlColor(skinParam(), ColorParam.activityBorder);
-		final HtmlColor backColor = color == null ? getRose().getHtmlColor(skinParam(), ColorParam.activityBackground)
+		final HtmlColor borderColor = getRose().getHtmlColor(skinParam(), ColorParam.activityDiamondBorder);
+		final HtmlColor backColor = color == null ? getRose().getHtmlColor(skinParam(), ColorParam.activityDiamondBackground)
 				: color;
 		final Rainbow arrowColor = HtmlColorAndStyle.build(skinParam());
 

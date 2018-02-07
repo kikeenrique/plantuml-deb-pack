@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -33,13 +38,16 @@ package net.sourceforge.plantuml.core;
 import net.sourceforge.plantuml.utils.StartUtils;
 
 public enum DiagramType {
-	UML, DITAA, DOT, PROJECT, JCCKIT, SALT, FLOW, CREOLE, JUNGLE, CUTE, MATH, LATEX, UNKNOWN;
+	UML, BPM, DITAA, DOT, PROJECT, JCCKIT, SALT, FLOW, CREOLE, JUNGLE, CUTE, MATH, LATEX, DEFINITION, GANTT, UNKNOWN;
 
 	static public DiagramType getTypeFromArobaseStart(String s) {
 		s = s.toLowerCase();
 		// if (s.startsWith("@startuml2")) {
 		// return UML2;
 		// }
+		if (StartUtils.startsWithSymbolAnd("startbpm", s)) {
+			return BPM;
+		}
 		if (StartUtils.startsWithSymbolAnd("startuml", s)) {
 			return UML;
 		}
@@ -75,6 +83,12 @@ public enum DiagramType {
 		}
 		if (StartUtils.startsWithSymbolAnd("startlatex", s)) {
 			return LATEX;
+		}
+		if (StartUtils.startsWithSymbolAnd("startdef", s)) {
+			return DEFINITION;
+		}
+		if (StartUtils.startsWithSymbolAnd("startgantt", s)) {
+			return GANTT;
 		}
 		return UNKNOWN;
 	}

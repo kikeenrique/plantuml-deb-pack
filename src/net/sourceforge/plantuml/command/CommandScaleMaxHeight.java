@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -32,17 +37,17 @@ package net.sourceforge.plantuml.command;
 
 import java.util.List;
 
+import net.sourceforge.plantuml.AbstractPSystem;
 import net.sourceforge.plantuml.ScaleMaxHeight;
-import net.sourceforge.plantuml.UmlDiagram;
 
-public class CommandScaleMaxHeight extends SingleLineCommand<UmlDiagram> {
+public class CommandScaleMaxHeight extends SingleLineCommand<AbstractPSystem> {
 
 	public CommandScaleMaxHeight() {
 		super("(?i)^scale[%s]+max[%s]+([0-9.]+)[%s]+height$");
 	}
 
 	@Override
-	protected CommandExecutionResult executeArg(UmlDiagram diagram, List<String> arg) {
+	protected CommandExecutionResult executeArg(AbstractPSystem diagram, List<String> arg) {
 		final double height = Double.parseDouble(arg.get(0));
 		diagram.setScale(new ScaleMaxHeight(height));
 		return CommandExecutionResult.ok();

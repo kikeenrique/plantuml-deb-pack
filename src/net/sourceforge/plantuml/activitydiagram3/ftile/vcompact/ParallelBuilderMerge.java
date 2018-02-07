@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -88,8 +93,8 @@ public class ParallelBuilderMerge extends ParallelFtilesBuilder {
 
 	@Override
 	protected  Ftile doStep2(Ftile result) {
-		final HtmlColor borderColor = getRose().getHtmlColor(skinParam(), ColorParam.activityBorder);
-		final HtmlColor backColor = getRose().getHtmlColor(skinParam(), ColorParam.activityBackground);
+		final HtmlColor borderColor = getRose().getHtmlColor(skinParam(), ColorParam.activityDiamondBorder);
+		final HtmlColor backColor = getRose().getHtmlColor(skinParam(), ColorParam.activityDiamondBackground);
 		final Ftile out = new FtileDiamond(skinParam(), backColor, borderColor, swimlane());
 		result = new FtileAssemblySimple(result, out);
 		final List<Connection> conns = new ArrayList<Connection>();
@@ -138,7 +143,7 @@ public class ParallelBuilderMerge extends ParallelFtilesBuilder {
 			} else if (counter == 1) {
 				endDecoration = Arrows.asToLeft();
 			}
-			final Snake snake = new Snake(arrowColor, endDecoration);
+			final Snake snake = new Snake(arrowHorizontalAlignment(), arrowColor, endDecoration);
 			snake.addPoint(x1, y1);
 			snake.addPoint(x1, y2);
 			snake.addPoint(x2, y2);
@@ -181,7 +186,7 @@ public class ParallelBuilderMerge extends ParallelFtilesBuilder {
 		public void drawU(UGraphic ug) {
 			ug = ug.apply(new UTranslate(x, 0));
 			final FtileGeometry geo = getFtile2().calculateDimension(getStringBounder());
-			final Snake snake = new Snake(arrowColor, Arrows.asToDown());
+			final Snake snake = new Snake(arrowHorizontalAlignment(), arrowColor, Arrows.asToDown());
 			if (Display.isNull(label) == false) {
 				snake.setLabel(getTextBlock(label));
 			}
@@ -196,7 +201,7 @@ public class ParallelBuilderMerge extends ParallelFtilesBuilder {
 			final Point2D p1 = new Point2D.Double(geo.getLeft(), 0);
 			final Point2D p2 = new Point2D.Double(geo.getLeft(), geo.getInY());
 
-			final Snake snake = new Snake(arrowColor, Arrows.asToDown());
+			final Snake snake = new Snake(arrowHorizontalAlignment(), arrowColor, Arrows.asToDown());
 			if (Display.isNull(label) == false) {
 				snake.setLabel(getTextBlock(label));
 			}

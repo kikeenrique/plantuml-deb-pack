@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -59,18 +64,17 @@ public class DriverRectangleSvg implements UDriver<SvgGraphics> {
 		double width = rect.getWidth();
 		double height = rect.getHeight();
 
-		final String color = StringUtils.getAsSvg(mapper, param.getColor());
 		final HtmlColor back = param.getBackcolor();
 		if (back instanceof HtmlColorGradient) {
 			final HtmlColorGradient gr = (HtmlColorGradient) back;
 			final String id = svg.createSvgGradient(StringUtils.getAsHtml(mapper.getMappedColor(gr.getColor1())),
 					StringUtils.getAsHtml(mapper.getMappedColor(gr.getColor2())), gr.getPolicy());
 			svg.setFillColor("url(#" + id + ")");
-			svg.setStrokeColor(color);
+			applyColor(svg, mapper, param);
 		} else {
 			final String backcolor = StringUtils.getAsSvg(mapper, back);
 			svg.setFillColor(backcolor);
-			svg.setStrokeColor(color);
+			applyColor(svg, mapper, param);
 		}
 
 		svg.setStrokeWidth(param.getStroke().getThickness(), param.getStroke().getDasharraySvg());
@@ -86,6 +90,18 @@ public class DriverRectangleSvg implements UDriver<SvgGraphics> {
 				return;
 			}
 		}
-		svg.svgRectangle(x, y, width, height, rx / 2, ry / 2, rect.getDeltaShadow());
+		svg.svgRectangle(x, y, width, height, rx / 2, ry / 2, rect.getDeltaShadow(), rect.getComment());
+	}
+
+	public static void applyColor(SvgGraphics svg, ColorMapper mapper, UParam param) {
+		final HtmlColor color = param.getColor();
+		if (color instanceof HtmlColorGradient) {
+			final HtmlColorGradient gr = (HtmlColorGradient) color;
+			final String id = svg.createSvgGradient(StringUtils.getAsHtml(mapper.getMappedColor(gr.getColor1())),
+					StringUtils.getAsHtml(mapper.getMappedColor(gr.getColor2())), gr.getPolicy());
+			svg.setStrokeColor("url(#" + id + ")");
+		} else {
+			svg.setStrokeColor(StringUtils.getAsSvg(mapper, color));
+		}
 	}
 }

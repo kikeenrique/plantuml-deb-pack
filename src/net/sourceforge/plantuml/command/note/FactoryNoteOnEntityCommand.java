@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -174,7 +179,7 @@ public final class FactoryNoteOnEntityCommand implements SingleMultiFactoryComma
 				diagram.getSkinParam().getRankdir());
 		final Link link;
 
-		final LinkType type = new LinkType(LinkDecor.NONE, LinkDecor.NONE).getDashed();
+		final LinkType type = new LinkType(LinkDecor.NONE, LinkDecor.NONE).goDashed();
 		if (position == Position.RIGHT) {
 			link = new Link(cl1, note, type, Display.NULL, 1);
 			link.setHorizontalSolitary(true);

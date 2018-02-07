@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -31,6 +36,7 @@
  */
 package net.sourceforge.plantuml.svek;
 
+import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.SymbolContext;
 import net.sourceforge.plantuml.graphic.TextBlock;
@@ -80,15 +86,16 @@ public class ClusterDecoration {
 	public final static int marginTitleY1 = 3;
 	public final static int marginTitleY2 = 3;
 
-	public void drawU(UGraphic ug, HtmlColor backColor, HtmlColor borderColor, boolean shadowing, double roundCorner) {
+	public void drawU(UGraphic ug, HtmlColor backColor, HtmlColor borderColor, boolean shadowing, double roundCorner,
+			HorizontalAlignment titleAlignment) {
 		final SymbolContext biColor = new SymbolContext(backColor, borderColor);
 		if (symbol == null) {
 			throw new UnsupportedOperationException();
 		}
 		final SymbolContext symbolContext = biColor.withShadow(shadowing).withStroke(defaultStroke)
 				.withRoundCorner(roundCorner);
-		symbol.asBig(title, stereo, maxX - minX, maxY - minY, symbolContext)
-				.drawU(ug.apply(new UTranslate(minX, minY)));
+		symbol.asBig(title, titleAlignment, stereo, maxX - minX, maxY - minY, symbolContext).drawU(
+				ug.apply(new UTranslate(minX, minY)));
 		// return;
 		// }
 		// if (style == PackageStyle.NODE) {

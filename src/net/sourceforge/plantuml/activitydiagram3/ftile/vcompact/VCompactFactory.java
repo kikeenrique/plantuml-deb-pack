@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -50,6 +55,7 @@ import net.sourceforge.plantuml.activitydiagram3.ftile.FtileFactory;
 import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vertical.FtileBox;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vertical.FtileCircleEnd;
+import net.sourceforge.plantuml.activitydiagram3.ftile.vertical.FtileCircleSpot;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vertical.FtileCircleStart;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vertical.FtileCircleStop;
 import net.sourceforge.plantuml.activitydiagram3.ftile.vertical.FtileDecorateIn;
@@ -86,6 +92,12 @@ public class VCompactFactory implements FtileFactory {
 		return new FtileCircleStop(skinParam(), color, swimlane);
 	}
 
+	public Ftile spot(Swimlane swimlane, String spot) {
+		// final HtmlColor color = rose.getHtmlColor(skinParam, ColorParam.activityBackground);
+		final UFont font = skinParam.getFont(null, false, FontParam.ACTIVITY);
+		return new FtileCircleSpot(skinParam(), swimlane, spot, font);
+	}
+
 	public Ftile end(Swimlane swimlane) {
 		final HtmlColor color = rose.getHtmlColor(skinParam, ColorParam.activityEnd);
 		return new FtileCircleEnd(skinParam(), color, swimlane);
@@ -111,8 +123,9 @@ public class VCompactFactory implements FtileFactory {
 		return new FtileAssemblySimple(tile1, tile2);
 	}
 
-	public Ftile repeat(Swimlane swimlane, Swimlane swimlaneOut, Ftile repeat, Display test, Display yes, Display out,
-			HtmlColor color, LinkRendering backRepeatLinkRendering) {
+	public Ftile repeat(Swimlane swimlane, Swimlane swimlaneOut, Display startLabel, Ftile repeat, Display test,
+			Display yes, Display out, HtmlColor color, LinkRendering backRepeatLinkRendering, Ftile backward,
+			boolean noOut) {
 		return repeat;
 	}
 
@@ -157,5 +170,4 @@ public class VCompactFactory implements FtileFactory {
 	public ISkinParam skinParam() {
 		return skinParam;
 	}
-
 }

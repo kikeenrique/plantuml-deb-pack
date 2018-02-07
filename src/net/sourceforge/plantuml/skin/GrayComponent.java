@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -49,7 +54,7 @@ import net.sourceforge.plantuml.ugraphic.URectangle;
 
 class GrayComponent extends AbstractComponent {
 
-	private static final UFont NORMAL = new UFont("SansSerif", Font.PLAIN, 7);
+	private static final UFont NORMAL = UFont.sansSerif(7);
 
 	private final ComponentType type;
 

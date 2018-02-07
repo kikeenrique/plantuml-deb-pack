@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -41,24 +46,24 @@ class Election {
 
 	private final Map<String, Member> all = new HashMap<String, Member>();
 
-	public void addCandidat(String display, Member candidat) {
-		all.put(display, candidat);
+	public void addCandidate(String display, Member candidate) {
+		all.put(display, candidate);
 
 	}
 
-	private Member getCandidat(String shortName) {
-		List<Member> list = getAllCandidatContains(shortName);
+	private Member getCandidate(String shortName) {
+		List<Member> list = getAllCandidateContains(shortName);
 		if (list.size() == 1) {
 			return list.get(0);
 		}
-		list = getAllCandidatContainsStrict(shortName);
+		list = getAllCandidateContainsStrict(shortName);
 		if (list.size() == 1) {
 			return list.get(0);
 		}
 		return null;
 	}
 
-	private List<Member> getAllCandidatContains(String shortName) {
+	private List<Member> getAllCandidateContains(String shortName) {
 		final List<Member> result = new ArrayList<Member>();
 		for (Map.Entry<String, Member> ent : all.entrySet()) {
 			if (ent.getKey().contains(shortName)) {
@@ -68,7 +73,7 @@ class Election {
 		return result;
 	}
 
-	private List<Member> getAllCandidatContainsStrict(String shortName) {
+	private List<Member> getAllCandidateContainsStrict(String shortName) {
 		final List<Member> result = new ArrayList<Member>();
 		for (Map.Entry<String, Member> ent : all.entrySet()) {
 			final String key = ent.getKey();
@@ -82,7 +87,7 @@ class Election {
 	public Map<Member, String> getAllElected(Collection<String> shortNames) {
 		final Map<Member, String> memberWithPort = new HashMap<Member, String>();
 		for (String shortName : shortNames) {
-			final Member m = getCandidat(shortName);
+			final Member m = getCandidate(shortName);
 			if (m != null) {
 				memberWithPort.put(m, shortName);
 			}

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -30,7 +35,6 @@
  */
 package net.sourceforge.plantuml.eggs;
 
-import java.awt.Font;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 import java.io.IOException;
@@ -43,6 +47,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sourceforge.plantuml.AbstractPSystem;
+import net.sourceforge.plantuml.BackSlash;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SpriteContainerEmpty;
 import net.sourceforge.plantuml.core.DiagramDescription;
@@ -85,12 +90,12 @@ public class PSystemColors extends AbstractPSystem implements UDrawable {
 	}
 
 	@Override
-	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat)
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat, long seed)
 			throws IOException {
 		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1.0, HtmlColorUtils.WHITE,
 				getMetadata(), null, 0, 0, null, false);
 		imageBuilder.setUDrawable(this);
-		return imageBuilder.writeImageTOBEMOVED(fileFormat, os);
+		return imageBuilder.writeImageTOBEMOVED(fileFormat, seed, os);
 	}
 
 	public DiagramDescription getDescription() {
@@ -98,10 +103,10 @@ public class PSystemColors extends AbstractPSystem implements UDrawable {
 	}
 
 	public void drawU(UGraphic ug) {
-		if (paletteCentralColor == null) {
-			drawFull(ug);
-		} else {
+		if (colors.getColorIfValid(paletteCentralColor) instanceof HtmlColorSimple) {
 			drawPalette(ug);
+		} else {
+			drawFull(ug);
 		}
 	}
 
@@ -154,7 +159,7 @@ public class PSystemColors extends AbstractPSystem implements UDrawable {
 		ug = ug.apply(new UTranslate(centerHexa(i, j)));
 		ug.draw(hexa);
 
-		final UFont font = new UFont("SansSerif", Font.BOLD, 14);
+		final UFont font = UFont.sansSerif(14).bold();
 
 		TextBlock tt = getTextName(font, colorName, color);
 		Dimension2D dimText = tt.calculateDimension(ug.getStringBounder());
@@ -172,7 +177,7 @@ public class PSystemColors extends AbstractPSystem implements UDrawable {
 			if (Character.isLowerCase(colorName.charAt(i))) {
 				continue;
 			}
-			final String candidat = colorName.substring(0, i) + "\\n" + colorName.substring(i);
+			final String candidat = colorName.substring(0, i) + BackSlash.BS_BS_N + colorName.substring(i);
 			final TextBlock tt = getTextName(font, candidat, (HtmlColorSimple) HtmlColorUtils.BLACK);
 			final double width = tt.calculateDimension(stringBounder).getWidth();
 			if (width < min) {
@@ -241,7 +246,7 @@ public class PSystemColors extends AbstractPSystem implements UDrawable {
 	}
 
 	private void drawFull(UGraphic ug) {
-		final UFont font = new UFont("SansSerif", Font.BOLD, 14);
+		final UFont font = UFont.sansSerif(14).bold();
 
 		ug = ug.apply(new UChangeColor(HtmlColorUtils.BLACK));
 		int i = 0;

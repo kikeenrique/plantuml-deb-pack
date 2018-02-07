@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -165,14 +170,29 @@ public class Bodier {
 				return true;
 			}
 		}
-		return true;
+		return false;
+	}
+
+	private List<String> rawBodyWithoutHidden() {
+		if (hides == null || hides.size() == 0) {
+			return rawBody;
+		}
+		final List<String> result = new ArrayList<String>();
+		for (String s : rawBody) {
+			final Member m = new MemberImpl(s, isMethod(s), manageModifier);
+			if (hides.contains(m.getVisibilityModifier()) == false) {
+				result.add(s);
+			}
+
+		}
+		return result;
 	}
 
 	public TextBlock getBody(final FontParam fontParam, final ISkinParam skinParam, final boolean showMethods,
 			final boolean showFields, Stereotype stereotype) {
 		if (type.isLikeClass() && isBodyEnhanced()) {
 			if (showMethods || showFields) {
-				return new BodyEnhanced(rawBody, fontParam, skinParam, manageModifier, stereotype, leaf);
+				return new BodyEnhanced(rawBodyWithoutHidden(), fontParam, skinParam, manageModifier, stereotype, leaf);
 			}
 			return null;
 		}
@@ -200,6 +220,10 @@ public class Bodier {
 		final TextBlock bb1 = fields.asBlockMemberImpl();
 		final TextBlock bb2 = methods.asBlockMemberImpl();
 		return TextBlockUtils.mergeTB(bb1, bb2, HorizontalAlignment.LEFT);
+	}
+
+	public List<String> getRawBody() {
+		return Collections.unmodifiableList(rawBody);
 	}
 
 }

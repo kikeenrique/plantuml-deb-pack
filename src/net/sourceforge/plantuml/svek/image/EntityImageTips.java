@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -48,6 +53,7 @@ import net.sourceforge.plantuml.cucadiagram.ILeaf;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.InnerStrategy;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.color.ColorType;
@@ -95,10 +101,6 @@ public class EntityImageTips extends AbstractEntityImage {
 		return ShapeType.RECTANGLE;
 	}
 
-	public int getShield() {
-		return 0;
-	}
-
 	public Dimension2D calculateDimension(StringBounder stringBounder) {
 		double width = 0;
 		double height = 0;
@@ -127,7 +129,7 @@ public class EntityImageTips extends AbstractEntityImage {
 		double height = 0;
 		for (Map.Entry<String, Display> ent : getEntity().getTips().entrySet()) {
 			final Display display = ent.getValue();
-			final Rectangle2D memberPosition = shapeOther.getImage().getInnerPosition(ent.getKey(), stringBounder);
+			final Rectangle2D memberPosition = shapeOther.getImage().getInnerPosition(ent.getKey(), stringBounder, InnerStrategy.STRICT);
 			if (memberPosition == null) {
 				return;
 			}

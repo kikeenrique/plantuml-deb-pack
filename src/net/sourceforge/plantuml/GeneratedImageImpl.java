@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -57,7 +62,7 @@ public class GeneratedImageImpl implements GeneratedImage {
 	public int lineErrorRaw() {
 		final Diagram system = blockUml.getDiagram();
 		if (system instanceof PSystemError) {
-			return ((PSystemError) system).getHigherErrorPosition() + blockUml.getStartLine();
+			return ((PSystemError) system).getHigherErrorPosition2().getPosition();
 		}
 		return -1;
 	}

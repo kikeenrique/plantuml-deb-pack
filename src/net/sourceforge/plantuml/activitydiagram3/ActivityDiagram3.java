@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -53,7 +58,6 @@ import net.sourceforge.plantuml.graphic.Rainbow;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockCompressed;
 import net.sourceforge.plantuml.graphic.TextBlockRecentred;
-import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
 import net.sourceforge.plantuml.sequencediagram.NoteType;
@@ -109,6 +113,13 @@ public class ActivityDiagram3 extends UmlDiagram {
 		if (url != null) {
 			hasUrl = true;
 		}
+	}
+
+	public void addSpot(String spot) {
+		final InstructionSpot ins = new InstructionSpot(spot, nextLinkRenderer(), swinlanes.getCurrentSwimlane());
+		current().add(ins);
+		setNextLinkRendererInternal(LinkRendering.none());
+		manageSwimlaneStrategy();
 	}
 
 	public CommandExecutionResult addGoto(String name) {
@@ -185,8 +196,9 @@ public class ActivityDiagram3 extends UmlDiagram {
 		result = new TextBlockRecentred(result);
 		final ISkinParam skinParam = getSkinParam();
 		result = new AnnotatedWorker(this, skinParam).addAdd(result);
-		final Dimension2D dim = TextBlockUtils.getMinMax(result, fileFormatOption.getDefaultStringBounder())
-				.getDimension();
+		// final Dimension2D dim = TextBlockUtils.getMinMax(result, fileFormatOption.getDefaultStringBounder())
+		// .getDimension();
+		final Dimension2D dim = result.getMinMax(fileFormatOption.getDefaultStringBounder()).getDimension();
 		final double margin = 10;
 		final double dpiFactor = getDpiFactor(fileFormatOption, Dimension2DDouble.delta(dim, 2 * margin, 0));
 
@@ -195,7 +207,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 				getAnimation());
 		imageBuilder.setUDrawable(result);
 
-		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, os);
+		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, seed(), os);
 
 	}
 
@@ -310,10 +322,10 @@ public class ActivityDiagram3 extends UmlDiagram {
 		return CommandExecutionResult.error("Cannot find if");
 	}
 
-	public void startRepeat(HtmlColor color) {
+	public void startRepeat(HtmlColor color, Display label) {
 		manageSwimlaneStrategy();
 		final InstructionRepeat instructionRepeat = new InstructionRepeat(swinlanes.getCurrentSwimlane(), current(),
-				nextLinkRenderer(), color);
+				nextLinkRenderer(), color, label);
 		current().add(instructionRepeat);
 		setCurrent(instructionRepeat);
 		setNextLinkRendererInternal(LinkRendering.none());
@@ -329,6 +341,20 @@ public class ActivityDiagram3 extends UmlDiagram {
 			instructionRepeat.setTest(label, yes, out, nextLinkRenderer(), back);
 			setCurrent(instructionRepeat.getParent());
 			this.setNextLinkRendererInternal(LinkRendering.none());
+			return CommandExecutionResult.ok();
+		}
+		return CommandExecutionResult.error("Cannot find repeat");
+
+	}
+
+	public CommandExecutionResult backwardWhile(Display label) {
+		manageSwimlaneStrategy();
+		if (current() instanceof InstructionRepeat) {
+			final InstructionRepeat instructionRepeat = (InstructionRepeat) current();
+			// final LinkRendering back = new LinkRendering(linkColor).withDisplay(linkLabel);
+			instructionRepeat.setBackward(label);
+			// setCurrent(instructionRepeat.getParent());
+			// this.setNextLinkRendererInternal(LinkRendering.none());
 			return CommandExecutionResult.ok();
 		}
 		return CommandExecutionResult.error("Cannot find repeat");
@@ -418,7 +444,7 @@ public class ActivityDiagram3 extends UmlDiagram {
 	}
 
 	public CommandExecutionResult addNote(Display note, NotePosition position, NoteType type, Colors colors) {
-		final boolean ok = current().addNote(note, position, type, colors);
+		final boolean ok = current().addNote(note, position, type, colors, swinlanes.getCurrentSwimlane());
 		if (ok == false) {
 			return CommandExecutionResult.error("Cannot add note here");
 		}

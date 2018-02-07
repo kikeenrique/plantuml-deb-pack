@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -76,7 +81,7 @@ class AcceptTelnetClient extends Thread {
 			final String uml = runInternal();
 			Log.println("UML=" + uml);
 			final SourceStringReader s = new SourceStringReader(uml);
-			s.generateImage(os, new FileFormatOption(FileFormat.ATXT));
+			s.outputImage(os, new FileFormatOption(FileFormat.ATXT));
 			os.close();
 			br.close();
 		} catch (IOException e) {

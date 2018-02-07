@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -53,16 +58,14 @@ import net.sourceforge.plantuml.ugraphic.ImageBuilder;
 
 public class ClassDiagram extends AbstractClassOrObjectDiagram {
 
-	private String namespaceSeparator = ".";
-
 	@Override
 	public ILeaf getOrCreateLeaf(Code code, LeafType type, USymbol symbol) {
-		if (namespaceSeparator != null) {
-			code = code.withSeparator(namespaceSeparator);
+		if (getNamespaceSeparator() != null) {
+			code = code.withSeparator(getNamespaceSeparator());
 		}
 		if (type == null) {
 			code = code.eventuallyRemoveStartingAndEndingDoubleQuote("\"([:");
-			if (namespaceSeparator == null) {
+			if (getNamespaceSeparator() == null) {
 				return getOrCreateLeafDefault(code, LeafType.CLASS, symbol);
 			}
 			code = code.getFullyQualifiedCode(getCurrentGroup());
@@ -72,7 +75,7 @@ public class ClassDiagram extends AbstractClassOrObjectDiagram {
 			return createEntityWithNamespace(code, Display.getWithNewlines(code.getShortName(getLeafs())),
 					LeafType.CLASS, symbol);
 		}
-		if (namespaceSeparator == null) {
+		if (getNamespaceSeparator() == null) {
 			return getOrCreateLeafDefault(code, LeafType.CLASS, symbol);
 		}
 		code = code.getFullyQualifiedCode(getCurrentGroup());
@@ -82,42 +85,18 @@ public class ClassDiagram extends AbstractClassOrObjectDiagram {
 		return createEntityWithNamespace(code, Display.getWithNewlines(code.getShortName(getLeafs())), type, symbol);
 	}
 
-	public IGroup getOrCreateNamespace(Code namespace, Display display, GroupType type, IGroup parent) {
-		if (namespaceSeparator != null) {
-			namespace = namespace.withSeparator(namespaceSeparator).getFullyQualifiedCode(getCurrentGroup());
-		}
-		final IGroup g = getOrCreateNamespaceInternal(namespace, display, type, parent);
-		currentGroup = g;
-		return g;
-	}
-
-	private IGroup getOrCreateNamespaceInternal(Code namespace, Display display, GroupType type, IGroup parent) {
-		IGroup result = entityFactory.getGroups().get(namespace);
-		if (result != null) {
-			return result;
-		}
-		if (entityFactory.getLeafs().containsKey(namespace)) {
-			result = entityFactory.muteToGroup(namespace, namespace, type, parent);
-			result.setDisplay(display);
-		} else {
-			result = entityFactory.createGroup(namespace, display, namespace, type, parent, getHides(),
-					getNamespaceSeparator());
-		}
-		entityFactory.addGroup(result);
-		return result;
-	}
 
 	@Override
 	public ILeaf createLeaf(Code code, Display display, LeafType type, USymbol symbol) {
-		if (namespaceSeparator != null) {
-			code = code.withSeparator(namespaceSeparator);
+		if (getNamespaceSeparator() != null) {
+			code = code.withSeparator(getNamespaceSeparator());
 		}
 		if (type != LeafType.ABSTRACT_CLASS && type != LeafType.ANNOTATION && type != LeafType.CLASS
 				&& type != LeafType.INTERFACE && type != LeafType.ENUM && type != LeafType.LOLLIPOP
 				&& type != LeafType.NOTE) {
 			return super.createLeaf(code, display, type, symbol);
 		}
-		if (namespaceSeparator == null) {
+		if (getNamespaceSeparator() == null) {
 			return super.createLeaf(code, display, type, symbol);
 		}
 		code = code.getFullyQualifiedCode(getCurrentGroup());
@@ -145,35 +124,27 @@ public class ClassDiagram extends AbstractClassOrObjectDiagram {
 	private final String getNamespace(Code fullyCode) {
 		String name = fullyCode.getFullName();
 		do {
-			final int x = name.lastIndexOf(namespaceSeparator);
+			final int x = name.lastIndexOf(getNamespaceSeparator());
 			if (x == -1) {
 				return null;
 			}
 			name = name.substring(0, x);
-		} while (getLeafs().containsKey(Code.of(name, namespaceSeparator)));
+		} while (getLeafs().containsKey(Code.of(name, getNamespaceSeparator())));
 		return name;
 	}
 
 	@Override
 	public final boolean leafExist(Code code) {
-		if (namespaceSeparator == null) {
+		if (getNamespaceSeparator() == null) {
 			return super.leafExist(code);
 		}
-		code = code.withSeparator(namespaceSeparator);
+		code = code.withSeparator(getNamespaceSeparator());
 		return super.leafExist(code.getFullyQualifiedCode(getCurrentGroup()));
 	}
 
 	@Override
 	public UmlDiagramType getUmlDiagramType() {
 		return UmlDiagramType.CLASS;
-	}
-
-	public void setNamespaceSeparator(String namespaceSeparator) {
-		this.namespaceSeparator = namespaceSeparator;
-	}
-
-	public String getNamespaceSeparator() {
-		return namespaceSeparator;
 	}
 
 	private boolean allowMixing;
@@ -211,7 +182,7 @@ public class ClassDiagram extends AbstractClassOrObjectDiagram {
 		}
 		final ImageBuilder imageBuilder = new ImageBuilder(getSkinParam(), 1, null, null, 0, 10, null);
 		imageBuilder.setUDrawable(fullLayout);
-		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, os);
+		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, seed(), os);
 	}
 
 	private RowLayout getRawLayout(int raw) {

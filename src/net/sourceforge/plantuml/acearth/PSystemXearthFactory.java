@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -40,7 +45,7 @@ import net.sourceforge.plantuml.command.regex.Matcher2;
 import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.command.regex.Pattern2;
 
-import com.ctreber.acearth.plugins.markers.Marker;
+import ext.plantuml.com.ctreber.acearth.plugins.markers.Marker;
 
 public class PSystemXearthFactory extends PSystemBasicFactory<PSystemXearth> {
 

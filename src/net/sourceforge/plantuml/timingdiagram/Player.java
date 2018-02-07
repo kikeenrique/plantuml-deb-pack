@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -39,13 +44,16 @@ import java.util.TreeSet;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.command.Position;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColorUtils;
+import net.sourceforge.plantuml.graphic.InnerStrategy;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.color.Colors;
+import net.sourceforge.plantuml.ugraphic.MinMax;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULine;
@@ -63,6 +71,7 @@ public class Player implements TextBlock, TimeProjected {
 
 	private final Set<ChangeState> changes = new TreeSet<ChangeState>();
 	private final List<TimeConstraint> constraints = new ArrayList<TimeConstraint>();
+	private final List<TimingNote> notes = new ArrayList<TimingNote>();
 
 	public Player(String code, String full, TimingStyle type, ISkinParam skinParam, TimingRuler ruler) {
 		this.code = code;
@@ -120,6 +129,7 @@ public class Player implements TextBlock, TimeProjected {
 	}
 
 	private TimeDrawing cached;
+	private Colors initialColors;
 
 	private TimeDrawing getTimeDrawing() {
 		if (cached == null) {
@@ -131,13 +141,13 @@ public class Player implements TextBlock, TimeProjected {
 	private TimeDrawing computeTimeDrawing() {
 		final TimeDrawing result;
 		if (type == TimingStyle.CONCISE) {
-			result = new Ribbon(ruler, skinParam);
+			result = new Ribbon(ruler, skinParam, notes);
 		} else if (type == TimingStyle.ROBUST) {
 			result = new Histogram(ruler, skinParam);
 		} else {
 			throw new IllegalStateException();
 		}
-		result.setInitialState(initialState);
+		result.setInitialState(initialState, initialColors);
 		for (ChangeState change : changes) {
 			result.addChange(change);
 		}
@@ -150,24 +160,29 @@ public class Player implements TextBlock, TimeProjected {
 	public Dimension2D calculateDimension(StringBounder stringBounder) {
 		final TextBlock title = getTitle();
 		final double width = ruler.getWidth();
-		final double zoneHeight = getZoneHeight();
+		final double zoneHeight = getZoneHeight(stringBounder);
 		return new Dimension2DDouble(width, title.calculateDimension(stringBounder).getHeight() * 2 + zoneHeight);
 	}
 
-	private double getZoneHeight() {
-		return getTimeDrawing().getHeight();
+	public MinMax getMinMax(StringBounder stringBounder) {
+		throw new UnsupportedOperationException();
 	}
 
-	public Rectangle2D getInnerPosition(String member, StringBounder stringBounder) {
+	private double getZoneHeight(StringBounder stringBounder) {
+		return getTimeDrawing().getHeight(stringBounder);
+	}
+
+	public Rectangle2D getInnerPosition(String member, StringBounder stringBounder, InnerStrategy strategy) {
 		return null;
 	}
 
 	public void setState(TimeTick now, String state, String comment, Colors color) {
 		if (now == null) {
 			this.initialState = state;
+			this.initialColors = color;
 		} else {
 			if (state == null) {
-				state = "";
+				throw new IllegalArgumentException();
 			}
 			this.changes.add(new ChangeState(now, state, comment, color));
 		}
@@ -176,12 +191,19 @@ public class Player implements TextBlock, TimeProjected {
 
 	public IntricatedPoint getTimeProjection(StringBounder stringBounder, TimeTick tick) {
 		final IntricatedPoint point = getTimeDrawing().getTimeProjection(stringBounder, tick);
+		if (point == null) {
+			return null;
+		}
 		final UTranslate translation = getTranslateForTimeDrawing(stringBounder);
 		return point.translated(translation);
 	}
 
 	public void createConstraint(TimeTick tick1, TimeTick tick2, String message) {
 		this.constraints.add(new TimeConstraint(tick1, tick2, message));
+	}
+
+	public void addNote(TimeTick now, Display note, Position position) {
+		this.notes.add(new TimingNote(now, this, note, position, skinParam));
 	}
 
 }

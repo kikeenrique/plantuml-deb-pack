@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -55,7 +60,7 @@ public class ColorParser {
 		if (mainType == null) {
 			throw new IllegalStateException();
 		}
-		final String data = arg.get(name, 0);
+		final String data = arg.getLazzy(name, 0);
 		if (data == null) {
 			return Colors.empty();
 		}
@@ -65,7 +70,11 @@ public class ColorParser {
 
 	// New Parsers
 	public static ColorParser simpleColor(ColorType mainType) {
-		return new ColorParser("COLOR", new RegexLeaf("COLOR", "(" + COLORS_REGEXP + ")?"), mainType);
+		return simpleColor(mainType, "COLOR");
+	}
+
+	public static ColorParser simpleColor(ColorType mainType, String id) {
+		return new ColorParser(id, new RegexLeaf(id, "(" + COLORS_REGEXP + ")?"), mainType);
 	}
 
 	public static ColorParser mandatoryColor(ColorType mainType) {

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -96,7 +101,7 @@ public class CommandSpriteFile extends SingleLineCommand2<UmlDiagram> {
 				if (isSvg(f.getName())) {
 					sprite = new SpriteSvg(f);
 				} else {
-					sprite = new SpriteImage(ImageIO.read(f));
+					sprite = new SpriteImage(FileUtils.ImageIO_read(f));
 				}
 			}
 		} catch (IOException e) {

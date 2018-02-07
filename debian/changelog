@@ -1,4 +1,10 @@
-plantuml (8058-1) UNRELEASED; urgency=medium
+plantuml (1.2018.1) UNRELEASED; urgency=medium
+
+  * New upstream version
+
+ -- Enrique <bitbucket@lemambo.com>  Tue, 6 Feb 2018 22:00:03 +0100
+
+ plantuml (8058-1) UNRELEASED; urgency=medium
 
   * New upstream version
 

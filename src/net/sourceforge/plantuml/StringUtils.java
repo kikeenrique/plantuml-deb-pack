@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -33,13 +38,13 @@ package net.sourceforge.plantuml;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.plantuml.asciiart.Wcwidth;
 import net.sourceforge.plantuml.command.regex.Matcher2;
 import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.command.regex.Pattern2;
@@ -53,33 +58,6 @@ public class StringUtils {
 
 	public static String getPlateformDependentAbsolutePath(File file) {
 		return file.getAbsolutePath();
-	}
-
-	public static List<String> getWithNewlines(CharSequence s) {
-		if (s == null) {
-			return null;
-		}
-		final List<String> result = new ArrayList<String>();
-		final StringBuilder current = new StringBuilder();
-		for (int i = 0; i < s.length(); i++) {
-			final char c = s.charAt(i);
-			if (c == '\\' && i < s.length() - 1) {
-				final char c2 = s.charAt(i + 1);
-				i++;
-				if (c2 == 'n') {
-					result.add(current.toString());
-					current.setLength(0);
-				} else if (c2 == 't') {
-					current.append('\t');
-				} else if (c2 == '\\') {
-					current.append(c2);
-				}
-			} else {
-				current.append(c);
-			}
-		}
-		result.add(current.toString());
-		return Collections.unmodifiableList(result);
 	}
 
 	final static public List<String> getSplit(Pattern2 pattern, String line) {
@@ -271,6 +249,9 @@ public class StringUtils {
 	}
 
 	public static String eventuallyRemoveStartingAndEndingDoubleQuote(String s) {
+		if (s == null) {
+			return s;
+		}
 		return eventuallyRemoveStartingAndEndingDoubleQuote(s, "\"([:");
 	}
 
@@ -292,10 +273,6 @@ public class StringUtils {
 		return '\u0006';
 	}
 
-	public static char hiddenNewLine() {
-		return '\u0009';
-	}
-
 	public static String hideComparatorCharacters(String s) {
 		s = s.replace('<', hiddenLesserThan());
 		s = s.replace('>', hiddenBiggerThan());
@@ -308,11 +285,22 @@ public class StringUtils {
 		return s;
 	}
 
-	public static int getWidth(Display stringsToDisplay) {
+	private static int getWidth(Display stringsToDisplay) {
 		int result = 1;
 		for (CharSequence s : stringsToDisplay) {
-			if (result < s.length()) {
+			if (s != null && result < s.length()) {
 				result = s.length();
+			}
+		}
+		return result;
+	}
+
+	public static int getWcWidth(Display stringsToDisplay) {
+		int result = 1;
+		for (CharSequence s : stringsToDisplay) {
+			final int length = Wcwidth.length(s);
+			if (s != null && result < length) {
+				result = length;
 			}
 		}
 		return result;
@@ -333,6 +321,15 @@ public class StringUtils {
 	public static boolean isDiagramCacheable(String uml) {
 		uml = uml.toLowerCase();
 		if (uml.startsWith("@startuml\nversion\n")) {
+			return false;
+		}
+		if (uml.startsWith("@startuml\nlicense\n")) {
+			return false;
+		}
+		if (uml.startsWith("@startuml\nlicence\n")) {
+			return false;
+		}
+		if (uml.startsWith("@startuml\nauthor\n")) {
 			return false;
 		}
 		if (uml.startsWith("@startuml\ncheckversion")) {
@@ -438,6 +435,8 @@ public class StringUtils {
 				c += 13;
 			} else if ((c >= 'n' && c <= 'z') || (c >= 'N' && c <= 'Z')) {
 				c -= 13;
+			} else if (c > 126) {
+				throw new IllegalArgumentException(s);
 			}
 			sb.append(c);
 		}
@@ -499,14 +498,6 @@ public class StringUtils {
 			return arg.toString();
 		}
 		return arg.subSequence(i, j + 1).toString();
-	}
-
-	public static List<String> splitHiddenNewLine(String s) {
-		return Arrays.asList(s.split("" + hiddenNewLine()));
-	}
-
-	public static String manageNewLine(String string) {
-		return string.replace(hiddenNewLine(), '\n');
 	}
 
 	// http://docs.oracle.com/javase/tutorial/i18n/format/dateFormat.html

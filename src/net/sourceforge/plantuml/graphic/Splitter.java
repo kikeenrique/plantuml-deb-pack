@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -141,7 +146,7 @@ public class Splitter {
 		String s = cmd.getText();
 		final Collection<Text> result = new ArrayList<Text>();
 		while (true) {
-			final int x = s.indexOf(Text.NEWLINE.getText());
+			final int x = s.indexOf(Text.TEXT_BS_BS_N.getText());
 			if (x == -1) {
 				result.add(new Text(s));
 				return result;
@@ -149,7 +154,7 @@ public class Splitter {
 			if (x > 0) {
 				result.add(new Text(s.substring(0, x)));
 			}
-			result.add(Text.NEWLINE);
+			result.add(Text.TEXT_BS_BS_N);
 			s = s.substring(x + 2);
 		}
 	}

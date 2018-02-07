@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -229,6 +234,14 @@ public class HtmlColorSetSimple implements IHtmlColorSet {
 		register("WhiteSmoke", "#F5F5F5");
 		register("Yellow", "#FFFF00");
 		register("YellowGreen", "#9ACD32");
+		// Archimate
+		register("BUSINESS", "#FFFF00");
+		register("APPLICATION", "#A9DCDF");
+		register("MOTIVATION", "#B19CD9");
+		register("STRATEGY", "#F6E4CC");
+		register("TECHNOLOGY", "#90EE90");
+		register("PHYSICAL", "#CCFFCC");
+		register("IMPLEMENTATION", "#FFA6BF");
 	}
 
 	private void register(String s, String color) {

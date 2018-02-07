@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -44,6 +49,7 @@ import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.LineParam;
+import net.sourceforge.plantuml.RoundParam;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.posimo.Positionable;
 import net.sourceforge.plantuml.posimo.PositionableImpl;
@@ -76,7 +82,7 @@ public class TextBlockUtils {
 		if (borderColor == null) {
 			borderColor = HtmlColorUtils.BLACK;
 		}
-		final double corner = skinParam.getRoundCorner("titleBorder", null);
+		final double corner = skinParam.getRoundCorner(RoundParam.titleBorder, null);
 		return withMargin(bordered(result, stroke, borderColor, backgroundColor, corner), 2, 2);
 	}
 
@@ -159,14 +165,19 @@ public class TextBlockUtils {
 			public Dimension2D calculateDimension(StringBounder stringBounder) {
 				return bloc.calculateDimension(stringBounder);
 			}
+			
+			public MinMax getMinMax(StringBounder stringBounder) {
+				return bloc.getMinMax(stringBounder);
+			}
 
-			public Rectangle2D getInnerPosition(String member, StringBounder stringBounder) {
-				if (display.startsWith(member)) {
+			public Rectangle2D getInnerPosition(String member, StringBounder stringBounder, InnerStrategy strategy) {
+				if (strategy.check(display, member)) {
 					final Dimension2D dim = calculateDimension(stringBounder);
 					return new Rectangle2D.Double(0, 0, dim.getWidth(), dim.getHeight());
 				}
 				return null;
 			}
+
 		};
 	}
 

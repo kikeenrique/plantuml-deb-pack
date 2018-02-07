@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -30,6 +35,7 @@
  */
 package net.sourceforge.plantuml.activitydiagram3;
 
+import net.sourceforge.plantuml.activitydiagram3.ftile.Swimlane;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.sequencediagram.NotePosition;
@@ -41,12 +47,14 @@ public class PositionedNote {
 	private final NotePosition notePosition;
 	private final NoteType type;
 	private final Colors colors;
+	private final Swimlane swimlaneNote;
 
-	public PositionedNote(Display display, NotePosition position, NoteType type, Colors colors) {
+	public PositionedNote(Display display, NotePosition position, NoteType type, Colors colors, Swimlane swimlaneNote) {
 		this.display = display;
 		this.notePosition = position;
 		this.type = type;
 		this.colors = colors;
+		this.swimlaneNote = swimlaneNote;
 	}
 
 	@Override
@@ -54,8 +62,8 @@ public class PositionedNote {
 		return "type=" + type + " notePosition=" + notePosition + " " + display;
 	}
 
-	public PositionedNote(Display note, NotePosition position, NoteType type) {
-		this(note, position, type, null);
+	public PositionedNote(Display note, NotePosition position, NoteType type, Swimlane swimlaneNote) {
+		this(note, position, type, null, swimlaneNote);
 	}
 
 	public Display getDisplay() {
@@ -72,6 +80,10 @@ public class PositionedNote {
 
 	public Colors getColors() {
 		return colors;
+	}
+
+	public final Swimlane getSwimlaneNote() {
+		return swimlaneNote;
 	}
 
 }

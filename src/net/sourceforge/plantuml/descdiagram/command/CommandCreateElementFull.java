@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -35,6 +40,7 @@ import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.UrlBuilder;
 import net.sourceforge.plantuml.UrlBuilder.ModeUrl;
+import net.sourceforge.plantuml.classdiagram.AbstractEntityDiagram;
 import net.sourceforge.plantuml.command.CommandExecutionResult;
 import net.sourceforge.plantuml.command.SingleLineCommand2;
 import net.sourceforge.plantuml.command.regex.RegexConcat;
@@ -44,6 +50,7 @@ import net.sourceforge.plantuml.command.regex.RegexResult;
 import net.sourceforge.plantuml.cucadiagram.Code;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.IEntity;
+import net.sourceforge.plantuml.cucadiagram.ILeaf;
 import net.sourceforge.plantuml.cucadiagram.LeafType;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
 import net.sourceforge.plantuml.descdiagram.DescriptionDiagram;
@@ -55,7 +62,7 @@ import net.sourceforge.plantuml.graphic.color.Colors;
 
 public class CommandCreateElementFull extends SingleLineCommand2<DescriptionDiagram> {
 
-	public static final String ALL_TYPES = "artifact|actor|folder|card|file|package|rectangle|node|frame|cloud|database|queue|storage|agent|usecase|component|boundary|control|entity|interface";
+	public static final String ALL_TYPES = "artifact|actor|folder|card|file|package|rectangle|node|frame|cloud|database|queue|stack|storage|agent|usecase|component|boundary|control|entity|interface|circle|collections";
 
 	public CommandCreateElementFull() {
 		super(getRegexConcat());
@@ -64,6 +71,7 @@ public class CommandCreateElementFull extends SingleLineCommand2<DescriptionDiag
 	private static RegexConcat getRegexConcat() {
 		return new RegexConcat(new RegexLeaf("^"), //
 				new RegexLeaf("SYMBOL", "(?:(" + ALL_TYPES + "|\\(\\))[%s]+)?"), //
+				color2().getRegex(), //
 				new RegexLeaf("[%s]*"), //
 				new RegexOr(//
 						new RegexLeaf("CODE1", CODE_WITH_QUOTE), //
@@ -95,13 +103,17 @@ public class CommandCreateElementFull extends SingleLineCommand2<DescriptionDiag
 		return ColorParser.simpleColor(ColorType.BACK);
 	}
 
+	private static ColorParser color2() {
+		return ColorParser.simpleColor(ColorType.BACK, "COLOR2");
+	}
+
 	private static final String CODE_CORE = "[\\p{L}0-9_.]+|\\(\\)[%s]*[\\p{L}0-9_.]+|\\(\\)[%s]*[%g][^%g]+[%g]|:[^:]+:|\\([^()]+\\)|\\[[^\\[\\]]+\\]";
 	public static final String CODE = "(" + CODE_CORE + ")";
 	public static final String CODE_WITH_QUOTE = "(" + CODE_CORE + "|[%g][^%g]+[%g])";
 
 	private static final String DISPLAY_CORE = "[%g][^%g]+[%g]|:[^:]+:|\\([^()]+\\)|\\[[^\\[\\]]+\\]";
 	public static final String DISPLAY = "(" + DISPLAY_CORE + ")";
-	private static final String DISPLAY_WITHOUT_QUOTE = "(" + DISPLAY_CORE + "|[\\p{L}0-9_.]+)";
+	public static final String DISPLAY_WITHOUT_QUOTE = "(" + DISPLAY_CORE + "|[\\p{L}0-9_.]+)";
 
 	@Override
 	final protected boolean isForbidden(CharSequence line) {
@@ -140,9 +152,12 @@ public class CommandCreateElementFull extends SingleLineCommand2<DescriptionDiag
 		} else if (symbol.equalsIgnoreCase("usecase")) {
 			type = LeafType.USECASE;
 			usymbol = null;
+		} else if (symbol.equalsIgnoreCase("circle")) {
+			type = LeafType.CIRCLE;
+			usymbol = null;
 		} else {
 			type = LeafType.DESCRIPTION;
-			usymbol = USymbol.getFoo1(symbol, diagram.getSkinParam().useUml2ForComponent());
+			usymbol = USymbol.getFromString(symbol, diagram.getSkinParam().useUml2ForComponent());
 			if (usymbol == null) {
 				throw new IllegalStateException();
 			}
@@ -158,6 +173,9 @@ public class CommandCreateElementFull extends SingleLineCommand2<DescriptionDiag
 		}
 		display = StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote(display);
 		final String stereotype = arg.getLazzy("STEREOTYPE", 0);
+		if (existsWithBadType(diagram, code, type, usymbol)) {
+			return CommandExecutionResult.error("This element (" + code.getFullName() + ") is already defined");
+		}
 		final IEntity entity = diagram.getOrCreateLeaf(code, type, usymbol);
 		entity.setDisplay(Display.getWithNewlines(display));
 		entity.setUSymbol(usymbol);
@@ -185,6 +203,21 @@ public class CommandCreateElementFull extends SingleLineCommand2<DescriptionDiag
 		// entity.setSpecificColorTOBEREMOVED(ColorType.BACK,
 		// diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(arg.get("COLOR", 0)));
 		return CommandExecutionResult.ok();
+	}
+
+	public static boolean existsWithBadType(AbstractEntityDiagram diagram, final Code code, LeafType type,
+			USymbol usymbol) {
+		if (diagram.leafExist(code) == false) {
+			return false;
+		}
+		final ILeaf other = diagram.getLeafsget(code);
+		if (other.getLeafType() != type) {
+			return true;
+		}
+		if (usymbol != null && other.getUSymbol() != usymbol) {
+			return true;
+		}
+		return false;
 	}
 
 	private char getCharEncoding(final String codeRaw) {

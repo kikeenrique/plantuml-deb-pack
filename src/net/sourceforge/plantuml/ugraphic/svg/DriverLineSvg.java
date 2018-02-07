@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -32,6 +37,8 @@ package net.sourceforge.plantuml.ugraphic.svg;
 import java.awt.geom.Line2D;
 
 import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.HtmlColorGradient;
 import net.sourceforge.plantuml.svg.SvgGraphics;
 import net.sourceforge.plantuml.ugraphic.ClipContainer;
 import net.sourceforge.plantuml.ugraphic.ColorMapper;
@@ -72,10 +79,13 @@ public class DriverLineSvg implements UDriver<SvgGraphics> {
 		// svg.svgLineShadow(x, y, x2, y2, shape.getDeltaShadow());
 		// }
 
-		// svg.setStroke(new BasicStroke((float)
-		// param.getStroke().getThickness()));
-		final String color = StringUtils.getAsSvg(mapper, param.getColor());
-		svg.setStrokeColor(color);
+		final HtmlColor color = param.getColor();
+		if (color instanceof HtmlColorGradient) {
+			final HtmlColorGradient gr = (HtmlColorGradient) color;
+			svg.setStrokeColor(StringUtils.getAsSvg(mapper, gr.getColor1()));
+		} else {
+			svg.setStrokeColor(StringUtils.getAsSvg(mapper, color));
+		}
 		svg.setStrokeWidth(param.getStroke().getThickness(), param.getStroke().getDasharraySvg());
 		svg.svgLine(x, y, x2, y2, shape.getDeltaShadow());
 	}

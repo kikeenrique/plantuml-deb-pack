@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -85,8 +90,12 @@ public class ChangeState implements Comparable<ChangeState> {
 		return new SymbolContext(getBackColor(), getLineColor()).withStroke(new UStroke(1.5));
 	}
 
-	public final boolean isHidden() {
-		return state.length() == 0;
+	public final boolean isBlank() {
+		return state.equals("{...}");
+	}
+
+	public final boolean isCompletelyHidden() {
+		return state.equals("{hidden}");
 	}
 
 }

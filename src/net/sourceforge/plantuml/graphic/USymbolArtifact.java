@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -48,9 +53,9 @@ class USymbolArtifact extends USymbol {
 		return SkinParameter.ARTIFACT;
 	}
 
-	private void drawArtifact(UGraphic ug, double widthTotal, double heightTotal, boolean shadowing) {
+	private void drawArtifact(UGraphic ug, double widthTotal, double heightTotal, boolean shadowing, double roundCorner) {
 
-		final URectangle form = new URectangle(widthTotal, heightTotal);
+		final URectangle form = new URectangle(widthTotal, heightTotal, roundCorner, roundCorner);
 		if (shadowing) {
 			form.setDeltaShadow(4);
 		}
@@ -83,20 +88,22 @@ class USymbolArtifact extends USymbol {
 	private Margin getMargin() {
 		return new Margin(10, 10 + 10, 10 + 3, 10);
 	}
-	
+
 	public boolean manageHorizontalLine() {
 		return true;
 	}
 
-
-	public TextBlock asSmall(TextBlock name, final TextBlock label, final TextBlock stereotype, final SymbolContext symbolContext) {
+	@Override
+	public TextBlock asSmall(TextBlock name, final TextBlock label, final TextBlock stereotype,
+			final SymbolContext symbolContext) {
 		return new AbstractTextBlock() {
 
 			public void drawU(UGraphic ug) {
 				final Dimension2D dim = calculateDimension(ug.getStringBounder());
 				ug = UGraphicStencil.create(ug, getRectangleStencil(dim), new UStroke());
 				ug = symbolContext.apply(ug);
-				drawArtifact(ug, dim.getWidth(), dim.getHeight(), symbolContext.isShadowing());
+				drawArtifact(ug, dim.getWidth(), dim.getHeight(), symbolContext.isShadowing(),
+						symbolContext.getRoundCorner());
 				final Margin margin = getMargin();
 				final TextBlock tb = TextBlockUtils.mergeTB(stereotype, label, HorizontalAlignment.CENTER);
 				tb.drawU(ug.apply(new UTranslate(margin.getX1(), margin.getY1())));
@@ -110,14 +117,16 @@ class USymbolArtifact extends USymbol {
 		};
 	}
 
-	public TextBlock asBig(final TextBlock title, final TextBlock stereotype, final double width, final double height,
-			final SymbolContext symbolContext) {
+	@Override
+	public TextBlock asBig(final TextBlock title, HorizontalAlignment labelAlignment, final TextBlock stereotype,
+			final double width, final double height, final SymbolContext symbolContext) {
 		return new AbstractTextBlock() {
 
 			public void drawU(UGraphic ug) {
 				final Dimension2D dim = calculateDimension(ug.getStringBounder());
 				ug = symbolContext.apply(ug);
-				drawArtifact(ug, dim.getWidth(), dim.getHeight(), symbolContext.isShadowing());
+				drawArtifact(ug, dim.getWidth(), dim.getHeight(), symbolContext.isShadowing(),
+						symbolContext.getRoundCorner());
 				final Dimension2D dimStereo = stereotype.calculateDimension(ug.getStringBounder());
 				final double posStereo = (width - dimStereo.getWidth()) / 2;
 				stereotype.drawU(ug.apply(new UTranslate(posStereo, 2)));

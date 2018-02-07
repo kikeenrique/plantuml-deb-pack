@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -35,10 +40,12 @@ import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.List;
 
+import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.Direction;
 import net.sourceforge.plantuml.Hideable;
 import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.LineParam;
 import net.sourceforge.plantuml.Log;
 import net.sourceforge.plantuml.Pragma;
 import net.sourceforge.plantuml.StringUtils;
@@ -59,6 +66,7 @@ import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColor;
+import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.TextBlockArrow;
@@ -79,7 +87,9 @@ import net.sourceforge.plantuml.svek.extremity.ExtremityFactoryExtends;
 import net.sourceforge.plantuml.svek.image.EntityImageNoteLink;
 import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
+import net.sourceforge.plantuml.ugraphic.UComment;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
+import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UPolygon;
 import net.sourceforge.plantuml.ugraphic.UShape;
 import net.sourceforge.plantuml.ugraphic.UStroke;
@@ -124,6 +134,9 @@ public class Line implements Moveable, Hideable {
 
 	private final Pragma pragma;
 	private final HtmlColor backgroundColor;
+	private final boolean useRankSame;
+	private final UStroke defaultThickness;
+	private HtmlColor arrowLollipopColor;
 
 	@Override
 	public String toString() {
@@ -205,6 +218,7 @@ public class Line implements Moveable, Hideable {
 		if (link == null) {
 			throw new IllegalArgumentException();
 		}
+		this.useRankSame = skinParam.useRankSame();
 		this.startUid = link.getEntityPort1(bibliotekon);
 		this.endUid = link.getEntityPort2(bibliotekon);
 
@@ -222,6 +236,11 @@ public class Line implements Moveable, Hideable {
 			labelFont = labelFont.mute(link.getColors());
 		}
 		this.backgroundColor = skinParam.getBackgroundColor();
+		this.defaultThickness = skinParam.getThickness(LineParam.arrow, null);
+		this.arrowLollipopColor = skinParam.getHtmlColor(ColorParam.arrowLollipop, null, false);
+		if (arrowLollipopColor == null) {
+			this.arrowLollipopColor = HtmlColorUtils.WHITE;
+		}
 		this.pragma = pragma;
 		this.bibliotekon = bibliotekon;
 		this.stringBounder = stringBounder;
@@ -332,7 +351,7 @@ public class Line implements Moveable, Hideable {
 		sb.append("[");
 		final LinkType linkType = link.getTypePatchCluster();
 		String decoration = linkType.getSpecificDecorationSvek();
-		if (decoration.endsWith(",") == false) {
+		if (decoration.length() > 0 && decoration.endsWith(",") == false) {
 			decoration += ",";
 		}
 		sb.append(decoration);
@@ -341,11 +360,16 @@ public class Line implements Moveable, Hideable {
 		// if (graphvizVersion == GraphvizVersion.V2_34_0 && length == 1) {
 		// length = 2;
 		// }
-		if (pragma.horizontalLineBetweenDifferentPackageAllowed() || link.isInvis() || length != 1) {
-			// if (graphvizVersion.isJs() == false) {
+		if (useRankSame) {
+			if (pragma.horizontalLineBetweenDifferentPackageAllowed() || link.isInvis() || length != 1) {
+				// if (graphvizVersion.isJs() == false) {
+				sb.append("minlen=" + (length - 1));
+				sb.append(",");
+				// }
+			}
+		} else {
 			sb.append("minlen=" + (length - 1));
 			sb.append(",");
-			// }
 		}
 		sb.append("color=\"" + StringUtils.getAsHtml(lineColor) + "\"");
 		if (labelText != null) {
@@ -440,8 +464,8 @@ public class Line implements Moveable, Hideable {
 		return endUid.getPrefix();
 	}
 
-	private UDrawable getExtremity(LinkDecor decor, PointListIterator pointListIterator, Point2D center, double angle,
-			Cluster cluster, Shape shapeContact) {
+	private UDrawable getExtremity(LinkDecor decor, PointListIterator pointListIterator, final Point2D center,
+			double angle, Cluster cluster, Shape shapeContact) {
 		final ExtremityFactory extremityFactory = decor.getExtremityFactory(backgroundColor);
 
 		if (cluster != null) {
@@ -457,6 +481,9 @@ public class Line implements Moveable, Hideable {
 
 		if (extremityFactory != null) {
 			final List<Point2D.Double> points = pointListIterator.next();
+			if (points.size() == 0) {
+				return extremityFactory.createUDrawable(center, angle, null);
+			}
 			final Point2D p0 = points.get(0);
 			final Point2D p1 = points.get(1);
 			final Point2D p2 = points.get(2);
@@ -465,6 +492,18 @@ public class Line implements Moveable, Hideable {
 				side = shapeContact.getClusterPosition().getClosestSide(p1);
 			}
 			return extremityFactory.createUDrawable(p0, p1, p2, side);
+		} else if (decor == LinkDecor.NONE) {
+			final UPolygon sh = new UPolygon(pointListIterator.cloneMe().next());
+			final Point2D contact = sh.checkMiddleContactForSpecificTriangle(center);
+			if (contact != null) {
+				return new UDrawable() {
+					public void drawU(UGraphic ug) {
+						ULine line = new ULine(contact.getX() - center.getX(), contact.getY() - center.getY());
+						ug = ug.apply(new UTranslate(center));
+						ug.draw(line);
+					}
+				};
+			}
 		} else if (decor != LinkDecor.NONE) {
 			final UShape sh = new UPolygon(pointListIterator.next());
 			return new UDrawable() {
@@ -482,7 +521,7 @@ public class Line implements Moveable, Hideable {
 			return;
 		}
 
-		int idx = getIndexFromColor(svg, this.lineColor);
+		int idx = SvekUtils.getIndexFromColor(svg, this.lineColor);
 		if (idx == -1) {
 			return;
 			// throw new IllegalStateException();
@@ -510,7 +549,7 @@ public class Line implements Moveable, Hideable {
 		}
 		dotPath = dotPath.simulateCompound(lhead, ltail);
 
-		PointListIterator pointListIterator = new PointListIterator(svg.substring(end), fullHeight);
+		PointListIterator pointListIterator = PointListIterator.create(svg.substring(end), fullHeight, lineColor);
 
 		final LinkType linkType = link.getType();
 		this.extremity1 = getExtremity(linkType.getDecor2(), pointListIterator, dotPath.getStartPoint(),
@@ -527,7 +566,7 @@ public class Line implements Moveable, Hideable {
 				final double dist2start = p2.distance(dotPath.getStartPoint());
 				final double dist2end = p2.distance(dotPath.getEndPoint());
 				if (dist1start > dist1end && dist2end > dist2start) {
-					pointListIterator = new PointListIterator(svg.substring(end), fullHeight);
+					pointListIterator = PointListIterator.create(svg.substring(end), fullHeight, lineColor);
 					this.extremity2 = getExtremity(linkType.getDecor1(), pointListIterator, dotPath.getEndPoint(),
 							dotPath.getEndAngle(), lhead, bibliotekon.getShape(link.getEntity2()));
 					this.extremity1 = getExtremity(linkType.getDecor2(), pointListIterator, dotPath.getStartPoint(),
@@ -572,7 +611,7 @@ public class Line implements Moveable, Hideable {
 	}
 
 	private Point2D.Double getXY(String svg, int color, int height) {
-		final int idx = getIndexFromColor(svg, color);
+		final int idx = SvekUtils.getIndexFromColor(svg, color);
 		if (idx == -1) {
 			return null;
 		}
@@ -580,32 +619,12 @@ public class Line implements Moveable, Hideable {
 
 	}
 
-	private int getIndexFromColor(String svg, int color) {
-		String s = "stroke=\"" + StringUtils.goLowerCase(StringUtils.getAsHtml(color)) + "\"";
-		int idx = svg.indexOf(s);
-		if (idx != -1) {
-			return idx;
-		}
-		s = ";stroke:" + StringUtils.goLowerCase(StringUtils.getAsHtml(color)) + ";";
-		idx = svg.indexOf(s);
-		if (idx != -1) {
-			return idx;
-		}
-		s = "fill=\"" + StringUtils.goLowerCase(StringUtils.getAsHtml(color)) + "\"";
-		idx = svg.indexOf(s);
-		if (idx != -1) {
-			return idx;
-		}
-		Log.info("Cannot find color=" + color + " " + StringUtils.goLowerCase(StringUtils.getAsHtml(color)));
-		return -1;
-
-	}
-
 	public void drawU(UGraphic ug, HtmlColor color) {
 		if (opale) {
 			return;
 		}
-
+		ug.draw(new UComment("link " + link.getEntity1().getCode().getFullName() + " to "
+				+ link.getEntity2().getCode().getFullName()));
 		double x = 0;
 		double y = 0;
 		final Url url = link.getUrl();
@@ -640,7 +659,7 @@ public class Line implements Moveable, Hideable {
 
 		ug = ug.apply(new UChangeBackColor(null)).apply(new UChangeColor(color));
 		final LinkType linkType = link.getType();
-		UStroke stroke = linkType.getStroke();
+		UStroke stroke = linkType.getStroke3(defaultThickness);
 		if (link.getColors() != null && link.getColors().getSpecificLineStroke() != null) {
 			stroke = link.getColors().getSpecificLineStroke();
 		}
@@ -663,6 +682,7 @@ public class Line implements Moveable, Hideable {
 			}
 		}
 
+		todraw.setComment(link.getEntity1().getCode().getFullName() + "-" + link.getEntity2().getCode().getFullName());
 		ug.apply(new UTranslate(x, y)).draw(todraw);
 
 		ug = ug.apply(new UStroke()).apply(new UChangeColor(color));
@@ -705,7 +725,8 @@ public class Line implements Moveable, Hideable {
 			final PointAndAngle middle = dotPath.getMiddle();
 			final double angleRad = middle.getAngle();
 			final double angleDeg = -angleRad * 180.0 / Math.PI;
-			final UDrawable mi = linkType.getMiddleDecor().getMiddleFactory().createUDrawable(angleDeg - 45);
+			final UDrawable mi = linkType.getMiddleDecor().getMiddleFactory(arrowLollipopColor)
+					.createUDrawable(angleDeg - 45);
 			mi.drawU(ug.apply(new UTranslate(x + middle.getX(), y + middle.getY())));
 		}
 

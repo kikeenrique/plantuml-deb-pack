@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -30,7 +35,7 @@
  */
 package net.sourceforge.plantuml.project3;
 
-public class DayAsDate implements Complement {
+public class DayAsDate implements Complement, Comparable<DayAsDate> {
 
 	private final int year;
 	private final int dayOfMonth;
@@ -48,6 +53,10 @@ public class DayAsDate implements Complement {
 		this.year = year;
 		this.dayOfMonth = dayOfMonth;
 		this.month = month;
+	}
+
+	private int internalNumber() {
+		return year * 100 * 100 + month.ordinal() * 100 + dayOfMonth;
 	}
 
 	@Override
@@ -88,5 +97,22 @@ public class DayAsDate implements Complement {
 		final int j = y / 100;
 		final int h = ((q + 13 * (m + 1) / 5) + k + k / 4 + j / 4 + 5 * j) % 7;
 		return DayOfWeek.fromH(h);
+	}
+
+	public InstantDay asInstantDay(DayAsDate reference) {
+		// if (this.compareTo(reference) < 0) {
+		// throw new IllegalArgumentException();
+		// }
+		int cmp = 0;
+		DayAsDate current = reference;
+		while (current.compareTo(this) < 0) {
+			current = current.next();
+			cmp++;
+		}
+		return new InstantDay(cmp);
+	}
+
+	public int compareTo(DayAsDate other) {
+		return this.internalNumber() - other.internalNumber();
 	}
 }

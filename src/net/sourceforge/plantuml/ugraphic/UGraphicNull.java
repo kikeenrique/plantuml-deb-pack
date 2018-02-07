@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -35,6 +40,7 @@ import java.io.OutputStream;
 
 import net.sourceforge.plantuml.EnsureVisible;
 import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.TikzFontDistortion;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.graphic.StringBounder;
 
@@ -54,7 +60,7 @@ public class UGraphicNull extends AbstractUGraphic<String> implements EnsureVisi
 	}
 
 	public StringBounder getStringBounder() {
-		return FileFormat.PNG.getDefaultStringBounder();
+		return FileFormat.PNG.getDefaultStringBounder(TikzFontDistortion.getDefault());
 	}
 
 	public void startUrl(Url url) {

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -36,6 +41,7 @@ import net.sourceforge.plantuml.command.SingleLineCommand2;
 import net.sourceforge.plantuml.command.regex.RegexConcat;
 import net.sourceforge.plantuml.command.regex.RegexLeaf;
 import net.sourceforge.plantuml.command.regex.RegexResult;
+import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.color.ColorParser;
 
@@ -49,14 +55,17 @@ public class CommandRepeat3 extends SingleLineCommand2<ActivityDiagram3> {
 		return new RegexConcat(new RegexLeaf("^"), //
 				ColorParser.exp4(), //
 				new RegexLeaf("repeat"), //
+				new RegexLeaf("[%s]*"), //
+				new RegexLeaf("LABEL", "(?::(.*?))?"), //
 				new RegexLeaf(";?$"));
 	}
 
 	@Override
 	protected CommandExecutionResult executeArg(ActivityDiagram3 diagram, RegexResult arg) {
 		final HtmlColor color = diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(arg.get("COLOR", 0));
-		
-		diagram.startRepeat(color);
+		final Display label = Display.getWithNewlines(arg.get("LABEL", 0));
+
+		diagram.startRepeat(color, label);
 
 		return CommandExecutionResult.ok();
 	}

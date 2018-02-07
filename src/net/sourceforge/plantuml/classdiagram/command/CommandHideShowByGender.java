@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -49,6 +54,7 @@ import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.LeafType;
 import net.sourceforge.plantuml.descdiagram.DescriptionDiagram;
 import net.sourceforge.plantuml.objectdiagram.AbstractClassOrObjectDiagram;
+import net.sourceforge.plantuml.sequencediagram.SequenceDiagram;
 
 public class CommandHideShowByGender extends SingleLineCommand2<UmlDiagram> {
 
@@ -80,20 +86,30 @@ public class CommandHideShowByGender extends SingleLineCommand2<UmlDiagram> {
 			return EntityGenderUtils.emptyFields();
 		}
 		if (portion == PORTION_MEMBER) {
-			return EntityGenderUtils.emptyMembers();
+			throw new IllegalArgumentException();
+			// return EntityGenderUtils.emptyMembers();
 		}
 		return EntityGenderUtils.all();
 	}
 
 	@Override
-	protected CommandExecutionResult executeArg(UmlDiagram classDiagram, RegexResult arg) {
-		if (classDiagram instanceof AbstractClassOrObjectDiagram) {
-			return executeClassDiagram((AbstractClassOrObjectDiagram) classDiagram, arg);
+	protected CommandExecutionResult executeArg(UmlDiagram diagram, RegexResult arg) {
+		if (diagram instanceof AbstractClassOrObjectDiagram) {
+			return executeClassDiagram((AbstractClassOrObjectDiagram) diagram, arg);
 		}
-		if (classDiagram instanceof DescriptionDiagram) {
-			return executeDescriptionDiagram((DescriptionDiagram) classDiagram, arg);
+		if (diagram instanceof DescriptionDiagram) {
+			return executeDescriptionDiagram((DescriptionDiagram) diagram, arg);
+		}
+		if (diagram instanceof SequenceDiagram) {
+			return executeSequenceDiagram((SequenceDiagram) diagram, arg);
 		}
 		// Just ignored
+		return CommandExecutionResult.ok();
+	}
+
+	private CommandExecutionResult executeSequenceDiagram(SequenceDiagram diagram, RegexResult arg) {
+		final Set<EntityPortion> portion = getEntityPortion(arg.get("PORTION", 0));
+		diagram.hideOrShow(portion, arg.get("COMMAND", 0).equalsIgnoreCase("show"));
 		return CommandExecutionResult.ok();
 	}
 
@@ -154,13 +170,22 @@ public class CommandHideShowByGender extends SingleLineCommand2<UmlDiagram> {
 		}
 		if (gender != null) {
 			final boolean empty = arg.get("EMPTY", 0) != null;
-			if (empty == true) {
+			final boolean emptyMembers = empty && portion == PORTION_MEMBER;
+			if (empty == true && emptyMembers == false) {
 				gender = EntityGenderUtils.and(gender, emptyByGender(portion));
 			}
 			if (EntityUtils.groupRoot(classDiagram.getCurrentGroup()) == false) {
 				gender = EntityGenderUtils.and(gender, EntityGenderUtils.byPackage(classDiagram.getCurrentGroup()));
 			}
-			classDiagram.hideOrShow(gender, portion, arg.get("COMMAND", 0).equalsIgnoreCase("show"));
+
+			if (emptyMembers) {
+				classDiagram.hideOrShow(EntityGenderUtils.and(gender, emptyByGender(PORTION_FIELD)), PORTION_FIELD, arg
+						.get("COMMAND", 0).equalsIgnoreCase("show"));
+				classDiagram.hideOrShow(EntityGenderUtils.and(gender, emptyByGender(PORTION_METHOD)), PORTION_METHOD,
+						arg.get("COMMAND", 0).equalsIgnoreCase("show"));
+			} else {
+				classDiagram.hideOrShow(gender, portion, arg.get("COMMAND", 0).equalsIgnoreCase("show"));
+			}
 		}
 		return CommandExecutionResult.ok();
 	}

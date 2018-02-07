@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -37,6 +42,7 @@ import java.io.InputStream;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FileUtils;
+import net.sourceforge.plantuml.SvgString;
 import net.sourceforge.plantuml.graphic.AbstractTextBlock;
 import net.sourceforge.plantuml.graphic.HtmlColor;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -49,7 +55,7 @@ public class SpriteSvg implements Sprite {
 	private final UImageSvg img;
 
 	public SpriteSvg(String svg) {
-		this.img = new UImageSvg(svg);
+		this.img = new UImageSvg(new SvgString(svg, 1));
 	}
 
 	public SpriteSvg(File svgFile) throws IOException {

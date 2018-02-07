@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -32,6 +37,7 @@ package net.sourceforge.plantuml.creole;
 
 import java.awt.geom.Dimension2D;
 
+import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
@@ -44,8 +50,14 @@ public class AtomOpenIcon implements Atom {
 	private final OpenIcon openIcon;
 	private final FontConfiguration fontConfiguration;
 	private final double factor;
+	private final Url url;
 
 	public AtomOpenIcon(OpenIcon openIcon, FontConfiguration fontConfiguration) {
+		this(openIcon, fontConfiguration, null);
+	}
+
+	public AtomOpenIcon(OpenIcon openIcon, FontConfiguration fontConfiguration, Url url) {
+		this.url = url;
 		this.openIcon = openIcon;
 		this.fontConfiguration = fontConfiguration;
 		this.factor = fontConfiguration.getSize2D() / 12;
@@ -64,7 +76,13 @@ public class AtomOpenIcon implements Atom {
 	}
 
 	public void drawU(UGraphic ug) {
+		if (url != null) {
+			ug.startUrl(url);
+		}
 		asTextBlock().drawU(ug);
+		if (url != null) {
+			ug.closeAction();
+		}
 	}
-	
+
 }

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -48,6 +53,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.sourceforge.plantuml.BackSlash;
 import net.sourceforge.plantuml.Dimension2DDouble;
 
 import org.w3c.dom.Document;
@@ -67,7 +73,7 @@ public class AsciiMathOld {
 			String s = null;
 			while ((s = br.readLine()) != null) {
 				sb.append(s);
-				sb.append("\n");
+				sb.append(BackSlash.NEWLINE);
 			}
 			br.close();
 			JAVASCRIPT_CODE = sb.toString();

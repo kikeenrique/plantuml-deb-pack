@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -71,7 +76,7 @@ import net.sourceforge.plantuml.ugraphic.g2d.UGraphicG2d;
 
 class PrintSkin extends AbstractPSystem {
 
-	private static final UFont FONT1 = new UFont("SansSerif", Font.PLAIN, 10);
+	private static final UFont FONT1 = UFont.sansSerif(10);
 
 	final private Skin skin;
 	final private List<String> toPrint;
@@ -91,7 +96,7 @@ class PrintSkin extends AbstractPSystem {
 	// }
 
 	@Override
-	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormatOption)
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormatOption, long seed)
 			throws IOException {
 		final BufferedImage im = createImage();
 		final ImageData imageData = new ImageDataSimple(im.getWidth(), (int) maxYpos);

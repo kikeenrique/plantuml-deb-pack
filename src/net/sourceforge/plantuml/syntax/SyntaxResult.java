@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -47,7 +52,7 @@ public class SyntaxResult {
 	private UmlDiagramType umlDiagramType;
 	private boolean isError;
 	private String description;
-	private int errorLinePosition;
+	// private int errorLinePosition;
 	private Collection<String> errors = new TreeSet<String>();
 	private List<String> suggest;
 	private boolean hasCmapData;
@@ -66,9 +71,9 @@ public class SyntaxResult {
 		return description;
 	}
 
-	public int getErrorLinePosition() {
-		return errorLinePosition;
-	}
+//	public int getErrorLinePosition() {
+//		return errorLinePosition;
+//	}
 
 	public List<String> getSuggest() {
 		return suggest;
@@ -90,9 +95,9 @@ public class SyntaxResult {
 		this.description = description;
 	}
 
-	public void setErrorLinePosition(int errorLinePosition) {
-		this.errorLinePosition = errorLinePosition;
-	}
+//	public void setErrorLinePosition(int errorLinePosition) {
+//		this.errorLinePosition = errorLinePosition;
+//	}
 
 	public void addErrorText(String error) {
 		this.errors.add(error);

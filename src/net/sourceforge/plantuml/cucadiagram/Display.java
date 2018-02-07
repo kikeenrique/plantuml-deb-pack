@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -37,6 +42,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import net.sourceforge.plantuml.BackSlash;
 import net.sourceforge.plantuml.CharSequence2;
 import net.sourceforge.plantuml.CharSequence2Impl;
 import net.sourceforge.plantuml.EmbededDiagram;
@@ -75,12 +81,6 @@ public class Display implements Iterable<CharSequence> {
 	private final boolean isNull;
 	private final CreoleMode defaultCreoleMode;
 
-//	public Display removeUrlHiddenNewLineUrl() {
-//		final String full = UrlBuilder.purgeUrl(asStringWithHiddenNewLine());
-//		return new Display(StringUtils.splitHiddenNewLine(full), this.naturalHorizontalAlignment, this.isNull,
-//				this.defaultCreoleMode);
-//	}
-
 	public final static Display NULL = new Display(null, null, true, CreoleMode.FULL);
 
 	public boolean isWhite() {
@@ -111,9 +111,16 @@ public class Display implements Iterable<CharSequence> {
 		final List<String> result = new ArrayList<String>();
 		final StringBuilder current = new StringBuilder();
 		HorizontalAlignment naturalHorizontalAlignment = null;
+		boolean rawMode = false;
 		for (int i = 0; i < s.length(); i++) {
 			final char c = s.charAt(i);
-			if (c == '\\' && i < s.length() - 1) {
+			final String sub = s.substring(i);
+			if (sub.startsWith("<math>") || sub.startsWith("<latex>") || sub.startsWith("[[")) {
+				rawMode = true;
+			} else if (sub.startsWith("</math>") || sub.startsWith("</latex>") || sub.startsWith("]]")) {
+				rawMode = false;
+			}
+			if (rawMode == false && c == '\\' && i < s.length() - 1) {
 				final char c2 = s.charAt(i + 1);
 				i++;
 				if (c2 == 'n' || c2 == 'r' || c2 == 'l') {
@@ -132,7 +139,7 @@ public class Display implements Iterable<CharSequence> {
 					current.append(c);
 					current.append(c2);
 				}
-			} else if (c == StringUtils.hiddenNewLine()) {
+			} else if (c == BackSlash.hiddenNewLine()) {
 				result.add(current.toString());
 				current.setLength(0);
 			} else {
@@ -199,6 +206,19 @@ public class Display implements Iterable<CharSequence> {
 		return new Display(result, this.naturalHorizontalAlignment, this.isNull, this.defaultCreoleMode);
 	}
 
+	public Display withPage(int page, int lastpage) {
+		if (display == null) {
+			return this;
+		}
+		final List<CharSequence> result = new ArrayList<CharSequence>();
+		for (CharSequence line : display) {
+			line = line.toString().replace("%page%", "" + page);
+			line = line.toString().replace("%lastpage%", "" + lastpage);
+			result.add(line);
+		}
+		return new Display(result, this.naturalHorizontalAlignment, this.isNull, this.defaultCreoleMode);
+	}
+
 	public Display underlined() {
 		final List<CharSequence> result = new ArrayList<CharSequence>();
 		for (CharSequence line : display) {
@@ -214,16 +234,16 @@ public class Display implements Iterable<CharSequence> {
 		return new Display(this, mode);
 	}
 
-	public String asStringWithHiddenNewLine() {
-		final StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < display.size(); i++) {
-			sb.append(display.get(i));
-			if (i < display.size() - 1) {
-				sb.append(StringUtils.hiddenNewLine());
-			}
-		}
-		return sb.toString();
-	}
+	// private String asStringWithHiddenNewLine() {
+	// final StringBuilder sb = new StringBuilder();
+	// for (int i = 0; i < display.size(); i++) {
+	// sb.append(display.get(i));
+	// if (i < display.size() - 1) {
+	// sb.append(BackSlash.hiddenNewLine());
+	// }
+	// }
+	// return sb.toString();
+	// }
 
 	@Override
 	public String toString() {
@@ -261,6 +281,17 @@ public class Display implements Iterable<CharSequence> {
 		return result;
 	}
 
+	public Display addGeneric(CharSequence s) {
+		final Display result = new Display(this, this.defaultCreoleMode);
+		final int size = display.size();
+		if (size == 0) {
+			result.display.add("<" + s + ">");
+		} else {
+			result.display.set(size - 1, display.get(size - 1) + "<" + s + ">");
+		}
+		return result;
+	}
+
 	public int size() {
 		if (isNull) {
 			return 0;
@@ -294,27 +325,6 @@ public class Display implements Iterable<CharSequence> {
 		}
 		return Collections.unmodifiableList(result);
 	}
-
-//	public Url initUrl() {
-//		if (this.size() == 0) {
-//			return null;
-//		}
-//		final UrlBuilder urlBuilder = new UrlBuilder(null, ModeUrl.AT_START);
-//		return urlBuilder.getUrl(StringUtils.trin(this.get(0).toString()));
-//	}
-
-//	public Display removeHeadingUrl(Url url) {
-//		if (url == null) {
-//			return this;
-//		}
-//		final Display result = new Display(this.naturalHorizontalAlignment, this.isNull, this.defaultCreoleMode);
-//		result.display.add(UrlBuilder.purgeUrl(this.get(0).toString()));
-//		result.display.addAll(this.subList(1, this.size()).display);
-//		if (result.isWhite() && url.getLabel() != null) {
-//			return Display.getWithNewlines(url.getLabel());
-//		}
-//		return result;
-//	}
 
 	public boolean hasUrl() {
 		final UrlBuilder urlBuilder = new UrlBuilder(null, ModeUrl.ANYWHERE);
@@ -371,7 +381,8 @@ public class Display implements Iterable<CharSequence> {
 
 	public TextBlock create(FontConfiguration fontConfiguration, HorizontalAlignment horizontalAlignment,
 			ISkinSimple spriteContainer, CreoleMode modeSimpleLine) {
-		return create(fontConfiguration, horizontalAlignment, spriteContainer, LineBreakStrategy.NONE, modeSimpleLine, null, null);
+		return create(fontConfiguration, horizontalAlignment, spriteContainer, LineBreakStrategy.NONE, modeSimpleLine,
+				null, null);
 	}
 
 	public TextBlock create(FontConfiguration fontConfiguration, HorizontalAlignment horizontalAlignment,

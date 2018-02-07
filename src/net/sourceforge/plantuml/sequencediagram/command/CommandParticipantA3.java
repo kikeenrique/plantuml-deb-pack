@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -49,6 +54,8 @@ public class CommandParticipantA3 extends CommandParticipant {
 				new RegexLeaf("CODE", "([\\p{L}0-9_.@]+)"), //
 				new RegexLeaf("[%s]*"), //
 				new RegexLeaf("STEREO", "(\\<\\<.*\\>\\>)?"), //
+				new RegexLeaf("[%s]*"), //
+				getOrderRegex(), //
 				new RegexLeaf("[%s]*"), //
 				new RegexLeaf("URL", "(" + UrlBuilder.getRegexp() + ")?"), //
 				new RegexLeaf("[%s]*"), //

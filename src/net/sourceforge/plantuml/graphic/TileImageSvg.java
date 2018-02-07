@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -36,6 +41,7 @@ import java.io.IOException;
 
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FileUtils;
+import net.sourceforge.plantuml.SvgString;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UImageSvg;
 
@@ -48,7 +54,7 @@ public class TileImageSvg extends AbstractTextBlock implements TextBlock {
 	}
 
 	private UImageSvg createSvg(File svgFile) throws IOException {
-		return new UImageSvg(FileUtils.readSvg(svgFile));
+		return new UImageSvg(new SvgString(FileUtils.readSvg(svgFile), 1));
 	}
 
 	public Dimension2D calculateDimension(StringBounder stringBounder) {

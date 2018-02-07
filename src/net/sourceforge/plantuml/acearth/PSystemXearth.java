@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -48,9 +53,9 @@ import net.sourceforge.plantuml.api.ImageDataSimple;
 import net.sourceforge.plantuml.core.DiagramDescription;
 import net.sourceforge.plantuml.core.ImageData;
 
-import com.ctreber.acearth.ACearth;
-import com.ctreber.acearth.ConfigurationACearth;
-import com.ctreber.acearth.plugins.markers.Marker;
+import ext.plantuml.com.ctreber.acearth.ACearth;
+import ext.plantuml.com.ctreber.acearth.ConfigurationACearth;
+import ext.plantuml.com.ctreber.acearth.plugins.markers.Marker;
 
 public class PSystemXearth extends AbstractPSystem {
 
@@ -74,7 +79,7 @@ public class PSystemXearth extends AbstractPSystem {
 	}
 
 	@Override
-	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat)
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat, long seed)
 			throws IOException {
 		final ACearth earth = new ACearth(markers);
 		final ConfigurationACearth conf = earth.getConf();

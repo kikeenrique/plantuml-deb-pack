@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -36,6 +41,7 @@ import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.LineParam;
 import net.sourceforge.plantuml.PaddingParam;
+import net.sourceforge.plantuml.RoundParam;
 import net.sourceforge.plantuml.SkinParamUtils;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
@@ -87,40 +93,41 @@ public class Rose implements Skin {
 			// final FontConfiguration fc = new FontConfiguration(fontArrow, HtmlColorUtils.BLACK);
 			// stringsToDisplay = DisplayUtils.breakLines(stringsToDisplay, fc, param, param.maxMessageSize());
 			// }
-			final HtmlColor sequenceArrow = config.getColor() == null ? getHtmlColor(param, ColorParam.arrow)
-					: config.getColor();
+			final HtmlColor sequenceArrow = config.getColor() == null ? getHtmlColor(param, ColorParam.arrow) : config
+					.getColor();
 			if (config.getArrowDirection() == ArrowDirection.SELF) {
-				return new ComponentRoseSelfArrow(sequenceArrow, getUFont2(param, FontParam.ARROW),
-						stringsToDisplay, config, param, param.maxMessageSize(), param.strictUmlStyle() == false);
+				return new ComponentRoseSelfArrow(sequenceArrow, getUFont2(param, FontParam.ARROW), stringsToDisplay,
+						config, param, param.maxMessageSize(), param.strictUmlStyle() == false);
 			}
 			final HorizontalAlignment messageHorizontalAlignment = param.getHorizontalAlignment(
 					AlignParam.SEQUENCE_MESSAGE_ALIGN, config.getArrowDirection());
 			final HorizontalAlignment textHorizontalAlignment = param.getHorizontalAlignment(
 					AlignParam.SEQUENCE_MESSAGETEXT_ALIGN, config.getArrowDirection());
-			return new ComponentRoseArrow(sequenceArrow, getUFont2(param, FontParam.ARROW), stringsToDisplay,
-					config, messageHorizontalAlignment, param, textHorizontalAlignment, param.maxMessageSize(),
+			return new ComponentRoseArrow(sequenceArrow, getUFont2(param, FontParam.ARROW), stringsToDisplay, config,
+					messageHorizontalAlignment, param, textHorizontalAlignment, param.maxMessageSize(),
 					param.strictUmlStyle() == false);
 		}
 		final double padding = param.getPadding(PaddingParam.PARTICIPANT);
+		final double roundCorner = param.getRoundCorner(RoundParam.DEFAULT, null);
 		if (type == ComponentType.PARTICIPANT_HEAD) {
 			return new ComponentRoseParticipant(getSymbolContext(param, ColorParam.participantBorder), getUFont2(param,
-					FontParam.PARTICIPANT), stringsToDisplay, param, param.getRoundCorner("", null), newFontForStereotype,
-					getFontColor(param, FontParam.SEQUENCE_STEREOTYPE), param.minClassWidth(), false, padding);
+					FontParam.PARTICIPANT), stringsToDisplay, param, roundCorner, newFontForStereotype, getFontColor(
+					param, FontParam.SEQUENCE_STEREOTYPE), param.minClassWidth(), false, padding);
 		}
 		if (type == ComponentType.PARTICIPANT_TAIL) {
 			return new ComponentRoseParticipant(getSymbolContext(param, ColorParam.participantBorder), getUFont2(param,
-					FontParam.PARTICIPANT), stringsToDisplay, param, param.getRoundCorner("", null), newFontForStereotype,
-					getFontColor(param, FontParam.SEQUENCE_STEREOTYPE), param.minClassWidth(), false, padding);
+					FontParam.PARTICIPANT), stringsToDisplay, param, roundCorner, newFontForStereotype, getFontColor(
+					param, FontParam.SEQUENCE_STEREOTYPE), param.minClassWidth(), false, padding);
 		}
 		if (type == ComponentType.COLLECTIONS_HEAD) {
-			return new ComponentRoseParticipant(getSymbolContext(param, ColorParam.participantBorder), getUFont2(param,
-					FontParam.PARTICIPANT), stringsToDisplay, param, param.getRoundCorner("", null), newFontForStereotype,
-					getFontColor(param, FontParam.SEQUENCE_STEREOTYPE), param.minClassWidth(), true, padding);
+			return new ComponentRoseParticipant(getSymbolContext(param, ColorParam.collectionsBorder), getUFont2(param,
+					FontParam.PARTICIPANT), stringsToDisplay, param, roundCorner, newFontForStereotype, getFontColor(
+					param, FontParam.SEQUENCE_STEREOTYPE), param.minClassWidth(), true, padding);
 		}
 		if (type == ComponentType.COLLECTIONS_TAIL) {
-			return new ComponentRoseParticipant(getSymbolContext(param, ColorParam.participantBorder), getUFont2(param,
-					FontParam.PARTICIPANT), stringsToDisplay, param, param.getRoundCorner("", null), newFontForStereotype,
-					getFontColor(param, FontParam.SEQUENCE_STEREOTYPE), param.minClassWidth(), true, padding);
+			return new ComponentRoseParticipant(getSymbolContext(param, ColorParam.collectionsBorder), getUFont2(param,
+					FontParam.PARTICIPANT), stringsToDisplay, param, roundCorner, newFontForStereotype, getFontColor(
+					param, FontParam.SEQUENCE_STEREOTYPE), param.minClassWidth(), true, padding);
 		}
 		if (type == ComponentType.PARTICIPANT_LINE) {
 			final HtmlColor borderColor = getHtmlColor(param, ColorParam.sequenceLifeLineBorder);
@@ -170,6 +177,16 @@ public class Rose implements Skin {
 					FontParam.ACTOR), stringsToDisplay, false, param, newFontForStereotype, getFontColor(param,
 					FontParam.SEQUENCE_STEREOTYPE));
 		}
+		if (type == ComponentType.QUEUE_HEAD) {
+			return new ComponentRoseQueue(getSymbolContext(param, ColorParam.entityBorder), getUFont2(param,
+					FontParam.ACTOR), stringsToDisplay, true, param, newFontForStereotype, getFontColor(param,
+					FontParam.SEQUENCE_STEREOTYPE));
+		}
+		if (type == ComponentType.QUEUE_TAIL) {
+			return new ComponentRoseQueue(getSymbolContext(param, ColorParam.entityBorder), getUFont2(param,
+					FontParam.ACTOR), stringsToDisplay, false, param, newFontForStereotype, getFontColor(param,
+					FontParam.SEQUENCE_STEREOTYPE));
+		}
 		if (type == ComponentType.DATABASE_HEAD) {
 			return new ComponentRoseDatabase(getSymbolContext(param, ColorParam.databaseBorder), getUFont2(param,
 					FontParam.ACTOR), stringsToDisplay, true, param, newFontForStereotype, getFontColor(param,
@@ -182,7 +199,7 @@ public class Rose implements Skin {
 		}
 		if (type == ComponentType.NOTE) {
 			return new ComponentRoseNote(getSymbolContext(param, ColorParam.noteBorder), getUFont2(param,
-					FontParam.NOTE), stringsToDisplay, paddingX, paddingY, param);
+					FontParam.NOTE), stringsToDisplay, paddingX, paddingY, param, roundCorner);
 		}
 		if (type == ComponentType.NOTE_HEXAGONAL) {
 			return new ComponentRoseNoteHexagonal(getSymbolContext(param, ColorParam.noteBorder), getUFont2(param,
@@ -200,7 +217,7 @@ public class Rose implements Skin {
 				smallFont = smallFont.changeColor(smallColor);
 			}
 			return new ComponentRoseGroupingHeader(param.getBackgroundColor(), getSymbolContext(param,
-					ColorParam.sequenceGroupBorder), bigFont, smallFont, stringsToDisplay, param);
+					ColorParam.sequenceGroupBorder), bigFont, smallFont, stringsToDisplay, param, roundCorner);
 		}
 		if (type == ComponentType.GROUPING_ELSE) {
 			return new ComponentRoseGroupingElse(getHtmlColor(param, ColorParam.sequenceGroupBorder), getUFont2(param,
@@ -254,7 +271,7 @@ public class Rose implements Skin {
 		// }
 		if (type == ComponentType.ENGLOBER) {
 			return new ComponentRoseEnglober(getSymbolContext(param, ColorParam.sequenceBoxBorder), stringsToDisplay,
-					getUFont2(param, FontParam.SEQUENCE_BOX), param);
+					getUFont2(param, FontParam.SEQUENCE_BOX), param, roundCorner);
 		}
 
 		return null;
@@ -283,6 +300,11 @@ public class Rose implements Skin {
 		if (color == ColorParam.controlBorder) {
 			return new SymbolContext(getHtmlColor(param, ColorParam.controlBackground), getHtmlColor(param,
 					ColorParam.controlBorder)).withStroke(getStroke(param, LineParam.sequenceActorBorder, 2))
+					.withDeltaShadow(deltaShadow(param));
+		}
+		if (color == ColorParam.collectionsBorder) {
+			return new SymbolContext(getHtmlColor(param, ColorParam.collectionsBackground), getHtmlColor(param,
+					ColorParam.collectionsBorder)).withStroke(getStroke(param, LineParam.sequenceActorBorder, 1.5))
 					.withDeltaShadow(deltaShadow(param));
 		}
 		if (color == ColorParam.entityBorder) {

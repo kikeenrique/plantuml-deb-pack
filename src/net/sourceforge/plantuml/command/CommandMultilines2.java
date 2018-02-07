@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -61,7 +66,11 @@ public abstract class CommandMultilines2<S extends Diagram> implements Command<S
 		if (isCommandForbidden()) {
 			return CommandControl.NOT_OK;
 		}
-		final boolean result1 = starting.match(StringUtils.trin(lines.getFirst499()));
+		final CharSequence first = lines.getFirst499();
+		if (first == null) {
+			return CommandControl.NOT_OK;
+		}
+		final boolean result1 = starting.match(StringUtils.trin(first));
 		if (result1 == false) {
 			return CommandControl.NOT_OK;
 		}

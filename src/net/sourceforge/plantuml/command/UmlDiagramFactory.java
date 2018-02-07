@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -86,7 +91,7 @@ public abstract class UmlDiagramFactory extends PSystemAbstractFactory {
 				}
 				final String err = sys.checkFinalError();
 				if (err != null) {
-					return buildEmptyError(source, err, it.peek().getLocation());
+					return buildExecutionError(source, err, it.peek().getLocation());
 				}
 				if (source.getTotalLineCount() == 2) {
 					return buildEmptyError(source, it.peek().getLocation());
@@ -111,9 +116,9 @@ public abstract class UmlDiagramFactory extends PSystemAbstractFactory {
 	private AbstractPSystem executeOneLine(AbstractPSystem sys, UmlSource source, final IteratorCounter2 it) {
 		final CommandControl commandControl = isValid2(it);
 		if (commandControl == CommandControl.NOT_OK) {
-			final ErrorUml err = new ErrorUml(ErrorUmlType.SYNTAX_ERROR, "Syntax Error?", it.currentNum(), it.peek()
+			final ErrorUml err = new ErrorUml(ErrorUmlType.SYNTAX_ERROR, "Syntax Error?", /* it.currentNum(), */it.peek()
 					.getLocation());
-			if (OptionFlags.getInstance().isUseSuggestEngine()) {
+			if (OptionFlags.getInstance().isUseSuggestEngine2()) {
 				final SuggestEngine engine = new SuggestEngine(source, this);
 				final SuggestEngineResult result = engine.tryToSuggest(sys);
 				if (result.getStatus() == SuggestEngineStatus.ONE_SUGGESTION) {
@@ -125,8 +130,9 @@ public abstract class UmlDiagramFactory extends PSystemAbstractFactory {
 			final IteratorCounter2 saved = it.cloneMe();
 			final CommandExecutionResult result = manageMultiline2(it, sys);
 			if (result.isOk() == false) {
-				sys = new PSystemError(source, new ErrorUml(ErrorUmlType.EXECUTION_ERROR, result.getError(),
-						it.currentNum() - 1, saved.next().getLocation()), null);
+				final ErrorUml err = new ErrorUml(ErrorUmlType.EXECUTION_ERROR, result.getError(),
+				/* it.currentNum() - 1, */saved.next().getLocation());
+				sys = new PSystemError(source, err, null);
 
 			}
 		} else if (commandControl == CommandControl.OK) {
@@ -135,8 +141,10 @@ public abstract class UmlDiagramFactory extends PSystemAbstractFactory {
 			Command cmd = getFirstCommandOkForLines(lines);
 			final CommandExecutionResult result = sys.executeCommand(cmd, lines);
 			if (result.isOk() == false) {
-				sys = new PSystemError(source, new ErrorUml(ErrorUmlType.EXECUTION_ERROR, result.getError(),
-						it.currentNum() - 1, ((CharSequence2) line).getLocation()), result.getDebugLines());
+				final ErrorUml err = new ErrorUml(ErrorUmlType.EXECUTION_ERROR, result.getError(),
+				/* it.currentNum() - 1, */((CharSequence2) line).getLocation());
+				sys = new PSystemError(source, err,
+						result.getDebugLines());
 			}
 			if (result.getNewDiagram() != null) {
 				sys = result.getNewDiagram();
@@ -258,8 +266,8 @@ public abstract class UmlDiagramFactory extends PSystemAbstractFactory {
 
 	final protected void addCommonCommands(List<Command> cmds) {
 		cmds.add(new CommandNope());
-		cmds.add(new CommandComment());
-		cmds.add(new CommandMultilinesComment());
+//		cmds.add(new CommandComment());
+//		cmds.add(new CommandMultilinesComment());
 		cmds.add(new CommandPragma());
 		cmds.add(new CommandTitle());
 		cmds.add(new CommandCaption());

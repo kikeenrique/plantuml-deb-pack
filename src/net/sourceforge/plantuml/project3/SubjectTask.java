@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -40,8 +45,8 @@ import net.sourceforge.plantuml.command.regex.RegexResult;
 public class SubjectTask implements SubjectPattern {
 
 	public Collection<VerbPattern> getVerbs() {
-		return Arrays.<VerbPattern> asList(new VerbLasts(), new VerbStarts(), new VerbHappens(), new VerbEnds(),
-				new VerbIsColored());
+		return Arrays.<VerbPattern> asList(new VerbLasts(), new VerbTaskStarts(), new VerbTaskStartsAbsolute(),
+				new VerbHappens(), new VerbEnds(), new VerbIsColored());
 	}
 
 	public IRegex toRegex() {

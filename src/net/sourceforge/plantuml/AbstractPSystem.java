@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -51,6 +56,7 @@ import net.sourceforge.plantuml.version.Version;
 public abstract class AbstractPSystem implements Diagram {
 
 	private UmlSource source;
+	private Scale scale;
 
 	private String getVersion() {
 		final StringBuilder toAppend = new StringBuilder();
@@ -60,7 +66,7 @@ public abstract class AbstractPSystem implements Diagram {
 		toAppend.append("(" + License.getCurrent() + " source distribution)\n");
 		for (String name : OptionPrint.interestingProperties()) {
 			toAppend.append(name);
-			toAppend.append('\n');
+			toAppend.append(BackSlash.CHAR_NEWLINE);
 		}
 		return toAppend.toString();
 	}
@@ -69,11 +75,18 @@ public abstract class AbstractPSystem implements Diagram {
 		if (source == null) {
 			return getVersion();
 		}
-		return source.getPlainString() + "\n" + getVersion();
+		return source.getPlainString() + BackSlash.NEWLINE + getVersion();
 	}
 
 	final public UmlSource getSource() {
 		return source;
+	}
+
+	final public long seed() {
+		if (source == null) {
+			return 42;
+		}
+		return getSource().seed();
 	}
 
 	final public void setSource(UmlSource source) {
@@ -119,7 +132,7 @@ public abstract class AbstractPSystem implements Diagram {
 			throws IOException {
 		final long now = System.currentTimeMillis();
 		try {
-			return exportDiagramNow(os, index, fileFormatOption);
+			return exportDiagramNow(os, index, fileFormatOption, seed());
 		} finally {
 			if (OptionFlags.getInstance().isEnableStats()) {
 				StatsUtilsIncrement.onceMoreGenerate(System.currentTimeMillis() - now, getClass(),
@@ -128,7 +141,15 @@ public abstract class AbstractPSystem implements Diagram {
 		}
 	}
 
-	protected abstract ImageData exportDiagramNow(OutputStream os, int index, FileFormatOption fileFormatOption)
-			throws IOException;
+	final public void setScale(Scale scale) {
+		this.scale = scale;
+	}
+
+	final public Scale getScale() {
+		return scale;
+	}
+
+	protected abstract ImageData exportDiagramNow(OutputStream os, int index, FileFormatOption fileFormatOption,
+			long seed) throws IOException;
 
 }

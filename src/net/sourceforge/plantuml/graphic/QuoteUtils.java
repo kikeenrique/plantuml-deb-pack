@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -209,8 +214,44 @@ public class QuoteUtils {
 					"Guvf oht vf n srngher nf qrfpevorq ol gur znexrgvat qrcnegzrag.",
 					"Abg rirelobql haqrefgnaqf gur uhzbe bs cebtenzzref.",
 					"Vs lbh yvir na beqvanel yvsr, nyy lbh'yy unir ner beqvanel fgbevrf.",
-					"Pbzr jvgu zr vs lbh jnag gb yvir", "Gh y'nf gebhir bh pryhv-yn ?"
-			);
+					"Pbzr jvgu zr vs lbh jnag gb yvir", "Gh y'nf gebhir bh pryhv-yn ?",
+					"Qb lbh ernyyl guvax lbh unir n punapr ntnvafg hf, Ze. Pbjobl?",
+					"Nggragvba, jubrire lbh ner, guvf punaary vf erfreirq sbe rzretrapl pnyyf bayl.",
+					"Qbrf vg fbhaq yvxr V'z beqrevat n cvmmn? ", "Jr'er tbaan arrq fbzr zber SOV thlf, V thrff.",
+					"Trg ernql sbe ehfu ubhe",
+					"V unir gb jnea lbh, V'ir urneq eryngvbafuvcf onfrq ba vagrafr rkcrevraprf arire jbex.",
+					"Nalguvat ryfr ohg gur onfrzrag gung'yy xrrc guvf ryringbe sebz snyyvat?",
+					"Vf guvf grfgvat jurgure V'z n ercyvpnag be n yrfovna, Ze. Qrpxneq? ",
+					"V'ir qbar... dhrfgvbanoyr guvatf", "Jbhyq lbh... yvxr gb or hctenqrq?",
+					"Snhg erpbaanvger... p'rfg qh oehgny!",
+					"Fv ba oevpbynvg cyhf fbhirag, ba nhenvg zbvaf yn grgr nhk orgvfrf.",
+					"Wr invf yhv snver har beqbaanapr, rg har frirer...",
+					"Znvf vy pbaanvg cnf Enbhy, pr zrp! vy in nibve ha erirvy cravoyr.",
+					"W'nv ibhyh rger qvcybzngr n pnhfr qr ibhf gbhf, rivgre dhr yr fnat pbhyr.",
+					"Vtabenapr oevatf punbf, abg xabjyrqtr.", "Yrneavat vf nyjnlf n cnvashy cebprff.",
+					"V'z fbeel, ner lbh sebz gur cnfg ?", "Unir lbh gevrq gheavat vg bss naq ba ntnva ?",
+					"Vs lbh qba'g xabj jurer lbh ner tbvat nal ebnq pna gnxr lbh gurer",
+					"Xrrc pnyz naq cerff Pgey-Nyg-Qry", "Vs lbh glcr Tbbtyr vagb Tbbtyr, lbh pna oernx gur Vagrearg.",
+					"V unir cneg bs n cyna.", "V'z cerggl fher gur nafjre vf: V nz Tebbg.",
+					"Nalguvat gung pna cbffvoyl tb jebat, qbrf", "Cyhf pn engr, cyhf ba n qr punapr dhr pn znepur",
+					"Fb V thrff gur sbeghar gryyre'f evtug...", "Jura rirelguvat'f tbar jebat fbzrubj...",
+					"V qba'g jnag gb yvir ba guvf cynarg nalzber",
+					"Oba, p'rfg y'urher bh yrf fbhiravef fr enzrarag...",
+					"Fhpprff pbafvfgf bs tbvat sebz snvyher gb snvyher jvgubhg ybff bs raguhfvnfz",
+					"Vs lbh'er tbvat guebhtu uryy, xrrc tbvat",
+					"Jre xnzcsg, xnaa ireyvrera. Jre avpug xnzcsg, ung fpuba ireybera.",
+					"P'rfg nh cvrq qh zhe dhr y'ba ibvg yr zvrhk yr zhe.",
+					"Jr xabj ubj uhznaf jbex. Gurl ner nyy fb cerqvpgnoyr.",
+					"Gur qbtznf bs gur dhvrg cnfg ner vanqrdhngr gb gur fgbezl cerfrag",
+					"Ab jnl gb cerirag guvf, fnlf bayl angvba jurer guvf erthyneyl unccraf",
+					"L'n dhrydhrf dhrfgvbaf dhv erfgrag fbhf fvyrapr...",
+					"Vs gurer vf ab fbyhgvba, gurer vf ab ceboyrz",
+					"V unir zrzbevrf, ohg V pna'g gryy vs gurl'er erny.", "L n pbzzr ha tbhg nzre ra abhf",
+					"L n qrf fvyraprf dhv qvfrag ornhpbhc", "V frr lbh'ir unq fbzr qvfpvcyvanel ceboyrzf va gur cnfg.",
+					"Cercnengvba vf gur xrl gb fhpprffshy, vapbafcvphbhf gvzr geniry.",
+					"Vg'f arire gbb yngr gb or jub lbh zvtug unir orra.",
+					"Rg cbhe nyyre purm Zvpxrl vyf ibag fherzrag cnf pbafgehver har tner gbhf yrf 100 zrgerf",
+					"Nyy lbhe onfr ner orybat gb hf");
 
 	private QuoteUtils() {
 	}

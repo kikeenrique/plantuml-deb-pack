@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -37,9 +42,8 @@ import java.util.Collections;
 import java.util.List;
 
 import net.sourceforge.plantuml.command.Command;
-import net.sourceforge.plantuml.command.CommandComment;
-import net.sourceforge.plantuml.command.CommandMultilinesComment;
 import net.sourceforge.plantuml.command.CommandNope;
+import net.sourceforge.plantuml.command.CommandScale;
 import net.sourceforge.plantuml.command.UmlDiagramFactory;
 import net.sourceforge.plantuml.core.DiagramType;
 
@@ -49,20 +53,30 @@ public class GanttDiagramFactory extends UmlDiagramFactory {
 		return Arrays.<SubjectPattern> asList(new SubjectTask(), new SubjectProject(), new SubjectDayOfWeek());
 	}
 
-	public GanttDiagramFactory() {
-		super(DiagramType.UML);
+	public GanttDiagramFactory(DiagramType type) {
+		super(type);
 	}
 
 	@Override
 	protected List<Command> createCommands() {
 		final List<Command> cmds = new ArrayList<Command>();
+		//addCommonCommands(cmds);
 		cmds.add(new CommandNope());
-		cmds.add(new CommandComment());
-		cmds.add(new CommandMultilinesComment());
-
+//		cmds.add(new CommandComment());
+//		cmds.add(new CommandMultilinesComment());
 		for (Command cmd : getLanguageCommands()) {
 			cmds.add(cmd);
 		}
+		cmds.add(new CommandGanttArrow());
+		
+		cmds.add(new CommandScale());
+//		cmds.add(new CommandScaleWidthAndHeight());
+//		cmds.add(new CommandScaleWidthOrHeight());
+//		cmds.add(new CommandScaleMaxWidth());
+//		cmds.add(new CommandScaleMaxHeight());
+//		cmds.add(new CommandScaleMaxWidthAndHeight());
+
+		
 		return cmds;
 	}
 

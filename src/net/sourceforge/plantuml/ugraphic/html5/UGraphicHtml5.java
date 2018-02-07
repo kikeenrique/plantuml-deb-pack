@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -33,6 +38,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.TikzFontDistortion;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.ugraphic.AbstractCommonUGraphic;
@@ -56,7 +62,7 @@ public class UGraphicHtml5 extends AbstractUGraphic<Html5Drawer> implements Clip
 
 	public UGraphicHtml5(ColorMapper colorMapper) {
 		super(colorMapper, new Html5Drawer());
-		stringBounder = FileFormat.PNG.getDefaultStringBounder();
+		stringBounder = FileFormat.PNG.getDefaultStringBounder(TikzFontDistortion.getDefault());
 		registerDriver(URectangle.class, new DriverRectangleHtml5(this));
 		// registerDriver(UText.class, new DriverTextEps(imDummy, this, strategy));
 		registerDriver(UText.class, new DriverNopHtml5());

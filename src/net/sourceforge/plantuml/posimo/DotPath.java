@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -88,6 +93,7 @@ public class DotPath implements UShape, Moveable {
 	}
 
 	private final List<CubicCurve2D.Double> beziers = new ArrayList<CubicCurve2D.Double>();
+	private String comment;
 
 	public DotPath() {
 		this(new ArrayList<CubicCurve2D.Double>());
@@ -401,7 +407,7 @@ public class DotPath implements UShape, Moveable {
 	}
 
 	public UPath toUPath() {
-		final UPath result = new UPath();
+		final UPath result = new UPath(comment);
 		boolean start = true;
 		for (CubicCurve2D.Double bez : beziers) {
 			if (start) {
@@ -661,6 +667,10 @@ public class DotPath implements UShape, Moveable {
 			}
 		}
 		return Collections.unmodifiableList(result);
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 }

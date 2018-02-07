@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -46,6 +51,7 @@ import net.sourceforge.plantuml.command.note.FactoryNoteOnEntityCommand;
 import net.sourceforge.plantuml.command.note.FactoryNoteOnLinkCommand;
 import net.sourceforge.plantuml.command.regex.RegexLeaf;
 import net.sourceforge.plantuml.command.regex.RegexOr;
+import net.sourceforge.plantuml.descdiagram.command.CommandArchimate;
 import net.sourceforge.plantuml.descdiagram.command.CommandCreateElementFull;
 import net.sourceforge.plantuml.descdiagram.command.CommandCreateElementMultilines;
 import net.sourceforge.plantuml.descdiagram.command.CommandLinkElement;
@@ -105,6 +111,8 @@ public class DescriptionDiagramFactory extends UmlDiagramFactory {
 		cmds.add(factoryNoteOnLinkCommand.createMultiLine(false));
 
 		cmds.add(new CommandHideShowSpecificClass());
+
+		cmds.add(new CommandArchimate());
 
 		return cmds;
 	}

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -32,6 +37,7 @@ package net.sourceforge.plantuml.svek.image;
 
 import java.awt.geom.Dimension2D;
 
+import net.sourceforge.plantuml.AlignParam;
 import net.sourceforge.plantuml.ColorParam;
 import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.FontParam;
@@ -100,7 +106,7 @@ public class EntityImageEmptyPackage extends AbstractEntityImage {
 	private UStroke getStroke() {
 		UStroke stroke = getSkinParam().getThickness(LineParam.packageBorder, getStereo());
 		if (stroke == null) {
-			stroke = new UStroke(2.0);
+			stroke = new UStroke(1.5);
 		}
 		return stroke;
 	}
@@ -123,7 +129,8 @@ public class EntityImageEmptyPackage extends AbstractEntityImage {
 				stereoBlock, 0, 0, widthTotal, heightTotal, getStroke());
 
 		decoration.drawU(ug, back, SkinParamUtils.getColor(getSkinParam(), ColorParam.packageBorder, getStereo()),
-				getSkinParam().shadowing(), roundCorner);
+				getSkinParam().shadowing(), roundCorner,
+				getSkinParam().getHorizontalAlignment(AlignParam.PACKAGE_TITLE_ALIGNMENT, null));
 
 		if (url != null) {
 			ug.closeAction();
@@ -133,10 +140,6 @@ public class EntityImageEmptyPackage extends AbstractEntityImage {
 
 	public ShapeType getShapeType() {
 		return ShapeType.RECTANGLE;
-	}
-
-	public int getShield() {
-		return 0;
 	}
 
 }

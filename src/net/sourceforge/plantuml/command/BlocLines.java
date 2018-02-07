@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -36,6 +41,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import net.sourceforge.plantuml.BackSlash;
 import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.cucadiagram.Display;
@@ -62,7 +68,7 @@ public class BlocLines implements Iterable<CharSequence> {
 	}
 
 	public static BlocLines getWithNewlines(CharSequence s) {
-		return new BlocLines(StringUtils.getWithNewlines(s));
+		return new BlocLines(BackSlash.getWithNewlines(s));
 	}
 
 	public BlocLines() {
@@ -88,6 +94,9 @@ public class BlocLines implements Iterable<CharSequence> {
 	}
 
 	public CharSequence getFirst499() {
+		if (lines.size()==0) {
+			return null;
+		}
 		return lines.get(0);
 	}
 
@@ -165,11 +174,11 @@ public class BlocLines implements Iterable<CharSequence> {
 		return new BlocLines(copy);
 	}
 
-	public BlocLines concat2() {
+	public BlocLines toSingleLineWithHiddenNewLine() {
 		final StringBuilder sb = new StringBuilder();
 		for (CharSequence line : lines) {
 			sb.append(line);
-			sb.append(StringUtils.hiddenNewLine());
+			sb.append(BackSlash.hiddenNewLine());
 		}
 		return single(sb.substring(0, sb.length() - 1));
 	}
@@ -223,34 +232,38 @@ public class BlocLines implements Iterable<CharSequence> {
 		return lines.iterator();
 	}
 
+	@Deprecated
 	public BlocLines removeComments() {
-		final List<CharSequence> copy = new ArrayList<CharSequence>();
-		boolean inComment = false;
-		for (CharSequence cs : lines) {
-			if (inComment == false && MyPattern.mtches(cs, CommandMultilinesComment.COMMENT_SINGLE_LINE)) {
-				continue;
-			}
-			if (inComment == false && MyPattern.mtches(cs, CommandMultilinesComment.COMMENT_MULTILINE_START)) {
-				inComment = true;
-				continue;
-			}
-			if (inComment && MyPattern.mtches(cs, CommandMultilinesComment.COMMENT_MULTILINE_END)) {
-				inComment = false;
-				continue;
-			}
-			if (inComment == false) {
-				copy.add(cs);
-			}
-		}
-		return new BlocLines(copy);
+		return this;
+//		final List<CharSequence> copy = new ArrayList<CharSequence>();
+//		boolean inComment = false;
+//		for (CharSequence cs : lines) {
+//			if (inComment == false && MyPattern.mtches(cs, CommandMultilinesComment.COMMENT_SINGLE_LINE)) {
+//				continue;
+//			}
+//			if (inComment == false && MyPattern.mtches(cs, CommandMultilinesComment.COMMENT_MULTILINE_START)) {
+//				inComment = true;
+//				continue;
+//			}
+//			if (inComment && MyPattern.mtches(cs, CommandMultilinesComment.COMMENT_MULTILINE_END)) {
+//				inComment = false;
+//				continue;
+//			}
+//			if (inComment == false) {
+//				copy.add(cs);
+//			}
+//		}
+//		return new BlocLines(copy);
 	}
 
+	@Deprecated
 	public BlocLines removeInnerComments() {
-		final List<CharSequence> copy = new ArrayList<CharSequence>();
-		for (CharSequence cs : lines) {
-			copy.add(MyPattern.removeAll(cs, CommandMultilinesComment.INNER_COMMENT));
-		}
-		return new BlocLines(copy);
+		return this;
+//		final List<CharSequence> copy = new ArrayList<CharSequence>();
+//		for (CharSequence cs : lines) {
+//			copy.add(MyPattern.removeAll(cs, CommandMultilinesComment.INNER_COMMENT));
+//		}
+//		return new BlocLines(copy);
 	}
 
 }

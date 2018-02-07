@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -101,7 +106,7 @@ public class FtpServer {
 		System.out.println("Server Started...");
 		System.out.println("Waiting for connections...");
 		System.out.println(" ");
-		new FtpServer(24242, FileFormat.SVG).go();
+		new FtpServer(4242, FileFormat.PNG).go();
 	}
 
 	public void processImage(final FtpConnexion connexion, final String name) {

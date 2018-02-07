@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -58,6 +63,7 @@ import net.sourceforge.plantuml.FileUtils;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.LineParam;
 import net.sourceforge.plantuml.OptionFlags;
+import net.sourceforge.plantuml.RoundParam;
 import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.anim.AffineTransformation;
@@ -134,7 +140,7 @@ public class ImageBuilder {
 		final Rose rose = new Rose();
 		this.borderColor = rose.getHtmlColor(skinParam, ColorParam.diagramBorder);
 		this.borderStroke = skinParam.getThickness(LineParam.diagramBorder, null);
-		this.borderCorner = skinParam.getRoundCorner("diagramBorder", null);
+		this.borderCorner = skinParam.getRoundCorner(RoundParam.diagramBorder, null);
 		if (borderStroke == null && borderColor != null) {
 			this.borderStroke = new UStroke();
 		}
@@ -156,14 +162,15 @@ public class ImageBuilder {
 		this.udrawable = udrawable;
 	}
 
-	public ImageData writeImageTOBEMOVED(FileFormatOption fileFormatOption, OutputStream os) throws IOException {
+	public ImageData writeImageTOBEMOVED(FileFormatOption fileFormatOption, long seed, OutputStream os)
+			throws IOException {
 		final FileFormat fileFormat = fileFormatOption.getFileFormat();
 		if (fileFormat == FileFormat.MJPEG) {
-			return writeImageMjpeg(os, fileFormat.getDefaultStringBounder());
+			return writeImageMjpeg(os, fileFormatOption.getDefaultStringBounder());
 		} else if (fileFormat == FileFormat.ANIMATED_GIF) {
-			return writeImageAnimatedGif(os, fileFormat.getDefaultStringBounder());
+			return writeImageAnimatedGif(os, fileFormatOption.getDefaultStringBounder());
 		}
-		return writeImageInternal(fileFormatOption, os, animation);
+		return writeImageInternal(fileFormatOption, seed, os, animation);
 	}
 
 	private static Semaphore SEMAPHORE_SMALL;
@@ -198,8 +205,8 @@ public class ImageBuilder {
 		return SEMAPHORE_SMALL;
 	}
 
-	private ImageData writeImageInternal(FileFormatOption fileFormatOption, OutputStream os, Animation animationArg)
-			throws IOException {
+	private ImageData writeImageInternal(FileFormatOption fileFormatOption, long seed, OutputStream os,
+			Animation animationArg) throws IOException {
 		Dimension2D dim = getFinalDimension(fileFormatOption.getDefaultStringBounder());
 		double dx = 0;
 		double dy = 0;
@@ -222,7 +229,7 @@ public class ImageBuilder {
 			}
 		}
 		try {
-			final UGraphic2 ug = createUGraphic(fileFormatOption, dim, animationArg, dx, dy);
+			final UGraphic2 ug = createUGraphic(fileFormatOption, seed, dim, animationArg, dx, dy);
 			UGraphic ug2 = ug;
 			if (externalMargin1 > 0) {
 				ug2 = ug2.apply(new UTranslate(externalMargin1, externalMargin1));
@@ -343,7 +350,7 @@ public class ImageBuilder {
 
 	private Image getAviImage(AffineTransformation affineTransform) throws IOException {
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		writeImageInternal(new FileFormatOption(FileFormat.PNG), baos, Animation.singleton(affineTransform));
+		writeImageInternal(new FileFormatOption(FileFormat.PNG), 42, baos, Animation.singleton(affineTransform));
 		baos.close();
 
 		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
@@ -352,15 +359,15 @@ public class ImageBuilder {
 		return im;
 	}
 
-	private UGraphic2 createUGraphic(FileFormatOption fileFormatOption, final Dimension2D dim, Animation animationArg,
-			double dx, double dy) {
+	private UGraphic2 createUGraphic(FileFormatOption fileFormatOption, long seed, final Dimension2D dim,
+			Animation animationArg, double dx, double dy) {
 		final FileFormat fileFormat = fileFormatOption.getFileFormat();
 		switch (fileFormat) {
 		case PNG:
 			return createUGraphicPNG(colorMapper, dpiFactor, dim, mybackcolor, animationArg, dx, dy);
 		case SVG:
 			return createUGraphicSVG(colorMapper, dpiFactor, dim, mybackcolor, fileFormatOption.getSvgLinkTarget(),
-					fileFormatOption.getHoverColor());
+					fileFormatOption.getHoverColor(), seed);
 		case EPS:
 			return new UGraphicEps(colorMapper, EpsStrategy.getDefault2());
 		case EPS_TEXT:
@@ -370,9 +377,9 @@ public class ImageBuilder {
 		case VDX:
 			return new UGraphicVdx(colorMapper);
 		case LATEX:
-			return new UGraphicTikz(colorMapper, dpiFactor, true);
+			return new UGraphicTikz(colorMapper, dpiFactor, true, fileFormatOption.getTikzFontDistortion());
 		case LATEX_NO_PREAMBLE:
-			return new UGraphicTikz(colorMapper, dpiFactor, false);
+			return new UGraphicTikz(colorMapper, dpiFactor, false, fileFormatOption.getTikzFontDistortion());
 		case BRAILLE_PNG:
 			return new UGraphicBraille(colorMapper, fileFormat);
 		default:
@@ -381,18 +388,20 @@ public class ImageBuilder {
 	}
 
 	private UGraphic2 createUGraphicSVG(ColorMapper colorMapper, double scale, Dimension2D dim, HtmlColor mybackcolor,
-			String svgLinkTarget, String hover) {
+			String svgLinkTarget, String hover, long seed) {
 		Color backColor = Color.WHITE;
 		if (mybackcolor instanceof HtmlColorSimple) {
 			backColor = colorMapper.getMappedColor(mybackcolor);
 		}
 		final UGraphicSvg ug;
 		if (mybackcolor instanceof HtmlColorGradient) {
-			ug = new UGraphicSvg(colorMapper, (HtmlColorGradient) mybackcolor, false, scale, svgLinkTarget, hover);
+			ug = new UGraphicSvg(dim, colorMapper, (HtmlColorGradient) mybackcolor, false, scale, svgLinkTarget, hover,
+					seed);
 		} else if (backColor == null || backColor.equals(Color.WHITE)) {
-			ug = new UGraphicSvg(colorMapper, false, scale, svgLinkTarget, hover);
+			ug = new UGraphicSvg(dim, colorMapper, false, scale, svgLinkTarget, hover, seed);
 		} else {
-			ug = new UGraphicSvg(colorMapper, StringUtils.getAsHtml(backColor), false, scale, svgLinkTarget, hover);
+			ug = new UGraphicSvg(dim, colorMapper, StringUtils.getAsHtml(backColor), false, scale, svgLinkTarget,
+					hover, seed);
 		}
 		return ug;
 

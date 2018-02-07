@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -89,10 +94,16 @@ public class OptionPrint {
 		System.out.println("    -DVAR1=value\tTo set a preprocessing variable as if '!define VAR1 value' were used");
 		System.out.println("    -Sparam1=value\tTo set a skin parameter as if 'skinparam param1 value' were used");
 		System.out.println("    -r[ecurse]\t\trecurse through directories");
-		System.out.println("    -config \"file\"\tTo read the provided config file before each diagram");
+		// System.out.println("    -config \"file\"\tTo read the provided config file before each diagram");
+		final char separator = File.separatorChar;
+		System.out.println("    -I" + separator + "path" + separator + "to" + separator
+				+ "file\tTo include file as if '!include file' were used");
+		System.out.println("    -I" + separator + "path" + separator + "to" + separator
+				+ "*.puml\tTo include files with pattern");
 		System.out.println("    -charset xxx\tTo use a specific charset (default is " + charset + ")");
 		System.out.println("    -e[x]clude pattern\tTo exclude files that match the provided pattern");
 		System.out.println("    -metadata\t\tTo retrieve PlantUML sources from PNG images");
+		System.out.println("    -nometadata\t\tTo NOT export metadata in PNG/SVG generated files");
 		System.out.println("    -version\t\tTo display information about PlantUML and Java versions");
 		System.out.println("    -checkversion\tTo check if a newer version is available for download");
 		System.out.println("    -v[erbose]\t\tTo have log information");
@@ -108,7 +119,7 @@ public class OptionPrint {
 		System.out.println("    -decodeurl\t\tTo retrieve the PlantUML source from an encoded URL");
 		System.out.println("    -syntax\t\tTo report any syntax error from standard input without generating images");
 		System.out.println("    -language\t\tTo print the list of PlantUML keywords");
-		System.out.println("    -nosuggestengine\tTo disable the suggest engine when errors in diagrams");
+		// System.out.println("    -nosuggestengine\tTo disable the suggest engine when errors in diagrams");
 		System.out.println("    -checkonly\t\tTo check the syntax of files without generating images");
 		System.out.println("    -failfast\t\tTo stop processing as soon as a syntax error in diagram occurs");
 		System.out.println("    -failfast2\t\tTo do a first syntax check before processing files, to fail even faster");
@@ -116,6 +127,8 @@ public class OptionPrint {
 		System.out.println("    -duration\t\tTo print the duration of complete diagrams processing");
 		System.out.println("    -nbthread N\t\tTo use (N) threads for processing");
 		System.out.println("    -nbthread auto\tTo use " + Option.defaultNbThreads() + " threads for processing");
+		System.out
+				.println("    -timeout N\t\tProcessing timeout in (N) seconds. Defaults to 15 minutes (900 seconds).");
 		System.out.println("    -author[s]\t\tTo print information about PlantUML authors");
 		System.out.println("    -overwrite\t\tTo allow to overwrite read only files");
 		System.out.println("    -printfonts\t\tTo print fonts available on your system");
@@ -127,6 +140,9 @@ public class OptionPrint {
 		System.out.println("    -loopstats\t\tTo continuously print statistics about usage");
 		System.out.println("    -splash\t\tTo display a splash screen with some progress bar");
 		System.out.println("    -progress\t\tTo display a textual progress bar in console");
+		System.out.println("    -pipeimageindex N\tTo generate the Nth image with pipe option");
+		System.out.println("    -extractstdlib\tTo extract PlantUML Standard Library into stdlib folder");
+		System.out.println("    -filename \"example.puml\"\tTo override %filename% variable");
 		System.out.println();
 		System.out.println("If needed, you can setup the environment variable GRAPHVIZ_DOT.");
 		exit();

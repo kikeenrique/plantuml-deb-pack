@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -82,7 +87,7 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 		final DrawableSetInitializer initializer = new DrawableSetInitializer(skin, sequenceDiagram.getSkinParam(),
 				sequenceDiagram.isShowFootbox(), sequenceDiagram.getAutonewpage());
 
-		for (Participant p : sequenceDiagram.participants().values()) {
+		for (Participant p : sequenceDiagram.participants()) {
 			initializer.addParticipant(p, sequenceDiagram.getEnglober(p));
 		}
 
@@ -153,8 +158,8 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 			final Dimension2D dimTitle = compTitle.calculateDimension(stringBounder);
 			area.setTitleArea(dimTitle.getWidth(), dimTitle.getHeight());
 		}
-		area.initFooter(getPngTitler(FontParam.FOOTER), stringBounder);
-		area.initHeader(getPngTitler(FontParam.HEADER), stringBounder);
+		area.initFooter(getPngTitler(FontParam.FOOTER, index), stringBounder);
+		area.initHeader(getPngTitler(FontParam.HEADER, index), stringBounder);
 
 		final DisplayPositionned legend = diagram.getLegend();
 		final TextBlock legendBlock;
@@ -173,8 +178,8 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 
 		final String metadata = fileFormatOption.isWithMetadata() ? diagram.getMetadata() : null;
 
-		final ImageBuilder imageBuilder = new ImageBuilder(diagram.getSkinParam(), oneOf(scale, dpiFactor), metadata, null, 3,
-				10, diagram.getAnimation());
+		final ImageBuilder imageBuilder = new ImageBuilder(diagram.getSkinParam(), oneOf(scale, dpiFactor), metadata,
+				null, 3, 10, diagram.getAnimation());
 
 		imageBuilder.setUDrawable(new UDrawable() {
 			public void drawU(UGraphic ug) {
@@ -208,8 +213,8 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 				drawableSet.drawU22(ug.apply(new UTranslate(area.getSequenceAreaX() + delta1 / 2, sequenceAreaY)),
 						delta, fullDimension.getWidth(), page, diagram.isShowFootbox());
 
-				drawHeader(area, ug);
-				drawFooter(area, ug);
+				drawHeader(area, ug, index);
+				drawFooter(area, ug, index);
 
 				if (DisplayPositionned.isNull(legend) == false) {
 					final double delta2;
@@ -226,11 +231,11 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 
 			}
 		});
-		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, os);
+		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, diagram.seed(), os);
 	}
 
-	private void drawFooter(SequenceDiagramArea area, UGraphic ug) {
-		final PngTitler pngTitler = getPngTitler(FontParam.FOOTER);
+	private void drawFooter(SequenceDiagramArea area, UGraphic ug, int page) {
+		final PngTitler pngTitler = getPngTitler(FontParam.FOOTER, page);
 		final TextBlock text = pngTitler.getTextBlock();
 		if (text == null) {
 			return;
@@ -239,8 +244,8 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 				.getFooterY())));
 	}
 
-	private void drawHeader(SequenceDiagramArea area, UGraphic ug) {
-		final PngTitler pngTitler = getPngTitler(FontParam.HEADER);
+	private void drawHeader(SequenceDiagramArea area, UGraphic ug, int page) {
+		final PngTitler pngTitler = getPngTitler(FontParam.HEADER, page);
 		final TextBlock text = pngTitler.getTextBlock();
 		if (text == null) {
 			return;
@@ -276,14 +281,14 @@ public class SequenceDiagramFileMakerPuma2 implements FileMaker {
 		return diagram.getScale().getScale(width, height);
 	}
 
-	private PngTitler getPngTitler(final FontParam fontParam) {
+	private PngTitler getPngTitler(final FontParam fontParam, int page) {
 		final HtmlColor hyperlinkColor = diagram.getSkinParam().getHyperlinkColor();
 		final HtmlColor titleColor = diagram.getSkinParam().getFontHtmlColor(null, fontParam);
 		final String fontFamily = diagram.getSkinParam().getFont(null, false, fontParam).getFamily(null);
 		final int fontSize = diagram.getSkinParam().getFont(null, false, fontParam).getSize();
-		return new PngTitler(titleColor, diagram.getFooterOrHeaderTeoz(fontParam).getDisplay(), fontSize, fontFamily,
-				diagram.getFooterOrHeaderTeoz(fontParam).getHorizontalAlignment(), hyperlinkColor, diagram
-						.getSkinParam().useUnderlineForHyperlink());
+		final Display display = diagram.getFooterOrHeaderTeoz(fontParam).getDisplay().withPage(page + 1, pages.size());
+		return new PngTitler(titleColor, display, fontSize, fontFamily, diagram.getFooterOrHeaderTeoz(fontParam)
+				.getHorizontalAlignment(), hyperlinkColor, diagram.getSkinParam().useUnderlineForHyperlink());
 	}
 
 }

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -34,6 +39,7 @@ import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import net.sourceforge.plantuml.ColorParam;
@@ -74,8 +80,14 @@ public class FtileWithNoteOpale extends AbstractFtile implements Stencil {
 	// private final HtmlColor arrowColor;
 	private final NotePosition notePosition;
 	private final double suppSpace = 20;
+	private final Swimlane swimlaneNote;
 
 	public Set<Swimlane> getSwimlanes() {
+		if (swimlaneNote != null) {
+			final Set<Swimlane> result = new HashSet<Swimlane>(tile.getSwimlanes());
+			result.add(swimlaneNote);
+			return Collections.unmodifiableSet(result);
+		}
 		return tile.getSwimlanes();
 	}
 
@@ -86,7 +98,7 @@ public class FtileWithNoteOpale extends AbstractFtile implements Stencil {
 	public Swimlane getSwimlaneOut() {
 		return tile.getSwimlaneOut();
 	}
-	
+
 	@Override
 	public Collection<Ftile> getMyChildren() {
 		return Collections.singleton(tile);
@@ -104,6 +116,7 @@ public class FtileWithNoteOpale extends AbstractFtile implements Stencil {
 
 	private FtileWithNoteOpale(Ftile tile, PositionedNote note, ISkinParam skinParam, boolean withLink) {
 		super(tile.skinParam());
+		this.swimlaneNote = note.getSwimlaneNote();
 		if (note.getColors() != null) {
 			skinParam = note.getColors().mute(skinParam);
 		}
@@ -122,7 +135,8 @@ public class FtileWithNoteOpale extends AbstractFtile implements Stencil {
 
 		final Sheet sheet = new CreoleParser(fc, skinParam.getDefaultTextAlignment(HorizontalAlignment.LEFT),
 				skinParam, CreoleMode.FULL).createSheet(note.getDisplay());
-		final TextBlock text = new SheetBlock2(new SheetBlock1(sheet, LineBreakStrategy.NONE, skinParam.getPadding()), this, new UStroke(1));
+		final TextBlock text = new SheetBlock2(new SheetBlock1(sheet, LineBreakStrategy.NONE, skinParam.getPadding()),
+				this, new UStroke(1));
 		opale = new Opale(borderColor, noteBackgroundColor, text, skinParam.shadowing(), withLink);
 
 	}
@@ -158,6 +172,13 @@ public class FtileWithNoteOpale extends AbstractFtile implements Stencil {
 	}
 
 	public void drawU(UGraphic ug) {
+		final Swimlane intoSw;
+		if (ug instanceof UGraphicInterceptorOneSwimlane) {
+			intoSw = ((UGraphicInterceptorOneSwimlane) ug).getSwimlane();
+		} else {
+			intoSw = null;
+		}
+
 		final StringBounder stringBounder = ug.getStringBounder();
 		final Dimension2D dimNote = opale.calculateDimension(stringBounder);
 
@@ -172,11 +193,14 @@ public class FtileWithNoteOpale extends AbstractFtile implements Stencil {
 			final Point2D pp2 = new Point2D.Double(-suppSpace, dimNote.getHeight() / 2);
 			opale.setOpale(strategy, pp1, pp2);
 		}
-		opale.drawU(ug.apply(getTranslateForOpale(ug)));
+		if (swimlaneNote == null || intoSw == swimlaneNote) {
+			opale.drawU(ug.apply(getTranslateForOpale(ug)));
+		}
 		ug.apply(getTranslate(stringBounder)).draw(tile);
 	}
 
-	public FtileGeometry calculateDimension(StringBounder stringBounder) {
+	@Override
+	protected FtileGeometry calculateDimensionFtile(StringBounder stringBounder) {
 		final Dimension2D dimTotal = calculateDimensionInternal(stringBounder);
 		final FtileGeometry orig = tile.calculateDimension(stringBounder);
 		final UTranslate translate = getTranslate(stringBounder);

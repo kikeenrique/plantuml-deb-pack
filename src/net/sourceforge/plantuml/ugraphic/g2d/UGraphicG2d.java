@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -45,6 +50,7 @@ import java.util.Set;
 
 import net.sourceforge.plantuml.EnsureVisible;
 import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.TikzFontDistortion;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.anim.AffineTransformation;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -155,7 +161,7 @@ public class UGraphicG2d extends AbstractUGraphic<Graphics2D> implements EnsureV
 		// if (hasAffineTransform) {
 		// return TextBlockUtils.getDummyStringBounder();
 		// }
-		return FileFormat.PNG.getDefaultStringBounder();
+		return FileFormat.PNG.getDefaultStringBounder(TikzFontDistortion.getDefault());
 	}
 
 	@Override
@@ -193,7 +199,9 @@ public class UGraphicG2d extends AbstractUGraphic<Graphics2D> implements EnsureV
 
 	public void ensureVisible(double x, double y) {
 		for (Url u : urls) {
-			u.ensureVisible(x, y);
+			if (getClip() == null || getClip().isInside(x, y)) {
+				u.ensureVisible(x, y);
+			}
 		}
 	}
 

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -74,6 +79,7 @@ public enum FontParam {
 	NODE(14, Font.PLAIN), //
 	DATABASE(14, Font.PLAIN), //
 	QUEUE(14, Font.PLAIN), //
+	STACK(14, Font.PLAIN), //
 	// SEQUENCE_ARROW(13, Font.PLAIN), //
 	SEQUENCE_BOX(13, Font.BOLD), //
 	SEQUENCE_DIVIDER(13, Font.BOLD), //
@@ -107,6 +113,7 @@ public enum FontParam {
 	FRAME_STEREOTYPE(14, Font.ITALIC), //
 	DATABASE_STEREOTYPE(14, Font.ITALIC), //
 	QUEUE_STEREOTYPE(14, Font.ITALIC), //
+	STACK_STEREOTYPE(14, Font.ITALIC), //
 	ACTOR_STEREOTYPE(14, Font.ITALIC), //
 	SEQUENCE_STEREOTYPE(14, Font.ITALIC), //
 	PARTITION(14, Font.PLAIN); //

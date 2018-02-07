@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -63,15 +68,26 @@ public class SymbolContext {
 	}
 
 	final public UGraphic apply(UGraphic ug) {
-		return applyStroke(applyColors(ug));
+		ug = applyColors(ug);
+		ug = applyStroke(ug);
+		return ug;
 	}
 
 	public UGraphic applyColors(UGraphic ug) {
-		return ug.apply(new UChangeColor(foreColor)).apply(new UChangeBackColor(backColor));
+		ug = ug.apply(new UChangeColor(foreColor));
+		ug = ug.apply(new UChangeBackColor(backColor));
+		return ug;
 	}
 
 	public UGraphic applyStroke(UGraphic ug) {
 		return ug.apply(stroke);
+	}
+
+	public SymbolContext transparentBackColorToNull() {
+		if (backColor instanceof HtmlColorTransparent) {
+			return new SymbolContext(null, foreColor, stroke, shadowing, deltaShadow, roundCorner);
+		}
+		return this;
 	}
 
 	public SymbolContext(HtmlColor backColor, HtmlColor foreColor) {

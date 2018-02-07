@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -84,13 +89,13 @@ public class CommandCreateClassMultilines extends CommandMultilines2<ClassDiagra
 				new RegexLeaf("TYPE", "(interface|enum|abstract[%s]+class|abstract|class|entity)[%s]+"), //
 				new RegexOr(//
 						new RegexConcat(//
-								new RegexLeaf("DISPLAY1", "[%g](.+)[%g]"), //
+								new RegexLeaf("DISPLAY1", CommandCreateClass.DISPLAY_WITH_GENERIC), //
 								new RegexLeaf("[%s]+as[%s]+"), //
 								new RegexLeaf("CODE1", "(" + CommandCreateClass.CODE + ")")), //
 						new RegexConcat(//
 								new RegexLeaf("CODE2", "(" + CommandCreateClass.CODE + ")"), //
 								new RegexLeaf("[%s]+as[%s]+"), // //
-								new RegexLeaf("DISPLAY2", "[%g](.+)[%g]")), //
+								new RegexLeaf("DISPLAY2", CommandCreateClass.DISPLAY_WITH_GENERIC)), //
 						new RegexLeaf("CODE3", "(" + CommandCreateClass.CODE + ")"), //
 						new RegexLeaf("CODE4", "[%g]([^%g]+)[%g]")), //
 				new RegexLeaf("GENERIC", "(?:[%s]*\\<(" + GenericRegexProducer.PATTERN + ")\\>)?"), //
@@ -155,7 +160,7 @@ public class CommandCreateClassMultilines extends CommandMultilines2<ClassDiagra
 			if (mode == Mode.IMPLEMENTS) {
 				type2 = LeafType.INTERFACE;
 			}
-			if (mode == Mode.EXTENDS && entity.getEntityType() == LeafType.INTERFACE) {
+			if (mode == Mode.EXTENDS && entity.getLeafType() == LeafType.INTERFACE) {
 				type2 = LeafType.INTERFACE;
 			}
 			final String codes = arg.get(keyword, 2);
@@ -163,8 +168,8 @@ public class CommandCreateClassMultilines extends CommandMultilines2<ClassDiagra
 				final Code other = Code.of(StringUtils.trin(s));
 				final IEntity cl2 = system.getOrCreateLeaf(other, type2, null);
 				LinkType typeLink = new LinkType(LinkDecor.NONE, LinkDecor.EXTENDS);
-				if (type2 == LeafType.INTERFACE && entity.getEntityType() != LeafType.INTERFACE) {
-					typeLink = typeLink.getDashed();
+				if (type2 == LeafType.INTERFACE && entity.getLeafType() != LeafType.INTERFACE) {
+					typeLink = typeLink.goDashed();
 				}
 				final Link link = new Link(cl2, entity, typeLink, Display.NULL, 2, null, null,
 						system.getLabeldistance(), system.getLabelangle());
@@ -184,9 +189,10 @@ public class CommandCreateClassMultilines extends CommandMultilines2<ClassDiagra
 
 		final Code code = Code.of(arg.getLazzy("CODE", 0)).eventuallyRemoveStartingAndEndingDoubleQuote("\"([:");
 		final String display = arg.getLazzy("DISPLAY", 0);
+		final String genericOption = arg.getLazzy("DISPLAY", 1);
+		final String generic = genericOption != null ? genericOption : arg.get("GENERIC", 0);
 
 		final String stereotype = arg.get("STEREO", 0);
-		final String generic = arg.get("GENERIC", 0);
 
 		final ILeaf result;
 		if (diagram.leafExist(code)) {

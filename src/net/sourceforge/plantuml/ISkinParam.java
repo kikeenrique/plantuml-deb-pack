@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -94,7 +99,7 @@ public interface ISkinParam extends ISkinSimple {
 
 	public double getRanksep();
 
-	public double getRoundCorner(String param, Stereotype stereotype);
+	public double getRoundCorner(RoundParam param, Stereotype stereotype);
 
 	public LineBreakStrategy maxMessageSize();
 
@@ -134,6 +139,12 @@ public interface ISkinParam extends ISkinSimple {
 
 	public HtmlColor getHoverPathColor();
 
+	public TikzFontDistortion getTikzFontDistortion();
+
 	public double getPadding(PaddingParam param);
+
+	public boolean useRankSame();
+
+	public boolean displayGenericWithOldFashion();
 
 }

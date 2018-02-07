@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -51,12 +56,15 @@ public class TimingDiagramFactory extends UmlDiagramFactory {
 		addCommonCommands(cmds);
 
 		cmds.add(new CommandLifeLine());
-		cmds.add(new CommandChangeState1());
-		cmds.add(new CommandChangeState2());
+		cmds.add(new CommandChangeStateByPlayerCode());
+		cmds.add(new CommandChangeStateByTime());
 		cmds.add(new CommandAtTime());
 		cmds.add(new CommandAtPlayer());
 		cmds.add(new CommandTimeMessage());
+		cmds.add(new CommandNote());
+		cmds.add(new CommandNoteLong());
 		cmds.add(new CommandConstraint());
+		cmds.add(new CommandScalePixel());
 
 		return cmds;
 	}

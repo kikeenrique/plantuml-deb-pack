@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -35,6 +40,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import net.sourceforge.plantuml.BackSlash;
 import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.LineBreakStrategy;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
@@ -142,6 +148,9 @@ public class StripeTable implements Stripe {
 					current.append(c);
 					current.append(c2);
 				}
+			} else if (c == BackSlash.hiddenNewLine()) {
+				result.add(current.toString());
+				current.setLength(0);
 			} else {
 				current.append(c);
 			}

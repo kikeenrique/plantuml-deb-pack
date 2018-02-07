@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -75,7 +80,7 @@ public class PostItDiagram extends UmlDiagram {
 			PngIO.write(im, os, fileFormatOption.isWithMetadata() ? getMetadata() : null, this.getDpi(fileFormatOption));
 		} else if (ug instanceof UGraphicSvg) {
 			final UGraphicSvg svg = (UGraphicSvg) ug;
-			svg.createXml(os);
+			svg.createXml(os, fileFormatOption.isWithMetadata() ? getMetadata() : null);
 		} else if (ug instanceof UGraphicEps) {
 			final UGraphicEps eps = (UGraphicEps) ug;
 			os.write(eps.getEPSCode().getBytes());
@@ -114,7 +119,7 @@ public class PostItDiagram extends UmlDiagram {
 				.getMappedColor(this.getSkinParam().getBackgroundColor());
 		final FileFormat fileFormat = fileFormatOption.getFileFormat();
 		if (fileFormat == FileFormat.PNG) {
-			final double height = getDefaultArea().heightWhenWidthIs(width, fileFormat.getDefaultStringBounder());
+			final double height = getDefaultArea().heightWhenWidthIs(width, fileFormatOption.getDefaultStringBounder());
 			final EmptyImageBuilder builder = new EmptyImageBuilder(width, height, backColor);
 
 			final Graphics2D graphics2D = builder.getGraphics2D();

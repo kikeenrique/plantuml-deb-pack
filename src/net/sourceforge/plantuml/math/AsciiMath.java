@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -43,6 +48,9 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import net.sourceforge.plantuml.BackSlash;
+import net.sourceforge.plantuml.SvgString;
+
 public class AsciiMath implements ScientificEquation {
 
 	private static final String ASCIIMATH_PARSER_JS_LOCATION = "/net/sourceforge/plantuml/math/";
@@ -60,7 +68,7 @@ public class AsciiMath implements ScientificEquation {
 			String s = null;
 			while ((s = br.readLine()) != null) {
 				sb.append(s);
-				sb.append("\n");
+				sb.append(BackSlash.NEWLINE);
 			}
 			br.close();
 			JAVASCRIPT_CODE = sb.toString();
@@ -82,10 +90,10 @@ public class AsciiMath implements ScientificEquation {
 		return builder.getDimension();
 	}
 
-	public String getSvg(Color foregroundColor, Color backgroundColor) throws ClassNotFoundException,
+	public SvgString getSvg(double scale, Color foregroundColor, Color backgroundColor) throws ClassNotFoundException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
 			SecurityException, InstantiationException, IOException {
-		return builder.getSvg(foregroundColor, backgroundColor);
+		return builder.getSvg(scale, foregroundColor, backgroundColor);
 	}
 
 	public BufferedImage getImage(double scale, Color foregroundColor, Color backgroundColor)

@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -144,7 +149,7 @@ public class InstructionIf extends WithNote implements Instruction, InstructionC
 				if (branch.getLast().kill() == false) {
 					return false;
 				}
-				if (elseBranch != null && elseBranch.getLast().kill() == false) {
+				if (elseBranch != null && elseBranch.getLast()!=null && elseBranch.getLast().kill() == false) {
 					return false;
 				}
 				return true;
@@ -158,11 +163,11 @@ public class InstructionIf extends WithNote implements Instruction, InstructionC
 	}
 
 	@Override
-	public boolean addNote(Display note, NotePosition position, NoteType type, Colors colors) {
+	public boolean addNote(Display note, NotePosition position, NoteType type, Colors colors, Swimlane swimlaneNote) {
 		if (endifCalled || current.isEmpty()) {
-			return super.addNote(note, position, type, colors);
+			return super.addNote(note, position, type, colors, swimlaneNote);
 		} else {
-			return current.addNote(note, position, type, colors);
+			return current.addNote(note, position, type, colors, swimlaneNote);
 		}
 	}
 

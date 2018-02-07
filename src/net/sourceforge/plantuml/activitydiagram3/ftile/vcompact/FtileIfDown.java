@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -139,7 +144,7 @@ public class FtileIfDown extends AbstractFtile {
 			final Point2D p2 = getP2(stringBounder);
 			// p2 = new Point2D.Double(p2.getX(), p1.getY());
 
-			final Snake snake = new Snake(color, Arrows.asToRight());
+			final Snake snake = new Snake(arrowHorizontalAlignment(), color, Arrows.asToRight());
 			snake.addPoint(p1);
 			snake.addPoint(p2);
 			ug.draw(snake);
@@ -182,7 +187,7 @@ public class FtileIfDown extends AbstractFtile {
 		public void drawU(UGraphic ug) {
 			final StringBounder stringBounder = ug.getStringBounder();
 
-			final Snake snake = new Snake(arrowColor, Arrows.asToDown());
+			final Snake snake = new Snake(arrowHorizontalAlignment(), arrowColor, Arrows.asToDown());
 			snake.addPoint(getP1(stringBounder));
 			snake.addPoint(getP2(stringBounder));
 
@@ -193,7 +198,7 @@ public class FtileIfDown extends AbstractFtile {
 			final StringBounder stringBounder = ug.getStringBounder();
 			final Point2D p1 = getP1(stringBounder);
 			final Point2D p2 = getP2(stringBounder);
-			final Snake snake = new Snake(arrowColor, Arrows.asToDown());
+			final Snake snake = new Snake(arrowHorizontalAlignment(), arrowColor, Arrows.asToDown());
 			final Point2D mp1a = translate1.getTranslated(p1);
 			final Point2D mp2b = translate2.getTranslated(p2);
 			final double middle = (mp1a.getY() + mp2b.getY()) / 2.0;
@@ -230,7 +235,7 @@ public class FtileIfDown extends AbstractFtile {
 				return;
 			}
 
-			final Snake snake = new Snake(arrowColor, Arrows.asToDown());
+			final Snake snake = new Snake(arrowHorizontalAlignment(), arrowColor, Arrows.asToDown());
 			snake.addPoint(getP1(stringBounder));
 			snake.addPoint(getP2(stringBounder));
 
@@ -246,7 +251,7 @@ public class FtileIfDown extends AbstractFtile {
 			final StringBounder stringBounder = ug.getStringBounder();
 			final Point2D p1 = getP1(stringBounder);
 			final Point2D p2 = getP2(stringBounder);
-			final Snake snake = new Snake(arrowColor, Arrows.asToDown());
+			final Snake snake = new Snake(arrowHorizontalAlignment(), arrowColor, Arrows.asToDown());
 			final Point2D mp1a = translate1.getTranslated(p1);
 			final Point2D mp2b = translate2.getTranslated(p2);
 			final double middle = (mp1a.getY() + mp2b.getY()) / 2.0;
@@ -285,7 +290,7 @@ public class FtileIfDown extends AbstractFtile {
 		public void drawU(UGraphic ug) {
 			final StringBounder stringBounder = ug.getStringBounder();
 
-			final Snake snake = new Snake(endInlinkColor, Arrows.asToLeft());
+			final Snake snake = new Snake(arrowHorizontalAlignment(), endInlinkColor, Arrows.asToLeft());
 			final Point2D p1 = getP1(stringBounder);
 			final Point2D p2 = getP2(stringBounder);
 
@@ -336,7 +341,8 @@ public class FtileIfDown extends AbstractFtile {
 		}
 	}
 
-	public FtileGeometry calculateDimension(StringBounder stringBounder) {
+	@Override
+	protected FtileGeometry calculateDimensionFtile(StringBounder stringBounder) {
 		final FtileGeometry geoDiamond1 = diamond1.calculateDimension(stringBounder);
 		final FtileGeometry geoThen = thenBlock.calculateDimension(stringBounder);
 		final FtileGeometry geoDiamond2 = diamond2.calculateDimension(stringBounder);

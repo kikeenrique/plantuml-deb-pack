@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -41,7 +46,7 @@ public abstract class Log {
 	public synchronized static void info(String s) {
 		if (OptionFlags.getInstance().isVerbose()) {
 			ProgressBar.clear();
-			System.out.println(format(s));
+			System.err.println(format(s));
 		}
 	}
 

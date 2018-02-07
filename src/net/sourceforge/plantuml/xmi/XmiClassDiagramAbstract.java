@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -52,6 +57,7 @@ import net.sourceforge.plantuml.cucadiagram.IEntity;
 import net.sourceforge.plantuml.cucadiagram.LeafType;
 import net.sourceforge.plantuml.cucadiagram.LongCode;
 import net.sourceforge.plantuml.cucadiagram.Member;
+import net.sourceforge.plantuml.cucadiagram.Stereotype;
 import net.sourceforge.plantuml.skin.VisibilityModifier;
 import net.sourceforge.plantuml.utils.UniqueSequence;
 
@@ -140,7 +146,7 @@ abstract class XmiClassDiagramAbstract implements IXmiClassDiagram {
 		// isAbstract="false" participant="UMLAssociationEnd.11"
 		// isActive="false">
 		final Element cla = document.createElement("UML:Class");
-		if (entity.getEntityType() == LeafType.NOTE) {
+		if (entity.getLeafType() == LeafType.NOTE) {
 			return null;
 		}
 
@@ -153,7 +159,18 @@ abstract class XmiClassDiagramAbstract implements IXmiClassDiagram {
 			cla.setAttribute("namespace", parentCode.getFullName());
 		}
 
-		final LeafType type = entity.getEntityType();
+		final Stereotype stereotype = entity.getStereotype();
+		if (stereotype != null) {
+			final Element stereo = document.createElement("UML:ModelElement.stereotype");
+			for (String s : stereotype.getMultipleLabels()) {
+				final Element name = document.createElement("UML:Stereotype");
+				name.setAttribute("name", s);
+				stereo.appendChild(name);
+			}
+			cla.appendChild(stereo);
+		}
+
+		final LeafType type = entity.getLeafType();
 		if (type == LeafType.ABSTRACT_CLASS) {
 			cla.setAttribute("isAbstract", "true");
 		} else if (type == LeafType.INTERFACE) {

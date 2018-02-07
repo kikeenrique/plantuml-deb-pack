@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -37,10 +42,13 @@ import java.util.zip.Inflater;
 
 public class CompressionZlib implements Compression {
 
+	private static boolean USE_ZOPFLI = false;
 	private static final int COMPRESSION_LEVEL = 9;
-	// private static final int COMPRESSION_LEVEL = 1;
 
 	public byte[] compress(byte[] in) {
+		if (USE_ZOPFLI) {
+			return new CompressionZopfliZlib().compress(in);
+		}
 		if (in.length == 0) {
 			return null;
 		}

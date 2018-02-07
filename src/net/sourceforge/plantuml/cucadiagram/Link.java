@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -162,11 +167,15 @@ public class Link implements Hideable, Removeable {
 	}
 
 	public void goDashed() {
-		type = type.getDashed();
+		type = type.goDashed();
 	}
 
 	public void goDotted() {
-		type = type.getDotted();
+		type = type.goDotted();
+	}
+
+	public void goThickness(double thickness) {
+		type = type.goThickness(thickness);
 	}
 
 	private boolean hidden = false;
@@ -180,7 +189,7 @@ public class Link implements Hideable, Removeable {
 	}
 
 	public void goBold() {
-		type = type.getBold();
+		type = type.goBold();
 	}
 
 	public String getLabeldistance() {
@@ -369,7 +378,7 @@ public class Link implements Hideable, Removeable {
 	}
 
 	public boolean containsType(LeafType type) {
-		if (getEntity1().getEntityType() == type || getEntity2().getEntityType() == type) {
+		if (getEntity1().getLeafType() == type || getEntity2().getLeafType() == type) {
 			return true;
 		}
 		return false;

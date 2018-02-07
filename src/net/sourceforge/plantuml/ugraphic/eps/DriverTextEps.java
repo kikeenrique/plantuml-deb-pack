@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -38,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.TikzFontDistortion;
 import net.sourceforge.plantuml.eps.EpsGraphics;
 import net.sourceforge.plantuml.eps.EpsGraphicsMacroAndText;
 import net.sourceforge.plantuml.eps.EpsStrategy;
@@ -64,7 +70,7 @@ public class DriverTextEps implements UDriver<EpsGraphics> {
 	private final EpsStrategy strategy;
 
 	public DriverTextEps(ClipContainer clipContainer, EpsStrategy strategy) {
-		this.stringBounder = FileFormat.PNG.getDefaultStringBounder();
+		this.stringBounder = FileFormat.PNG.getDefaultStringBounder(TikzFontDistortion.getDefault());
 		this.clipContainer = clipContainer;
 		this.fontRenderContext = TextBlockUtils.getFontRenderContext();
 		this.strategy = strategy;

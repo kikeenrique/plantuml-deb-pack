@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -43,6 +48,7 @@ import javax.imageio.ImageIO;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.Log;
+import net.sourceforge.plantuml.SvgString;
 import net.sourceforge.plantuml.api.ImageDataSimple;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.graphic.GraphicStrings;
@@ -82,10 +88,10 @@ public class ScientificEquationSafe {
 
 	private ImageData dimSvg;
 
-	public String getSvg(Color foregroundColor, Color backgroundColor) {
+	public SvgString getSvg(double scale, Color foregroundColor, Color backgroundColor) {
 
 		try {
-			final String svg = equation.getSvg(foregroundColor, backgroundColor);
+			final SvgString svg = equation.getSvg(scale, foregroundColor, backgroundColor);
 			dimSvg = new ImageDataSimple(equation.getDimension());
 			return svg;
 		} catch (Exception e) {
@@ -93,11 +99,11 @@ public class ScientificEquationSafe {
 			final ImageBuilder imageBuilder = getRollback();
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {
-				dimSvg = imageBuilder.writeImageTOBEMOVED(new FileFormatOption(FileFormat.SVG), baos);
+				dimSvg = imageBuilder.writeImageTOBEMOVED(new FileFormatOption(FileFormat.SVG), 42, baos);
 			} catch (IOException e1) {
 				return null;
 			}
-			return new String(baos.toByteArray());
+			return new SvgString(new String(baos.toByteArray()), scale);
 		}
 	}
 
@@ -109,7 +115,7 @@ public class ScientificEquationSafe {
 			final ImageBuilder imageBuilder = getRollback();
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {
-				imageBuilder.writeImageTOBEMOVED(new FileFormatOption(FileFormat.PNG), baos);
+				imageBuilder.writeImageTOBEMOVED(new FileFormatOption(FileFormat.PNG), 42, baos);
 				return ImageIO.read(new ByteArrayInputStream(baos.toByteArray()));
 			} catch (IOException e1) {
 				return null;
@@ -133,15 +139,15 @@ public class ScientificEquationSafe {
 		return imageBuilder;
 	}
 
-	public ImageData export(OutputStream os, FileFormatOption fileFormat, float scale, Color foregroundColor, Color backgroundColor)
-			throws IOException {
+	public ImageData export(OutputStream os, FileFormatOption fileFormat, float scale, Color foregroundColor,
+			Color backgroundColor) throws IOException {
 		if (fileFormat.getFileFormat() == FileFormat.PNG) {
 			final BufferedImage image = getImage(scale, foregroundColor, backgroundColor);
 			ImageIO.write(image, "png", os);
 			return new ImageDataSimple(image.getWidth(), image.getHeight());
 		}
 		if (fileFormat.getFileFormat() == FileFormat.SVG) {
-			os.write(getSvg(foregroundColor, backgroundColor).getBytes());
+			os.write(getSvg(1, foregroundColor, backgroundColor).getSvg().getBytes());
 			return dimSvg;
 		}
 		return null;

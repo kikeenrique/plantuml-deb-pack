@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -36,15 +41,20 @@ public class TranscoderSmart implements Transcoder {
 
 	private final Transcoder oldOne = new TranscoderImpl(new AsciiEncoder(), new CompressionHuffman());
 	private final Transcoder zlib = new TranscoderImpl(new AsciiEncoder(), new CompressionZlib());
-	
-	
+	private final Transcoder brotli = new TranscoderImpl(new AsciiEncoder(), new CompressionBrotli());
+
 	public String decode(String code) throws IOException {
+		if (code.startsWith("0")) {
+			return brotli.decode(code.substring(1));
+		}
 		try {
 			return zlib.decode(code);
 		} catch (Exception ex) {
 			return oldOne.decode(code);
 		}
+		// return zlib.decode(code);
 	}
+
 	public String encode(String text) throws IOException {
 		return zlib.encode(text);
 	}

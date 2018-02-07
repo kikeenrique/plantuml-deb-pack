@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -30,6 +35,7 @@
  */
 package net.sourceforge.plantuml.svg;
 
+import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,7 +45,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
@@ -54,6 +59,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import net.sourceforge.plantuml.Log;
 import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.SvgString;
 import net.sourceforge.plantuml.code.Base64Coder;
 import net.sourceforge.plantuml.eps.EpsGraphics;
 import net.sourceforge.plantuml.graphic.HtmlColorGradient;
@@ -110,15 +116,16 @@ public class SvgGraphics {
 		}
 	}
 
-	public SvgGraphics(double scale, String hover) {
-		this(null, scale, hover);
+	public SvgGraphics(Dimension2D minDim, double scale, String hover, long seed) {
+		this(minDim, null, scale, hover, seed);
 	}
 
-	public SvgGraphics(String backcolor, double scale, String hover) {
+	public SvgGraphics(Dimension2D minDim, String backcolor, double scale, String hover, long seed) {
 		try {
 			this.scale = scale;
 			this.document = getDocument();
 			this.backcolor = backcolor;
+			ensureVisible(minDim.getWidth(), minDim.getHeight());
 
 			this.root = getRootNode();
 
@@ -127,10 +134,9 @@ public class SvgGraphics {
 			defs = simpleElement("defs");
 			gRoot = simpleElement("g");
 			strokeWidth = "" + scale;
-			final Random rnd = new Random();
-			this.filterUid = "b" + getRandomString(rnd);
-			this.shadowId = "f" + getRandomString(rnd);
-			this.gradientId = "g" + getRandomString(rnd);
+			this.filterUid = "b" + getSeed(seed);
+			this.shadowId = "f" + getSeed(seed);
+			this.gradientId = "g" + getSeed(seed);
 			if (hover != null) {
 				defs.appendChild(getPathHover(hover));
 			}
@@ -148,16 +154,8 @@ public class SvgGraphics {
 		return style;
 	}
 
-	private static String getRandomString(final Random rnd) {
-		String result = Integer.toString(Math.abs(rnd.nextInt()), 36);
-		while (result.length() < 6) {
-			result = "0" + result;
-		}
-		return result;
-	}
-
-	public static void main(String[] args) {
-		System.err.println(getRandomString(new Random()));
+	private static String getSeed(final long seed) {
+		return Long.toString(Math.abs(seed), 36);
 	}
 
 	private Element pendingBackground;
@@ -298,46 +296,50 @@ public class SvgGraphics {
 	}
 
 	public void closeLink() {
-		if (pendingLink2.size() > 0) {
-			final Element element = pendingLink2.get(0);
-			pendingLink2.remove(0);
-			getG().appendChild(element);
+		if (pendingAction.size() > 0) {
+			final Element element = pendingAction.get(0);
+			pendingAction.remove(0);
+			if (element.getFirstChild() != null) {
+				// Empty link
+				getG().appendChild(element);
+			}
 		}
 	}
 
-	private final List<Element> pendingLink2 = new ArrayList<Element>();
+	private final List<Element> pendingAction = new ArrayList<Element>();
 
 	public void openLink(String url, String title, String target) {
 		if (url == null) {
 			throw new IllegalArgumentException();
 		}
 
-		if (pendingLink2.size() > 0) {
+		if (pendingAction.size() > 0) {
 			closeLink();
 		}
 
-		pendingLink2.add(0, (Element) document.createElement("a"));
-		pendingLink2.get(0).setAttribute("target", target);
-		pendingLink2.get(0).setAttribute("xlink:href", url);
-		pendingLink2.get(0).setAttribute("xlink:type", "simple");
-		pendingLink2.get(0).setAttribute("xlink:actuate", "onRequest");
-		pendingLink2.get(0).setAttribute("xlink:show", "new");
+		pendingAction.add(0, (Element) document.createElement("a"));
+		pendingAction.get(0).setAttribute("target", target);
+		pendingAction.get(0).setAttribute("xlink:href", url);
+		pendingAction.get(0).setAttribute("xlink:type", "simple");
+		pendingAction.get(0).setAttribute("xlink:actuate", "onRequest");
+		pendingAction.get(0).setAttribute("xlink:show", "new");
 		if (title == null) {
-			pendingLink2.get(0).setAttribute("xlink:title", url);
+			pendingAction.get(0).setAttribute("xlink:title", url);
 		} else {
 			title = title.replaceAll("\\\\n", "\n");
-			pendingLink2.get(0).setAttribute("xlink:title", title);
+			pendingAction.get(0).setAttribute("xlink:title", title);
 		}
 	}
 
 	public final Element getG() {
-		if (pendingLink2.size() == 0) {
+		if (pendingAction.size() == 0) {
 			return gRoot;
 		}
-		return pendingLink2.get(0);
+		return pendingAction.get(0);
 	}
 
-	public void svgRectangle(double x, double y, double width, double height, double rx, double ry, double deltaShadow) {
+	public void svgRectangle(double x, double y, double width, double height, double rx, double ry, double deltaShadow,
+			String id) {
 		if (height <= 0 || width <= 0) {
 			throw new IllegalArgumentException();
 		}
@@ -349,7 +351,9 @@ public class SvgGraphics {
 				elt.setAttribute("rx", format(rx));
 				elt.setAttribute("ry", format(ry));
 			}
-
+			if (id != null) {
+				elt.setAttribute("id", id);
+			}
 			getG().appendChild(elt);
 		}
 		ensureVisible(x + width + 2 * deltaShadow, y + height + 2 * deltaShadow);
@@ -447,6 +451,10 @@ public class SvgGraphics {
 					fontFamily = "monospace";
 				}
 				elt.setAttribute("font-family", fontFamily);
+
+				if (fontFamily.equalsIgnoreCase("monospace") || fontFamily.equalsIgnoreCase("courier")) {
+					text = text.replace(' ', (char) 160);
+				}
 			}
 			if (textBackColor != null) {
 				final String backFilterId = getFilterBackColor(textBackColor);
@@ -606,8 +614,9 @@ public class SvgGraphics {
 				ensureVisible(coord[2] + x + 2 * deltaShadow, coord[3] + y + 2 * deltaShadow);
 				ensureVisible(coord[4] + x + 2 * deltaShadow, coord[5] + y + 2 * deltaShadow);
 			} else if (type == USegmentType.SEG_ARCTO) {
-				sb.append("A" + format(coord[0]) + "," + format(coord[1]) + " " + format(coord[2]) + ","
-						+ format(coord[3]) + " " + format(coord[4]) + "," + format(coord[5] + x) + ","
+				// A25,25 0,0 5,395,40
+				sb.append("A" + format(coord[0]) + "," + format(coord[1]) + " " + formatBoolean(coord[2]) + " "
+						+ formatBoolean(coord[3]) + " " + formatBoolean(coord[4]) + " " + format(coord[5] + x) + ","
 						+ format(coord[6] + y) + " ");
 				ensureVisible(coord[5] + coord[0] + x + 2 * deltaShadow, coord[6] + coord[1] + y + 2 * deltaShadow);
 			} else if (type == USegmentType.SEG_CLOSE) {
@@ -622,6 +631,10 @@ public class SvgGraphics {
 			elt.setAttribute("d", sb.toString());
 			elt.setAttribute("style", getStyle());
 			elt.setAttribute("fill", fill);
+			final String id = path.getComment();
+			if (id != null) {
+				elt.setAttribute("id", id);
+			}
 			addFilterShadowId(elt, deltaShadow);
 			getG().appendChild(elt);
 		}
@@ -674,6 +687,10 @@ public class SvgGraphics {
 		return EpsGraphics.format(x * scale);
 	}
 
+	private String formatBoolean(double x) {
+		return x == 0 ? "0" : "1";
+	}
+
 	public void fill(int windingRule) {
 		if (hidden == false) {
 			final Element elt = (Element) document.createElement("path");
@@ -702,22 +719,28 @@ public class SvgGraphics {
 
 	private final Map<String, String> images = new HashMap<String, String>();
 
-	public void svgImage(String svg, double x, double y) {
-		if (svg.startsWith("<svg>") == false) {
-			throw new IllegalArgumentException();
-		}
+	public void svgImage(SvgString image, double x, double y) {
 		if (hidden == false) {
+			String svg = manageScale(image);
 			final String pos = "<svg x=\"" + format(x) + "\" y=\"" + format(y) + "\">";
 			svg = pos + svg.substring(5);
-			// System.err.println("svg=" + svg);
-			// System.err.println("x=" + x);
-			// System.err.println("y=" + y);
 			final String key = "imagesvginlined" + images.size();
 			final Element elt = (Element) document.createElement(key);
 			getG().appendChild(elt);
 			images.put(key, svg);
 		}
 		ensureVisible(x, y);
+		ensureVisible(x + image.getData("width"), y + image.getData("height"));
+	}
+
+	private String manageScale(SvgString svg) {
+		final double svgScale = svg.getScale();
+		if (svgScale * scale == 1) {
+			return svg.getSvg();
+		}
+		final String s1 = "\\<g\\b";
+		final String s2 = "<g transform=\"scale(" + format(svgScale) + "," + format(svgScale) + ")\" ";
+		return svg.getSvg().replaceFirst(s1, s2);
 	}
 
 	private String toBase64(BufferedImage image) throws IOException {

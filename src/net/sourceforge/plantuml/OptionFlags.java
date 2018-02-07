@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -42,6 +47,8 @@ import net.sourceforge.plantuml.ugraphic.ImageBuilder;
 
 public class OptionFlags {
 
+	private static final OptionFlags singleton = new OptionFlags();
+
 	// static public final boolean PBBACK = false;
 	// static public boolean GRAPHVIZCACHE = false;
 	// static public final boolean TRACE_DOT = false;
@@ -69,24 +76,28 @@ public class OptionFlags {
 
 	public void reset() {
 		reset(false);
+		GraphvizUtils.setDotExecutable(null);
 	}
 
 	public final void setDotExecutable(String dotExecutable) {
 		GraphvizUtils.setDotExecutable(dotExecutable);
 	}
 
+	private OptionFlags() {
+		reset(true);
+	}
+
 	private void reset(boolean exit) {
 		// keepTmpFiles = false;
 		verbose = false;
-		metadata = false;
+		extractFromMetadata = false;
 		word = false;
 		systemExit = exit;
-		GraphvizUtils.setDotExecutable(null);
 		gui = false;
 		quiet = false;
 		checkDotError = false;
 		printFonts = false;
-		useSuggestEngine = true;
+		// useSuggestEngine = true;
 		// failOnError = false;
 		encodesprite = false;
 		// PIC_LINE = false;
@@ -96,30 +107,26 @@ public class OptionFlags {
 		return false;
 	}
 
-	private static final OptionFlags singleton = new OptionFlags();
-
 	// private boolean keepTmpFiles;
 	private boolean verbose;
-	private boolean metadata;
+	private boolean extractFromMetadata;
 	private boolean word;
 	private boolean systemExit;
 	private boolean gui;
 	private boolean quiet;
 	private boolean checkDotError;
 	private boolean printFonts;
-	private boolean useSuggestEngine;
+	// private boolean useSuggestEngine;
 	private boolean encodesprite;
 	private boolean dumpHtmlStats;
 	private boolean dumpStats;
 	private boolean loopStats;
 	private boolean overwrite;
 	private boolean enableStats = defaultForStats();
+	private boolean extractStdLib;
 	private String fileSeparator = "_";
+	private long timeoutMs = 15 * 60 * 1000L; // 15 minutes
 	private File logData;
-
-	private OptionFlags() {
-		reset(true);
-	}
 
 	public static OptionFlags getInstance() {
 		return singleton;
@@ -133,12 +140,12 @@ public class OptionFlags {
 		this.verbose = verbose;
 	}
 
-	public final boolean isMetadata() {
-		return metadata;
+	public final boolean isExtractFromMetadata() {
+		return extractFromMetadata;
 	}
 
-	public final void setMetadata(boolean metadata) {
-		this.metadata = metadata;
+	public final void setExtractFromMetadata(boolean extractFromMetadata) {
+		this.extractFromMetadata = extractFromMetadata;
 	}
 
 	public final boolean isWord() {
@@ -244,13 +251,17 @@ public class OptionFlags {
 		this.printFonts = printFonts;
 	}
 
-	public final boolean isUseSuggestEngine() {
-		return useSuggestEngine;
+	public final boolean isUseSuggestEngine2() {
+		return false;
 	}
 
-	public final void setUseSuggestEngine(boolean useSuggestEngine) {
-		this.useSuggestEngine = useSuggestEngine;
-	}
+	// public final boolean isUseSuggestEngine() {
+	// return useSuggestEngine;
+	// }
+	//
+	// public final void setUseSuggestEngine(boolean useSuggestEngine) {
+	// this.useSuggestEngine = useSuggestEngine;
+	// }
 
 	public final boolean isEncodesprite() {
 		return encodesprite;
@@ -305,7 +316,7 @@ public class OptionFlags {
 	}
 
 	private static boolean isTrue(final String value) {
-		return "on".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value) || "on".equalsIgnoreCase(value);
+		return "on".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
 	}
 
 	public boolean isEnableStats() {
@@ -316,4 +327,19 @@ public class OptionFlags {
 		this.enableStats = enableStats;
 	}
 
+	public final long getTimeoutMs() {
+		return timeoutMs;
+	}
+
+	public final void setTimeoutMs(long timeoutMs) {
+		this.timeoutMs = timeoutMs;
+	}
+
+	public void setExtractStdLib(boolean extractStdLib) {
+		this.extractStdLib = extractStdLib;
+	}
+
+	public boolean getExtractStdLib() {
+		return extractStdLib;
+	}
 }

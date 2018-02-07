@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -30,8 +35,6 @@
  */
 package net.sourceforge.plantuml.skin.bluemodern;
 
-import java.awt.Font;
-
 import net.sourceforge.plantuml.FontParam;
 import net.sourceforge.plantuml.ISkinParam;
 import net.sourceforge.plantuml.LineParam;
@@ -53,10 +56,10 @@ import net.sourceforge.plantuml.ugraphic.UFont;
 
 public class BlueModern implements Skin {
 
-	private final UFont bigFont = new UFont("SansSerif", Font.BOLD, 20);
-	private final UFont participantFont = new UFont("SansSerif", Font.PLAIN, 17);
-	private final UFont normalFont = new UFont("SansSerif", Font.PLAIN, 13);
-	private final UFont smallFont = new UFont("SansSerif", Font.BOLD, 11);
+	private final UFont bigFont = UFont.sansSerif(20).bold();
+	private final UFont participantFont = UFont.sansSerif(17);
+	private final UFont normalFont = UFont.sansSerif(13);
+	private final UFont smallFont = UFont.sansSerif(11).bold();
 
 	private final HtmlColor hyperlinkColor = HtmlColorUtils.BLUE;
 	private final boolean useUnderlineForHyperlink = true;

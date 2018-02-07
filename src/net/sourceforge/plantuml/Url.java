@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -49,11 +54,12 @@ public class Url implements EnsureVisible {
 		if (url.contains("{")) {
 			throw new IllegalArgumentException(url);
 		}
+		url = StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote(url, "\"");
 		this.url = url;
 		if (tooltip == null) {
 			this.tooltip = url;
 		} else {
-			this.tooltip = StringUtils.manageNewLine(tooltip);
+			this.tooltip = BackSlash.manageNewLine(tooltip);
 		}
 		if (label == null || label.length() == 0) {
 			this.label = url;
@@ -106,6 +112,10 @@ public class Url implements EnsureVisible {
 
 	public void ensureVisible(double x, double y) {
 		visible.ensureVisible(x, y);
+	}
+
+	public boolean hasData() {
+		return visible.hasData();
 	}
 
 	public static final Comparator<Url> SURFACE_COMPARATOR = new Comparator<Url>() {

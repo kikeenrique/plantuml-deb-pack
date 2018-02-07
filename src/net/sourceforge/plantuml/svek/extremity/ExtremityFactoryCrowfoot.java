@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -42,4 +47,10 @@ public class ExtremityFactoryCrowfoot extends AbstractExtremityFactory implement
 		final double ortho = atan2(p0, p2);
 		return new ExtremityCrowfoot(p1, ortho, side);
 	}
+
+	@Override
+	public UDrawable createUDrawable(Point2D p0, double angle, Side side) {
+		throw new UnsupportedOperationException(getClass().toString());
+	}
+
 }

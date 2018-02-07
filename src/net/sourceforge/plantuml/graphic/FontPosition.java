@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -53,7 +58,7 @@ public enum FontPosition {
 		if (size < 2) {
 			size = 2;
 		}
-		return font.deriveSize((float) size);
+		return font.withSize((float) size);
 	}
 
 	public String getHtmlTag() {

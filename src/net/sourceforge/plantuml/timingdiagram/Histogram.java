@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -45,9 +50,12 @@ import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColorUtils;
+import net.sourceforge.plantuml.graphic.InnerStrategy;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.SymbolContext;
 import net.sourceforge.plantuml.graphic.TextBlock;
+import net.sourceforge.plantuml.graphic.color.Colors;
+import net.sourceforge.plantuml.ugraphic.MinMax;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UStroke;
@@ -73,6 +81,9 @@ public class Histogram implements TimeDrawing {
 	public IntricatedPoint getTimeProjection(StringBounder stringBounder, TimeTick tick) {
 		final double x = ruler.getPosInPixel(tick);
 		final List<String> states = getStatesAt(tick);
+		if (states.size() == 0) {
+			return null;
+		}
 		if (states.size() == 1) {
 			final double y = getStateYFor(states.get(0));
 			return new IntricatedPoint(new Point2D.Double(x, y), new Point2D.Double(x, y));
@@ -89,6 +100,9 @@ public class Histogram implements TimeDrawing {
 	}
 
 	private List<String> getStatesAt(TimeTick tick) {
+		if (changes.size() == 0) {
+			return Collections.emptyList();
+		}
 		for (int i = 0; i < changes.size(); i++) {
 			if (changes.get(i).getWhen().compareTo(tick) == 0) {
 				if (i == 0 && initialState == null) {
@@ -131,8 +145,12 @@ public class Histogram implements TimeDrawing {
 	public void drawU(UGraphic ug) {
 		ug = getContext().apply(ug);
 		final UTranslate deltaY = new UTranslate(0, getFullDeltaY());
+		if (changes.size() == 0) {
+			return;
+		}
 		if (initialState != null) {
-			drawHLine(ug, getInitialPoint(), getInitialWidth());
+			final Point2D pt = getPoint(0);
+			drawHLine(ug, getInitialPoint(), getInitialWidth() + pt.getX());
 		}
 		for (int i = 0; i < changes.size() - 1; i++) {
 			final Point2D pt = getPoint(i);
@@ -209,7 +227,7 @@ public class Histogram implements TimeDrawing {
 		return display.create(getFontConfiguration(), HorizontalAlignment.LEFT, skinParam);
 	}
 
-	public double getHeight() {
+	public double getHeight(StringBounder stringBounder) {
 		return stepHeight * allStates.size() + 10;
 	}
 
@@ -236,15 +254,19 @@ public class Histogram implements TimeDrawing {
 				}
 				return new Dimension2DDouble(width, getFullDeltaY());
 			}
+			
+			public MinMax getMinMax(StringBounder stringBounder) {
+				throw new UnsupportedOperationException();
+			}
 
-			public Rectangle2D getInnerPosition(String member, StringBounder stringBounder) {
+			public Rectangle2D getInnerPosition(String member, StringBounder stringBounder, InnerStrategy strategy) {
 				return null;
 			}
 
 		};
 	}
 
-	public void setInitialState(String initialState) {
+	public void setInitialState(String initialState, Colors initialColors) {
 		this.initialState = initialState;
 		if (initialState != null) {
 			allStates.add(initialState);

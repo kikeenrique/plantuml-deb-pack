@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -594,6 +599,9 @@ class DrawableSetInitializer {
 		} else if (p.getType() == ParticipantType.ENTITY) {
 			headType = ComponentType.ENTITY_HEAD;
 			tailType = ComponentType.ENTITY_TAIL;
+		} else if (p.getType() == ParticipantType.QUEUE) {
+			headType = ComponentType.QUEUE_HEAD;
+			tailType = ComponentType.QUEUE_TAIL;
 		} else if (p.getType() == ParticipantType.DATABASE) {
 			headType = ComponentType.DATABASE_HEAD;
 			tailType = ComponentType.DATABASE_TAIL;

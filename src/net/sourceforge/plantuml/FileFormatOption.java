@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -46,17 +51,18 @@ public class FileFormatOption implements Serializable {
 
 	private final FileFormat fileFormat;
 	private final AffineTransform affineTransform;
-	private final boolean withMetadata;
+	private boolean withMetadata;
 	private final boolean useRedForError;
 	private final String svgLinkTarget;
 	private final String hoverColor;
+	private final TikzFontDistortion tikzFontDistortion;
 
 	public FileFormatOption(FileFormat fileFormat) {
-		this(fileFormat, null, true, false, "_top", false, null);
+		this(fileFormat, null, true, false, "_top", false, null, TikzFontDistortion.getDefault());
 	}
 
 	public StringBounder getDefaultStringBounder() {
-		return fileFormat.getDefaultStringBounder();
+		return fileFormat.getDefaultStringBounder(tikzFontDistortion);
 	}
 
 	public String getSvgLinkTarget() {
@@ -68,11 +74,11 @@ public class FileFormatOption implements Serializable {
 	}
 
 	public FileFormatOption(FileFormat fileFormat, boolean withMetadata) {
-		this(fileFormat, null, false, false, "_top", false, null);
+		this(fileFormat, null, false, false, "_top", false, null, TikzFontDistortion.getDefault());
 	}
 
 	private FileFormatOption(FileFormat fileFormat, AffineTransform at, boolean withMetadata, boolean useRedForError,
-			String svgLinkTarget, boolean debugsvek, String hoverColor) {
+			String svgLinkTarget, boolean debugsvek, String hoverColor, TikzFontDistortion tikzFontDistortion) {
 		this.hoverColor = hoverColor;
 		this.fileFormat = fileFormat;
 		this.affineTransform = at;
@@ -80,18 +86,30 @@ public class FileFormatOption implements Serializable {
 		this.useRedForError = useRedForError;
 		this.svgLinkTarget = svgLinkTarget;
 		this.debugsvek = debugsvek;
+		this.tikzFontDistortion = tikzFontDistortion;
+		if (tikzFontDistortion == null) {
+			throw new IllegalArgumentException();
+		}
 	}
 
 	public FileFormatOption withUseRedForError() {
-		return new FileFormatOption(fileFormat, affineTransform, withMetadata, true, svgLinkTarget, debugsvek, hoverColor);
+		return new FileFormatOption(fileFormat, affineTransform, withMetadata, true, svgLinkTarget, debugsvek,
+				hoverColor, tikzFontDistortion);
+	}
+
+	public FileFormatOption withTikzFontDistortion(TikzFontDistortion tikzFontDistortion) {
+		return new FileFormatOption(fileFormat, affineTransform, withMetadata, true, svgLinkTarget, debugsvek,
+				hoverColor, tikzFontDistortion);
 	}
 
 	public FileFormatOption withSvgLinkTarget(String svgLinkTarget) {
-		return new FileFormatOption(fileFormat, affineTransform, withMetadata, useRedForError, svgLinkTarget, debugsvek, hoverColor);
+		return new FileFormatOption(fileFormat, affineTransform, withMetadata, useRedForError, svgLinkTarget,
+				debugsvek, hoverColor, tikzFontDistortion);
 	}
 
 	public FileFormatOption withHoverColor(String hoverColor) {
-		return new FileFormatOption(fileFormat, affineTransform, withMetadata, useRedForError, svgLinkTarget, debugsvek, hoverColor);
+		return new FileFormatOption(fileFormat, affineTransform, withMetadata, useRedForError, svgLinkTarget,
+				debugsvek, hoverColor, tikzFontDistortion);
 	}
 
 	@Override
@@ -123,6 +141,14 @@ public class FileFormatOption implements Serializable {
 
 	public final String getHoverColor() {
 		return hoverColor;
+	}
+
+	public void hideMetadata() {
+		this.withMetadata = false;
+	}
+
+	public final TikzFontDistortion getTikzFontDistortion() {
+		return tikzFontDistortion;
 	}
 
 }

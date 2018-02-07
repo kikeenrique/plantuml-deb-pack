@@ -6,6 +6,11 @@
  *
  * Project Info:  http://plantuml.com
  * 
+ * If you like this project or if you find it useful, you can support us at:
+ * 
+ * http://plantuml.com/patreon (only 1$ per month!)
+ * http://plantuml.com/paypal
+ * 
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -30,7 +35,6 @@
  */
 package net.sourceforge.plantuml.project3;
 
-import java.awt.Font;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -43,6 +47,7 @@ import java.util.Map;
 
 import net.sourceforge.plantuml.AbstractPSystem;
 import net.sourceforge.plantuml.FileFormatOption;
+import net.sourceforge.plantuml.Scale;
 import net.sourceforge.plantuml.SpriteContainerEmpty;
 import net.sourceforge.plantuml.core.DiagramDescription;
 import net.sourceforge.plantuml.core.ImageData;
@@ -70,7 +75,7 @@ public class GanttDiagram extends AbstractPSystem implements Subject {
 	private final IHtmlColorSet colorSet = new HtmlColorSetSimple();
 	private GCalendar calendar;
 
-	private Instant min;
+	private final Instant min = new InstantDay(0);
 	private Instant max;
 
 	public DiagramDescription getDescription() {
@@ -78,21 +83,23 @@ public class GanttDiagram extends AbstractPSystem implements Subject {
 	}
 
 	@Override
-	protected ImageData exportDiagramNow(OutputStream os, int index, FileFormatOption fileFormatOption)
+	protected ImageData exportDiagramNow(OutputStream os, int index, FileFormatOption fileFormatOption, long seed)
 			throws IOException {
-		final double dpiFactor = 1;
 		final double margin = 10;
 
 		// public ImageBuilder(ColorMapper colorMapper, double dpiFactor, HtmlColor mybackcolor, String metadata,
 		// String warningOrError, double margin1, double margin2, Animation animation, boolean useHandwritten) {
 
 		sortTasks();
+		final Scale scale = getScale();
 
-		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), 1, null, "", "", 0, 0, null,
-				false);
-		imageBuilder.setUDrawable(getUDrawable());
+		final double dpiFactor = scale == null ? 1 : scale.getScale(100, 100);
+		final ImageBuilder imageBuilder = new ImageBuilder(new ColorMapperIdentity(), dpiFactor, null, "", "", 0, 0,
+				null, false);
+		final UDrawable result = getUDrawable();
+		imageBuilder.setUDrawable(result);
 
-		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, os);
+		return imageBuilder.writeImageTOBEMOVED(fileFormatOption, seed, os);
 	}
 
 	private void sortTasks() {
@@ -221,14 +228,14 @@ public class GanttDiagram extends AbstractPSystem implements Subject {
 	}
 
 	private void initMinMax() {
-		min = tasks.values().iterator().next().getStart();
+		// min = tasks.values().iterator().next().getStart();
 		max = tasks.values().iterator().next().getEnd();
 		for (Task task : tasks.values()) {
 			final Instant start = task.getStart();
 			final Instant end = task.getEnd();
-			if (min.compareTo(start) > 0) {
-				min = start;
-			}
+			// if (min.compareTo(start) > 0) {
+			// min = start;
+			// }
 			if (max.compareTo(end) < 0) {
 				max = end;
 			}
@@ -245,7 +252,7 @@ public class GanttDiagram extends AbstractPSystem implements Subject {
 	}
 
 	private FontConfiguration getFontConfiguration() {
-		final UFont font = new UFont("Serif", Font.PLAIN, 10);
+		final UFont font = UFont.serif(10);
 		return new FontConfiguration(font, HtmlColorUtils.LIGHT_GRAY, HtmlColorUtils.LIGHT_GRAY, false);
 	}
 
@@ -313,6 +320,10 @@ public class GanttDiagram extends AbstractPSystem implements Subject {
 
 	public void setStartingDate(DayAsDate start) {
 		this.calendar = new GCalendarSimple(start);
+	}
+
+	public DayAsDate getStartingDate() {
+		return this.calendar.getStartingDate();
 	}
 
 }
