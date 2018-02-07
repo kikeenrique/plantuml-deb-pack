@@ -4,6 +4,7 @@
       </description>
 
   <property name="src" location="../src"/>
+  <property name="stdlib" location="../stdlib"/>
   <property name="build" location="../build"/>
   <property name="dist"  location="../dist"/>
 
@@ -49,7 +50,7 @@
       </fileset>
     </copy>
     <copy todir="${build}/stdlib">
-      <fileset dir="${src}/stdlib">
+      <fileset dir="${stdlib}">
         <include name="**/*.repx" />
       </fileset>
     </copy>
