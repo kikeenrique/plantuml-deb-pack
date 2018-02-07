@@ -9,7 +9,7 @@ Homepage: http://plantuml.sourceforge.net
 
 Package: plantuml
 Architecture: all
-Depends: default-jre , graphviz, ${misc:Depends}
+Depends: default-jre , graphviz, libavalon-framework-java, libbatik-java, libcommons-io-java, libcommons-logging-java, libfop-java, libjlatexmath-java, libxmlgraphics-commons-java, ${misc:Depends}
 Description: Program to generate UML diagram from a text description
  PlantUML is a program allowing to draw UML diagrams, using a simple
  and human readable text description. It is extremely useful for code
