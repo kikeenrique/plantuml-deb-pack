@@ -37,38 +37,44 @@ package net.sourceforge.plantuml.project3;
 
 import net.sourceforge.plantuml.Direction;
 import net.sourceforge.plantuml.SpriteContainerEmpty;
+import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.HtmlColorUtils;
 import net.sourceforge.plantuml.graphic.TextBlock;
-import net.sourceforge.plantuml.graphic.UDrawable;
-import net.sourceforge.plantuml.ugraphic.UChangeBackColor;
+import net.sourceforge.plantuml.graphic.TextBlockUtils;
 import net.sourceforge.plantuml.ugraphic.UChangeColor;
 import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
-import net.sourceforge.plantuml.ugraphic.UPolygon;
-import net.sourceforge.plantuml.ugraphic.URectangle;
-import net.sourceforge.plantuml.ugraphic.UShape;
+import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
 
-public class TaskDraw implements UDrawable {
+public class TaskDrawSeparator implements TaskDraw {
 
-	private final Task task;
 	private final TimeScale timeScale;
 	private final double y;
-	private ComplementColors colors;
+	private final Instant min;
+	private final Instant max;
+	private final String name;
 
-	private final double margin = 2;
-
-	public TaskDraw(Task task, TimeScale timeScale, double y) {
+	public TaskDrawSeparator(TaskSeparator task, TimeScale timeScale, double y, Instant min, Instant max) {
+		this.name = task.getName();
 		this.y = y;
-		this.task = task;
 		this.timeScale = timeScale;
+		this.min = min;
+		this.max = max;
 	}
 
-	public TextBlock getTitle() {
-		return task.getCode().getSimpleDisplay()
-				.create(getFontConfiguration(), HorizontalAlignment.LEFT, new SpriteContainerEmpty());
+	public void drawTitle(UGraphic ug) {
+		getTitle().drawU(ug.apply(new UTranslate(MARGIN1, 0)));
+	}
+
+	private TextBlock getTitle() {
+		if (name == null) {
+			return TextBlockUtils.empty(0, 0);
+		}
+		return Display.getWithNewlines(this.name).create(getFontConfiguration(), HorizontalAlignment.LEFT,
+				new SpriteContainerEmpty());
 	}
 
 	private FontConfiguration getFontConfiguration() {
@@ -76,50 +82,26 @@ public class TaskDraw implements UDrawable {
 		return new FontConfiguration(font, HtmlColorUtils.BLACK, HtmlColorUtils.BLACK, false);
 	}
 
+	private final static double MARGIN1 = 10;
+	private final static double MARGIN2 = 2;
+
 	public void drawU(UGraphic ug) {
-		final double start = timeScale.getStartingPosition(task.getStart());
-		final UShape rect = getShape();
+		final double widthTitle = getTitle().calculateDimension(ug.getStringBounder()).getWidth();
+		final double start = timeScale.getStartingPosition(min) + widthTitle;
+		final double end = timeScale.getEndingPosition(max);
 
-		ug = applyColors(ug);
-		ug.apply(new UTranslate(start + margin, margin)).draw(rect);
-	}
+		ug = ug.apply(new UChangeColor(HtmlColorUtils.BLACK));
+		ug = ug.apply(new UTranslate(0, getHeight() / 2));
 
-	private UGraphic applyColors(UGraphic ug) {
-		if (colors != null && colors.isOk()) {
-			return colors.apply(ug);
+		if (widthTitle == 0) {
+			final ULine line = new ULine(end - start, 0);
+			ug.draw(line);
+		} else {
+			final ULine line1 = new ULine(MARGIN1 - MARGIN2, 0);
+			final ULine line2 = new ULine(end - start - MARGIN1 - MARGIN2, 0);
+			ug.draw(line1);
+			ug.apply(new UTranslate(widthTitle + MARGIN1 + MARGIN2, 0)).draw(line2);
 		}
-		if (isDiamond()) {
-			return ug.apply(new UChangeColor(HtmlColorUtils.BLACK)).apply(new UChangeBackColor(HtmlColorUtils.BLACK));
-		}
-		return ug.apply(new UChangeColor(HtmlColorUtils.BLUE)).apply(new UChangeBackColor(HtmlColorUtils.COL_84BE84));
-	}
-
-	private UShape getShape() {
-		if (isDiamond()) {
-			return getDiamond();
-		}
-		final Instant instantStart = task.getStart();
-		final Instant instantEnd = task.getEnd();
-		final double start = timeScale.getStartingPosition(instantStart);
-		final double end = timeScale.getStartingPosition(instantEnd.increment());
-		return new URectangle(end - start - 2 * margin, getHeight() - 2 * margin, 8, 8);
-	}
-
-	private boolean isDiamond() {
-		final Instant instantStart = task.getStart();
-		final Instant instantEnd = task.getEnd();
-		return instantStart.compareTo(instantEnd) == 0;
-	}
-
-	private UShape getDiamond() {
-		final double h = getHeight() - 2 * margin;
-		final UPolygon result = new UPolygon();
-		result.addPoint(h / 2, 0);
-		result.addPoint(h, h / 2);
-		result.addPoint(h / 2, h);
-		result.addPoint(0, h / 2);
-		return result;
-		// return result.translate(2, 2);
 	}
 
 	public double getHeight() {
@@ -141,6 +123,6 @@ public class TaskDraw implements UDrawable {
 	}
 
 	public void setColors(ComplementColors colors) {
-		this.colors = colors;
 	}
+
 }
