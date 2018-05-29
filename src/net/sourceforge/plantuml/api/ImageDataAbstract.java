@@ -30,30 +30,44 @@
  *
  *
  * Original Author:  Arnaud Roques
- * 
+ *
  *
  */
-package net.sourceforge.plantuml.command;
+package net.sourceforge.plantuml.api;
 
-import java.util.List;
+import java.awt.geom.Dimension2D;
 
-import net.sourceforge.plantuml.UmlDiagram;
-import net.sourceforge.plantuml.cucadiagram.Display;
-import net.sourceforge.plantuml.cucadiagram.DisplayPositionned;
-import net.sourceforge.plantuml.graphic.HorizontalAlignment;
-import net.sourceforge.plantuml.graphic.VerticalAlignment;
+import net.sourceforge.plantuml.core.ImageData;
 
-public class CommandCaption extends SingleLineCommand<UmlDiagram> {
+public abstract class ImageDataAbstract implements ImageData {
 
-	public CommandCaption() {
-		super("(?i)^caption(?:[%s]*:[%s]*|[%s]+)(.*[\\p{L}0-9_.].*)$");
+	private final int width;
+	private final int height;
+	private int status;
+
+	public ImageDataAbstract(int width, int height) {
+		this.width = width;
+		this.height = height;
 	}
 
-	@Override
-	protected CommandExecutionResult executeArg(UmlDiagram diagram, List<String> arg) {
-		diagram.setCaption(DisplayPositionned.single(Display.getWithNewlines(arg.get(0)), HorizontalAlignment.CENTER,
-				VerticalAlignment.BOTTOM));
-		return CommandExecutionResult.ok();
+	public ImageDataAbstract(Dimension2D dim) {
+		this((int) dim.getWidth(), (int) dim.getHeight());
+	}
+
+	public final int getWidth() {
+		return width;
+	}
+
+	public final int getHeight() {
+		return height;
+	}
+
+	public final int getStatus() {
+		return status;
+	}
+
+	public final void setStatus(int status) {
+		this.status = status;
 	}
 
 }
