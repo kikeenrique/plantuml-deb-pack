@@ -4,11 +4,6 @@ image: debian
 
 pipelines:
   default:
-    - step:
-        script:
-          - echo "Runs on branches that don't have specific pipeline."
-  branches: # Container for all branch-specific pipelines.
-    master:
       - step:
           script:
             - echo "Runs only on the master branch."
