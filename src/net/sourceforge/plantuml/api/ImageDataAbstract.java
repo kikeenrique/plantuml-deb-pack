@@ -39,40 +39,35 @@ import java.awt.geom.Dimension2D;
 
 import net.sourceforge.plantuml.core.ImageData;
 
-public class ImageDataSimple extends ImageDataAbstract {
+public abstract class ImageDataAbstract implements ImageData {
 
-	public ImageDataSimple(int width, int height) {
-		super(width, height);
+	private final int width;
+	private final int height;
+	private int status;
+
+	public ImageDataAbstract(int width, int height) {
+		this.width = width;
+		this.height = height;
 	}
 
-	public ImageDataSimple(Dimension2D dim) {
-		super(dim);
+	public ImageDataAbstract(Dimension2D dim) {
+		this((int) dim.getWidth(), (int) dim.getHeight());
 	}
 
-	private ImageDataSimple() {
-		this(0, 0);
+	public final int getWidth() {
+		return width;
 	}
 
-	public boolean containsCMapData() {
-		return false;
+	public final int getHeight() {
+		return height;
 	}
 
-	public String getCMapData(String nameId) {
-		throw new UnsupportedOperationException();
+	public final int getStatus() {
+		return status;
 	}
 
-	public String getWarningOrError() {
-		return null;
-	}
-
-	public static ImageData error() {
-		final ImageDataSimple result = new ImageDataSimple();
-		result.setStatus(503);
-		return result;
-	}
-
-	public static ImageData ok() {
-		return new ImageDataSimple();
+	public final void setStatus(int status) {
+		this.status = status;
 	}
 
 }
