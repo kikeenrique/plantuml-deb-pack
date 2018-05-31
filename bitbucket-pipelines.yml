@@ -9,7 +9,7 @@ pipelines:
             - echo "Runs only on the master branch."
             - apt-get clean
             - apt-get update
-            - apt-get -y --no-install-recommends install ant ant-contrib javacc default-jdk dpkg-dev cdbs debhelper build-essential curl
+            - apt-get -y --no-install-recommends install ant ant-contrib javacc default-jdk dpkg-dev cdbs debhelper build-essential curl libfop-java libbatik-java
             - dpkg-buildpackage -j2 -us -uc -b
             - pwd && ls -laR ../
             - curl -X POST "https://${BB_AUTH_STRING_SEC}@api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"`ls ../plantuml*.deb`"
