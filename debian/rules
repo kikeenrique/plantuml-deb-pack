@@ -1,16 +1,15 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
 
-export DH_VERBOSE=1
+%:
+	dh $@
 
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/class/ant.mk
+override_dh_auto_clean:
+	rm -rf build dist
 
-JAVA_HOME := /usr/lib/jvm/default-java
-DEB_ANT_BUILDFILE := debian/build.xml
+override_dh_auto_build:
+	dh_auto_build -- dist
 
-build:
-	cp debian/plantuml.sh dist/plantuml
+override_dh_auto_install:
+	install -m 755 $(CURDIR)/debian/plantuml.sh $(CURDIR)/debian/plantuml/usr/bin/plantuml
 
-clean::
-	-$(DEB_ANT_INVOKE) $(DEB_ANT_CLEAN_TARGET)
+.PHONY: override_dh_auto_clean override_dh_auto_build override_dh_auto_install
