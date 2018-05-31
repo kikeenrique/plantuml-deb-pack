@@ -1,2 +1,1 @@
-dist/plantuml.jar usr/share/plantuml
-dist/plantuml usr/bin
+plantuml.jar usr/share/plantuml

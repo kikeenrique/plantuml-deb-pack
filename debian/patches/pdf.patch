@@ -1,0 +1,16 @@
+Subject: Specify Class-Path to the libraries needed to support PDF (#807928).
+Author: Andrew Shadura <andrewsh@debian.org>
+Forwarded: not-needed
+Last-Update: 2017-09-16 
+
+--- a/build.xml
++++ b/build.xml
+@@ -64,7 +64,7 @@
+ 		<jar jarfile="plantuml.jar" basedir="build">
+ 			<manifest>
+ 				<attribute name="Main-Class" value="net.sourceforge.plantuml.Run" />
+-				<attribute name="Class-Path" value="batik-all-1.7.jar jlatexmath-minimal-1.0.3.jar jlm_cyrillic.jar jlm_greek.jar vizjs.jar j2v8_win32_x86_64-3.1.6.jar j2v8_linux_x86_64-3.1.6.jar j2v8_macosx_x86_64-3.1.6.jar" />
++				<attribute name="Class-Path" value="/usr/share/java/batik-all.jar /usr/share/java/fop.jar /usr/share/java/jlatexmath.jar" />
+ 			</manifest>
+ 		</jar>
+ 		<delete dir="build" />
