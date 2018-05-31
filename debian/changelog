@@ -1,4 +1,10 @@
-plantuml (1.2018.5) UNRELEASED; urgency=low
+plantuml (1.2018.6) UNRELEASED; urgency=low
+
+  * New upstream version
+
+ -- Enrique <bitbucket@lemambo.com>  Wed, 31 May 2018 00:30:03 +0100
+
+plantuml (1.2018.5) RELEASED; urgency=low
 
   * New upstream version
   * Import debian files from official Debian package.
