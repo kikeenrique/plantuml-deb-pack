@@ -9,4 +9,4 @@
 ### Who do I talk to? ###
 
 * Repo owner or admin
-* Development for plantuml can be checked out in http://plantuml.sourceforge.net/
+* Development for plantuml can be checked out in http://plantuml.com/
