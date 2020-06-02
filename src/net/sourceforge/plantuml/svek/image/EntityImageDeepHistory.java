@@ -30,59 +30,18 @@
  *
  *
  * Original Author:  Arnaud Roques
- *
+ * Contribution   :  Serge Wenger
  *
  */
-package net.sourceforge.plantuml.classdiagram.command;
+package net.sourceforge.plantuml.svek.image;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.StringTokenizer;
+import net.sourceforge.plantuml.ISkinParam;
+import net.sourceforge.plantuml.cucadiagram.ILeaf;
 
-import net.sourceforge.plantuml.StringUtils;
-import net.sourceforge.plantuml.cucadiagram.LeafType;
+public class EntityImageDeepHistory extends EntityImagePseudoState {
 
-class JavaClass {
+	public EntityImageDeepHistory(ILeaf entity, ISkinParam skinParam) {
+		super(entity, skinParam, "H*");
 
-	private final String name;
-	private final String javaPackage;
-	private final List<String> parents = new ArrayList<String>();
-	private final LeafType type;
-	private final LeafType parentType;
-
-	public JavaClass(String javaPackage, String name, String p, LeafType type, LeafType parentType) {
-		this.name = name;
-		this.javaPackage = javaPackage;
-		if (p == null) {
-			p = "";
-		}
-		final StringTokenizer st = new StringTokenizer(StringUtils.trin(p), ",");
-		while (st.hasMoreTokens()) {
-			this.parents.add(StringUtils.trin(st.nextToken()).replaceAll("\\<.*", ""));
-		}
-		this.type = type;
-		this.parentType = parentType;
 	}
-
-	public final String getName() {
-		return name;
-	}
-
-	public final LeafType getType() {
-		return type;
-	}
-
-	public final List<String> getParents() {
-		return Collections.unmodifiableList(parents);
-	}
-
-	public final LeafType getParentType() {
-		return parentType;
-	}
-
-	public final String getJavaPackage() {
-		return javaPackage;
-	}
-
 }
