@@ -35,7 +35,7 @@
 
     <groupId>net.sourceforge.plantuml</groupId>
     <artifactId>plantuml</artifactId>
-    <version>1.2020.27-SNAPSHOT</version>
+    <version>1.2021.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>PlantUML</name>
@@ -161,6 +161,9 @@
                         <manifest>
                             <mainClass>net.sourceforge.plantuml.Run</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <Automatic-Module-Name>net.sourceforge.plantuml</Automatic-Module-Name>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
