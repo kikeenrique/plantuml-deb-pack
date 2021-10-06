@@ -37,9 +37,12 @@ package net.sourceforge.plantuml.ugraphic;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import net.sourceforge.plantuml.graphic.SpecialText;
+import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
+import net.sourceforge.plantuml.ugraphic.color.HColor;
 
 public abstract class AbstractUGraphic<O> extends AbstractCommonUGraphic {
 
@@ -47,8 +50,8 @@ public abstract class AbstractUGraphic<O> extends AbstractCommonUGraphic {
 
 	private final Map<Class<? extends UShape>, UDriver<O>> drivers = new HashMap<Class<? extends UShape>, UDriver<O>>();
 
-	public AbstractUGraphic(ColorMapper colorMapper, O graphic) {
-		super(colorMapper);
+	public AbstractUGraphic(HColor defaultBackground, ColorMapper colorMapper, StringBounder stringBounder, O graphic) {
+		super(Objects.requireNonNull(defaultBackground), colorMapper, stringBounder);
 		this.graphic = graphic;
 	}
 
@@ -90,13 +93,7 @@ public abstract class AbstractUGraphic<O> extends AbstractCommonUGraphic {
 			return;
 		}
 		beforeDraw();
-		if (shape instanceof Scalable) {
-			final double scale = getParam().getScale();
-			shape = ((Scalable) shape).getScaled(scale);
-			driver.draw(shape, getTranslateX(), getTranslateY(), getColorMapper(), getParam(), graphic);
-		} else {
-			driver.draw(shape, getTranslateX(), getTranslateY(), getColorMapper(), getParam(), graphic);
-		}
+		driver.draw(shape, getTranslateX(), getTranslateY(), getColorMapper(), getParam(), graphic);
 		afterDraw();
 	}
 

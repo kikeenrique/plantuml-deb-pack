@@ -103,7 +103,7 @@ public class VCompactFactory implements FtileFactory {
 		Style style = null;
 		if (UseStyle.useBetaStyle()) {
 			style = getDefaultStyleDefinitionCircle().getMergedStyle(skinParam.getCurrentStyleBuilder());
-			color = style.value(PName.LineColor).asColor(skinParam.getIHtmlColorSet());
+			color = style.value(PName.LineColor).asColor(skinParam.getThemeStyle(), skinParam.getIHtmlColorSet());
 		} else {
 			color = rose.getHtmlColor(skinParam, ColorParam.activityStart);
 		}
@@ -111,15 +111,20 @@ public class VCompactFactory implements FtileFactory {
 	}
 
 	public Ftile stop(Swimlane swimlane) {
-		final HColor color;
+		final HColor borderColor;
 		Style style = null;
+		final HColor backgroundColor;
 		if (UseStyle.useBetaStyle()) {
 			style = getDefaultStyleDefinitionCircle().getMergedStyle(skinParam.getCurrentStyleBuilder());
-			color = style.value(PName.LineColor).asColor(skinParam.getIHtmlColorSet());
+			borderColor = style.value(PName.LineColor).asColor(skinParam.getThemeStyle(), skinParam.getIHtmlColorSet());
+			// backgroundColor =
+			// style.value(PName.BackGroundColor).asColor(skinParam.getIHtmlColorSet());
+			backgroundColor = skinParam.getBackgroundColor(false);
 		} else {
-			color = rose.getHtmlColor(skinParam, ColorParam.activityEnd);
+			borderColor = rose.getHtmlColor(skinParam, ColorParam.activityEnd);
+			backgroundColor = skinParam.getBackgroundColor(false);
 		}
-		return new FtileCircleStop(skinParam(), color, swimlane, style);
+		return new FtileCircleStop(skinParam(), backgroundColor, borderColor, swimlane, style);
 	}
 
 	public Ftile spot(Swimlane swimlane, String spot, HColor color) {
@@ -130,15 +135,20 @@ public class VCompactFactory implements FtileFactory {
 	}
 
 	public Ftile end(Swimlane swimlane) {
-		final HColor color;
+		final HColor borderColor;
 		Style style = null;
+		final HColor backgroundColor;
 		if (UseStyle.useBetaStyle()) {
 			style = getDefaultStyleDefinitionCircle().getMergedStyle(skinParam.getCurrentStyleBuilder());
-			color = style.value(PName.LineColor).asColor(skinParam.getIHtmlColorSet());
+			borderColor = style.value(PName.LineColor).asColor(skinParam.getThemeStyle(), skinParam.getIHtmlColorSet());
+			// backgroundColor =
+			// style.value(PName.BackGroundColor).asColor(skinParam.getIHtmlColorSet());
+			backgroundColor = skinParam.getBackgroundColor(false);
 		} else {
-			color = rose.getHtmlColor(skinParam, ColorParam.activityEnd);
+			borderColor = rose.getHtmlColor(skinParam, ColorParam.activityEnd);
+			backgroundColor = skinParam.getBackgroundColor(false);
 		}
-		return new FtileCircleEnd(skinParam(), color, swimlane, style);
+		return new FtileCircleEnd(skinParam(), backgroundColor, borderColor, swimlane, style);
 	}
 
 	public Ftile activity(Display label, Swimlane swimlane, BoxStyle boxStyle, Colors colors, Stereotype stereotype) {
@@ -171,7 +181,7 @@ public class VCompactFactory implements FtileFactory {
 
 	public Ftile createIf(Swimlane swimlane, List<Branch> thens, Branch elseBranch, LinkRendering afterEndwhile,
 			LinkRendering topInlinkRendering, Url url) {
-		final List<Ftile> ftiles = new ArrayList<Ftile>();
+		final List<Ftile> ftiles = new ArrayList<>();
 		for (Branch branch : thens) {
 			ftiles.add(branch.getFtile());
 		}
@@ -181,7 +191,7 @@ public class VCompactFactory implements FtileFactory {
 
 	public Ftile createSwitch(Swimlane swimlane, List<Branch> branches, LinkRendering afterEndwhile,
 			LinkRendering topInlinkRendering, Display labelTest) {
-		final List<Ftile> ftiles = new ArrayList<Ftile>();
+		final List<Ftile> ftiles = new ArrayList<>();
 		for (Branch branch : branches) {
 			ftiles.add(branch.getFtile());
 		}

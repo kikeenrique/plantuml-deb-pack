@@ -45,6 +45,7 @@ import net.sourceforge.plantuml.command.note.sequence.FactorySequenceNoteAcrossC
 import net.sourceforge.plantuml.command.note.sequence.FactorySequenceNoteCommand;
 import net.sourceforge.plantuml.command.note.sequence.FactorySequenceNoteOnArrowCommand;
 import net.sourceforge.plantuml.command.note.sequence.FactorySequenceNoteOverSeveralCommand;
+import net.sourceforge.plantuml.core.UmlSource;
 import net.sourceforge.plantuml.sequencediagram.command.CommandActivate;
 import net.sourceforge.plantuml.sequencediagram.command.CommandActivate2;
 import net.sourceforge.plantuml.sequencediagram.command.CommandArrow;
@@ -79,21 +80,15 @@ import net.sourceforge.plantuml.sequencediagram.command.CommandUrl;
 
 public class SequenceDiagramFactory extends PSystemCommandFactory {
 
-	private final ISkinSimple skinParam;
-
-	public SequenceDiagramFactory(ISkinSimple skinParam) {
-		this.skinParam = skinParam;
-	}
-
 	@Override
-	public SequenceDiagram createEmptyDiagram() {
-		return new SequenceDiagram(skinParam);
+	public SequenceDiagram createEmptyDiagram(UmlSource source, ISkinSimple skinParam) {
+		return new SequenceDiagram(source, skinParam);
 	}
 
 	@Override
 	protected List<Command> createCommands() {
 
-		final List<Command> cmds = new ArrayList<Command>();
+		final List<Command> cmds = new ArrayList<>();
 
 		addCommonCommands1(cmds);
 

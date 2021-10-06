@@ -43,6 +43,7 @@ import java.util.List;
 import net.sourceforge.plantuml.AbstractPSystem;
 import net.sourceforge.plantuml.ErrorUml;
 import net.sourceforge.plantuml.ErrorUmlType;
+import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.LineLocation;
 import net.sourceforge.plantuml.StringLocated;
 import net.sourceforge.plantuml.classdiagram.command.CommandHideShowByGender;
@@ -71,7 +72,8 @@ public abstract class PSystemCommandFactory extends PSystemAbstractFactory {
 		super(type);
 	}
 
-	final public Diagram createSystem(UmlSource source) {
+	@Override
+	final public Diagram createSystem(UmlSource source, ISkinSimple skinParam) {
 		final IteratorCounter2 it = source.iterator2();
 		final StringLocated startLine = it.next();
 		if (StartUtils.isArobaseStartDiagram(startLine.getString()) == false) {
@@ -84,7 +86,7 @@ public abstract class PSystemCommandFactory extends PSystemAbstractFactory {
 			}
 			return buildEmptyError(source, startLine.getLocation(), it.getTrace());
 		}
-		AbstractPSystem sys = createEmptyDiagram();
+		AbstractPSystem sys = createEmptyDiagram(source, skinParam);
 
 		while (it.hasNext()) {
 			if (StartUtils.isArobaseEndDiagram(it.peek().getString())) {
@@ -104,7 +106,6 @@ public abstract class PSystemCommandFactory extends PSystemAbstractFactory {
 				if (sys.isOk() == false) {
 					return null;
 				}
-				sys.setSource(source);
 				return sys;
 			}
 			sys = executeFewLines(sys, source, it);
@@ -112,7 +113,6 @@ public abstract class PSystemCommandFactory extends PSystemAbstractFactory {
 				return sys;
 			}
 		}
-		sys.setSource(source);
 		return sys;
 
 	}
@@ -120,15 +120,16 @@ public abstract class PSystemCommandFactory extends PSystemAbstractFactory {
 	private AbstractPSystem executeFewLines(AbstractPSystem sys, UmlSource source, final IteratorCounter2 it) {
 		final Step step = getCandidate(it);
 		if (step == null) {
-			final ErrorUml err = new ErrorUml(ErrorUmlType.SYNTAX_ERROR, "Syntax Error?", it.peek().getLocation());
+			final ErrorUml err = new ErrorUml(ErrorUmlType.SYNTAX_ERROR, "Syntax Error?", 0, it.peek().getLocation());
 			it.next();
 			return PSystemErrorUtils.buildV2(source, err, null, it.getTrace());
 		}
 
 		final CommandExecutionResult result = sys.executeCommand(step.command, step.blocLines);
 		if (result.isOk() == false) {
-			final ErrorUml err = new ErrorUml(ErrorUmlType.EXECUTION_ERROR, result.getError(),
-					((StringLocated) step.blocLines.getFirst()).getLocation());
+			final LineLocation location = ((StringLocated) step.blocLines.getFirst()).getLocation();
+			final ErrorUml err = new ErrorUml(ErrorUmlType.EXECUTION_ERROR, result.getError(), result.getScore(),
+					location);
 			sys = PSystemErrorUtils.buildV2(source, err, result.getDebugLines(), it.getTrace());
 		}
 		if (result.getNewDiagram() != null) {
@@ -213,7 +214,7 @@ public abstract class PSystemCommandFactory extends PSystemAbstractFactory {
 
 	protected abstract List<Command> createCommands();
 
-	public abstract AbstractPSystem createEmptyDiagram();
+	public abstract AbstractPSystem createEmptyDiagram(UmlSource source, ISkinSimple skinParam);
 
 	final protected void addCommonCommands1(List<Command> cmds) {
 		addTitleCommands(cmds);
@@ -224,11 +225,13 @@ public abstract class PSystemCommandFactory extends PSystemAbstractFactory {
 	final protected void addCommonCommands2(List<Command> cmds) {
 		cmds.add(new CommandNope());
 		cmds.add(new CommandPragma());
+		cmds.add(new CommandAssumeTransparent());
 
 		cmds.add(new CommandSkinParam());
 		cmds.add(new CommandSkinParamMultilines());
 		cmds.add(new CommandSkin());
 		cmds.add(new CommandMinwidth());
+		cmds.add(new CommandPage());
 		cmds.add(new CommandRotate());
 		cmds.add(new CommandScale());
 		cmds.add(new CommandScaleWidthAndHeight());
@@ -272,7 +275,7 @@ public abstract class PSystemCommandFactory extends PSystemAbstractFactory {
 	}
 
 	final public List<String> getDescription() {
-		final List<String> result = new ArrayList<String>();
+		final List<String> result = new ArrayList<>();
 		for (Command cmd : createCommands()) {
 			result.addAll(Arrays.asList(cmd.getDescription()));
 		}

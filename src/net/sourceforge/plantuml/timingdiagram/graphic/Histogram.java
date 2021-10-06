@@ -67,8 +67,8 @@ import net.sourceforge.plantuml.ugraphic.color.HColorUtils;
 
 public class Histogram implements PDrawing {
 
-	private final List<ChangeState> changes = new ArrayList<ChangeState>();
-	private final List<TimeConstraint> constraints = new ArrayList<TimeConstraint>();
+	private final List<ChangeState> changes = new ArrayList<>();
+	private final List<TimeConstraint> constraints = new ArrayList<>();
 
 	private List<String> allStates;
 
@@ -84,7 +84,7 @@ public class Histogram implements PDrawing {
 		this.suggestedHeight = suggestedHeight;
 		this.ruler = ruler;
 		this.skinParam = skinParam;
-		this.allStates = new ArrayList<String>(someStates);
+		this.allStates = new ArrayList<>(someStates);
 		this.compact = compact;
 		this.title = title;
 		Collections.reverse(allStates);
@@ -347,16 +347,14 @@ public class Histogram implements PDrawing {
 
 	private void drawConstraints(UGraphic ug) {
 		for (TimeConstraint constraint : constraints) {
-			final String state1 = last(getStatesAt(constraint.getTick1()));
-			final String state2 = getStatesAt(constraint.getTick2()).get(0);
-			final double y1 = yOfState(state1);
-			final double y2 = yOfState(state2);
-			constraint.drawU(ug.apply(UTranslate.dy(y1)), ruler);
+			double y = yOfState(constraint.getTick1());
+			for (ChangeState change : changes) {
+				if (constraint.containsStrict(change.getWhen())) {
+					y = Math.min(y, yOfState(change.getWhen()));
+				}
+			}
+			constraint.drawU(ug.apply(UTranslate.dy(y)), ruler);
 		}
-	}
-
-	private static String last(List<String> list) {
-		return list.get(list.size() - 1);
 	}
 
 	private Point2D.Double getInitialPoint() {
@@ -378,6 +376,14 @@ public class Histogram implements PDrawing {
 	private double yOfState(String state) {
 		final int nb = allStates.size() - 1 - allStates.indexOf(state);
 		return stepHeight() * nb;
+	}
+
+	private double yOfState(TimeTick when) {
+		return yOfState(last(getStatesAt(when)));
+	}
+
+	private static String last(List<String> list) {
+		return list.get(list.size() - 1);
 	}
 
 	private double stepHeight() {

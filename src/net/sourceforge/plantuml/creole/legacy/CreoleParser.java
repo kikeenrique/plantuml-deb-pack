@@ -37,9 +37,11 @@ package net.sourceforge.plantuml.creole.legacy;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import net.sourceforge.plantuml.EmbeddedDiagram;
 import net.sourceforge.plantuml.ISkinSimple;
+import net.sourceforge.plantuml.SpriteContainerEmpty;
 import net.sourceforge.plantuml.StringUtils;
 import net.sourceforge.plantuml.creole.CreoleContext;
 import net.sourceforge.plantuml.creole.CreoleMode;
@@ -52,6 +54,9 @@ import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
+import net.sourceforge.plantuml.ugraphic.UFont;
+import net.sourceforge.plantuml.ugraphic.color.NoSuchColorException;
+import net.sourceforge.plantuml.ugraphic.color.NoSuchColorRuntimeException;
 
 public class CreoleParser implements SheetBuilder {
 
@@ -66,10 +71,7 @@ public class CreoleParser implements SheetBuilder {
 		this.stereotype = stereotype;
 		this.creoleMode = creoleMode;
 		this.fontConfiguration = fontConfiguration;
-		this.skinParam = skinParam;
-		if (skinParam == null) {
-			throw new IllegalArgumentException();
-		}
+		this.skinParam = Objects.requireNonNull(skinParam);
 		this.horizontalAlignment = horizontalAlignment;
 	}
 
@@ -143,5 +145,15 @@ public class CreoleParser implements SheetBuilder {
 			}
 		}
 		return sheet;
+	}
+
+	public static void checkColor(Display result) throws NoSuchColorException {
+		FontConfiguration fc = FontConfiguration.blackBlueTrue(UFont.byDefault(10));
+		try {
+			new CreoleParser(fc, HorizontalAlignment.LEFT, new SpriteContainerEmpty(), CreoleMode.FULL, fc)
+					.createSheet(result);
+		} catch (NoSuchColorRuntimeException e) {
+			throw new NoSuchColorException();
+		}
 	}
 }

@@ -54,6 +54,7 @@ import net.sourceforge.plantuml.cucadiagram.NamespaceStrategy;
 import net.sourceforge.plantuml.cucadiagram.Stereotype;
 import net.sourceforge.plantuml.graphic.color.ColorParser;
 import net.sourceforge.plantuml.graphic.color.ColorType;
+import net.sourceforge.plantuml.ugraphic.color.NoSuchColorException;
 
 public class CommandNamespace extends SingleLineCommand2<ClassDiagram> {
 
@@ -65,7 +66,7 @@ public class CommandNamespace extends SingleLineCommand2<ClassDiagram> {
 		return RegexConcat.build(CommandNamespace.class.getName(), RegexLeaf.start(), //
 				new RegexLeaf("namespace"), //
 				RegexLeaf.spaceOneOrMore(), //
-				new RegexLeaf("NAME", "([\\p{L}0-9_][-\\p{L}0-9_.:\\\\]*)"), //
+				new RegexLeaf("NAME", "([%pLN_][-%pLN_.:\\\\]*)"), //
 				RegexLeaf.spaceZeroOrMore(), //
 				new RegexLeaf("STEREOTYPE", "(\\<\\<.*\\>\\>)?"), //
 				RegexLeaf.spaceZeroOrMore(), //
@@ -77,7 +78,8 @@ public class CommandNamespace extends SingleLineCommand2<ClassDiagram> {
 	}
 
 	@Override
-	protected CommandExecutionResult executeArg(ClassDiagram diagram, LineLocation location, RegexResult arg) {
+	protected CommandExecutionResult executeArg(ClassDiagram diagram, LineLocation location, RegexResult arg)
+			throws NoSuchColorException {
 		final String idShort = arg.get("NAME", 0);
 		final Code code;
 		final IGroup currentPackage;
@@ -109,7 +111,7 @@ public class CommandNamespace extends SingleLineCommand2<ClassDiagram> {
 		final String color = arg.get("COLOR", 0);
 		if (color != null) {
 			p.setSpecificColorTOBEREMOVED(ColorType.BACK,
-					diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(color));
+					diagram.getSkinParam().getIHtmlColorSet().getColor(diagram.getSkinParam().getThemeStyle(), color));
 		}
 		return CommandExecutionResult.ok();
 	}

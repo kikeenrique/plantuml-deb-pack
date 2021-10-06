@@ -46,20 +46,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
+import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.ugraphic.UAntiAliasing;
 import net.sourceforge.plantuml.ugraphic.color.ColorMapperIdentity;
+import net.sourceforge.plantuml.ugraphic.color.HColor;
+import net.sourceforge.plantuml.ugraphic.color.HColorSimple;
 import net.sourceforge.plantuml.ugraphic.g2d.UGraphicG2d;
 
 public class EmptyImageBuilder {
 
 	private final BufferedImage im;
 	private final Graphics2D g2d;
+	private final Color background;
+	private final StringBounder stringBounder;
 
-	public EmptyImageBuilder(String watermark, double width, double height, Color background) {
-		this(watermark, (int) width, (int) height, background);
+	public EmptyImageBuilder(String watermark, double width, double height, Color background, StringBounder stringBounder) {
+		this(watermark, (int) width, (int) height, background, stringBounder);
 	}
 
-	public EmptyImageBuilder(String watermark, int width, int height, Color background) {
+	public EmptyImageBuilder(String watermark, int width, int height, Color background, StringBounder stringBounder) {
 		if (width > GraphvizUtils.getenvImageLimit()) {
 			Log.info("Width too large " + width + ". You should set PLANTUML_LIMIT_SIZE");
 			width = GraphvizUtils.getenvImageLimit();
@@ -68,6 +73,8 @@ public class EmptyImageBuilder {
 			Log.info("Height too large " + height + ". You should set PLANTUML_LIMIT_SIZE");
 			height = GraphvizUtils.getenvImageLimit();
 		}
+		this.background = background;
+		this.stringBounder = stringBounder;
 		Log.info("Creating image " + width + "x" + height);
 		im = new BufferedImage(width, height, getType(background));
 		g2d = im.createGraphics();
@@ -128,7 +135,7 @@ public class EmptyImageBuilder {
 
 	private List<String> withBreaks(String watermark, Font javaFont, FontMetrics fm, int maxWidth) {
 		final String[] words = watermark.split("\\s+");
-		final List<String> result = new ArrayList<String>();
+		final List<String> result = new ArrayList<>();
 		String pending = "";
 		for (String word : words) {
 			final String candidate = pending.length() == 0 ? word : pending + " " + word;
@@ -145,8 +152,8 @@ public class EmptyImageBuilder {
 		return result;
 	}
 
-	public EmptyImageBuilder(String watermark, int width, int height, Color background, double dpiFactor) {
-		this(watermark, width * dpiFactor, height * dpiFactor, background);
+	public EmptyImageBuilder(String watermark, int width, int height, Color background, StringBounder stringBounder, double dpiFactor) {
+		this(watermark, width * dpiFactor, height * dpiFactor, background, stringBounder);
 		if (dpiFactor != 1.0) {
 			g2d.setTransform(AffineTransform.getScaleInstance(dpiFactor, dpiFactor));
 		}
@@ -161,7 +168,8 @@ public class EmptyImageBuilder {
 	}
 
 	public UGraphicG2d getUGraphicG2d() {
-		final UGraphicG2d result = new UGraphicG2d(new ColorMapperIdentity(), g2d, 1.0);
+		final HColor back = new HColorSimple(background, false);
+		final UGraphicG2d result = new UGraphicG2d(back, new ColorMapperIdentity(), stringBounder, g2d, 1.0);
 		result.setBufferedImage(im);
 		return result;
 	}

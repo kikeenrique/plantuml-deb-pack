@@ -55,6 +55,7 @@ import net.sourceforge.plantuml.svg.LengthAdjust;
 import net.sourceforge.plantuml.ugraphic.UFont;
 import net.sourceforge.plantuml.ugraphic.UStroke;
 import net.sourceforge.plantuml.ugraphic.color.HColor;
+import net.sourceforge.plantuml.ugraphic.color.NoSuchColorException;
 
 public interface ISkinParam extends ISkinSimple {
 
@@ -68,7 +69,7 @@ public interface ISkinParam extends ISkinSimple {
 
 	public HColor getHtmlColor(ColorParam param, Stereotype stereotype, boolean clickable);
 
-	public Colors getColors(ColorParam param, Stereotype stereotype);
+	public Colors getColors(ColorParam param, Stereotype stereotype) throws NoSuchColorException;
 
 	public HColor getFontHtmlColor(Stereotype stereotype, FontParam... param);
 
@@ -77,7 +78,7 @@ public interface ISkinParam extends ISkinSimple {
 	public UFont getFont(Stereotype stereotype, boolean inPackageTitle, FontParam... fontParam);
 
 	public HorizontalAlignment getHorizontalAlignment(AlignmentParam param, ArrowDirection arrowDirection,
-			boolean isReverseDefine);
+			boolean isReverseDefine, HorizontalAlignment overrideDefault);
 
 	public HorizontalAlignment getDefaultTextAlignment(HorizontalAlignment defaultValue);
 
@@ -190,8 +191,9 @@ public interface ISkinParam extends ISkinSimple {
 	public ActorStyle actorStyle();
 
 	public void setSvgSize(String origin, String sizeToUse);
-	
+
 	public LengthAdjust getlengthAdjust();
 
+	public void assumeTransparent(ThemeStyle style);
 
 }

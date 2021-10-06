@@ -61,8 +61,8 @@ final class WElement {
 	private final String stereotype;
 	private final WElement parent;
 	private final StyleBuilder styleBuilder;
-	private final List<WElement> childrenLeft = new ArrayList<WElement>();
-	private final List<WElement> childrenRight = new ArrayList<WElement>();
+	private final List<WElement> childrenLeft = new ArrayList<>();
+	private final List<WElement> childrenRight = new ArrayList<>();
 	private final IdeaShape shape;
 
 	private StyleSignature getDefaultStyleDefinitionNode(int level) {
@@ -71,8 +71,17 @@ final class WElement {
 			return StyleSignature.of(SName.root, SName.element, SName.wbsDiagram, SName.node, SName.rootNode)
 					.add(stereotype).add(depth);
 		}
+		if (shape == IdeaShape.NONE && isLeaf()) {
+			return StyleSignature
+					.of(SName.root, SName.element, SName.wbsDiagram, SName.node, SName.leafNode, SName.boxless)
+					.add(stereotype).add(depth);
+		}
 		if (isLeaf()) {
 			return StyleSignature.of(SName.root, SName.element, SName.wbsDiagram, SName.node, SName.leafNode)
+					.add(stereotype).add(depth);
+		}
+		if (shape == IdeaShape.NONE) {
+			return StyleSignature.of(SName.root, SName.element, SName.wbsDiagram, SName.node, SName.boxless)
 					.add(stereotype).add(depth);
 		}
 		return StyleSignature.of(SName.root, SName.element, SName.wbsDiagram, SName.node).add(stereotype).add(depth);
@@ -85,18 +94,22 @@ final class WElement {
 		return new SkinParamColors(skinParam, Colors.empty().add(ColorType.BACK, backColor));
 	}
 
+	private static final int STEP_BY_PARENT = 1000_1000;
+
 	public Style getStyle() {
-		Style result = getDefaultStyleDefinitionNode(level).getMergedStyle(styleBuilder);
+		int deltaPriority = STEP_BY_PARENT * 1000;
+		Style result = styleBuilder.getMergedStyleSpecial(getDefaultStyleDefinitionNode(level), deltaPriority);
 		for (WElement up = parent; up != null; up = up.parent) {
 			final StyleSignature ss = up.getDefaultStyleDefinitionNode(level).addStar();
-			final Style p = ss.getMergedStyle(styleBuilder);
-			result = result.mergeWith(p);
+			deltaPriority -= STEP_BY_PARENT;
+			final Style styleParent = styleBuilder.getMergedStyleSpecial(ss, deltaPriority);
+			result = result.mergeWith(styleParent);
 		}
 		return result;
 	}
 
-	public WElement(HColor backColor, Display label, String stereotype, StyleBuilder styleBuilder) {
-		this(backColor, 0, label, stereotype, null, IdeaShape.BOX, styleBuilder);
+	public WElement(HColor backColor, Display label, String stereotype, StyleBuilder styleBuilder, IdeaShape shape) {
+		this(backColor, 0, label, stereotype, null, shape, styleBuilder);
 	}
 
 	private WElement(HColor backColor, int level, Display label, String stereotype, WElement parent, IdeaShape shape,

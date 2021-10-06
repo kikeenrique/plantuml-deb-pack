@@ -77,8 +77,7 @@ public abstract class Eater {
 		return result;
 	}
 
-	final protected TValue eatExpression(TContext context, TMemory memory)
-			throws EaterException, EaterExceptionLocated {
+	final public TValue eatExpression(TContext context, TMemory memory) throws EaterException, EaterExceptionLocated {
 		if (peekChar() == '{') {
 			String data = eatAllToEnd();
 			// System.err.println("data=" + data);
@@ -307,7 +306,7 @@ public abstract class Eater {
 	final protected TFunctionImpl eatDeclareFunction(TContext context, TMemory memory, boolean unquoted,
 			LineLocation location, boolean allowNoParenthesis, TFunctionType type)
 			throws EaterException, EaterExceptionLocated {
-		final List<TFunctionArgument> args = new ArrayList<TFunctionArgument>();
+		final List<TFunctionArgument> args = new ArrayList<>();
 		final String functionName = eatAndGetFunctionName();
 		skipSpaces();
 		if (safeCheckAndEatChar('(') == false) {

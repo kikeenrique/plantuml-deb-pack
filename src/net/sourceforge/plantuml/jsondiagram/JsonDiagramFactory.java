@@ -40,7 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sourceforge.plantuml.BackSlash;
-import net.sourceforge.plantuml.StringLocated;
+import net.sourceforge.plantuml.ISkinSimple;
 import net.sourceforge.plantuml.UmlDiagramType;
 import net.sourceforge.plantuml.command.PSystemAbstractFactory;
 import net.sourceforge.plantuml.core.Diagram;
@@ -56,15 +56,18 @@ public class JsonDiagramFactory extends PSystemAbstractFactory {
 		super(DiagramType.JSON);
 	}
 
-	public Diagram createSystem(UmlSource source) {
-		final List<String> highlighted = new ArrayList<String>();
+	@Override
+	public Diagram createSystem(UmlSource source, ISkinSimple skinParam) {
+		final List<String> highlighted = new ArrayList<>();
+		StyleExtractor styleExtractor = null;
 		JsonValue json;
 		try {
 			final StringBuilder sb = new StringBuilder();
-			final Iterator<StringLocated> it = source.iterator2();
+			styleExtractor = new StyleExtractor(source.iterator2());
+			final Iterator<String> it = styleExtractor.getIterator();
 			it.next();
 			while (true) {
-				final String line = it.next().getString();
+				final String line = it.next();
 				if (it.hasNext() == false) {
 					break;
 				}
@@ -82,8 +85,10 @@ public class JsonDiagramFactory extends PSystemAbstractFactory {
 		} catch (ParseException e) {
 			json = null;
 		}
-		final JsonDiagram result = new JsonDiagram(UmlDiagramType.JSON, json, highlighted);
-		result.setSource(source);
+		final JsonDiagram result = new JsonDiagram(source, UmlDiagramType.JSON, json, highlighted);
+		if (styleExtractor != null) {
+			styleExtractor.applyStyles(result.getSkinParam());
+		}
 		return result;
 	}
 

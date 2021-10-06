@@ -85,7 +85,7 @@ public class FtileIfDown extends AbstractFtile {
 	}
 
 	public Set<Swimlane> getSwimlanes() {
-		final Set<Swimlane> result = new HashSet<Swimlane>(thenBlock.getSwimlanes());
+		final Set<Swimlane> result = new HashSet<>(thenBlock.getSwimlanes());
 		result.add(getSwimlaneIn());
 		return result;
 	}
@@ -119,7 +119,7 @@ public class FtileIfDown extends AbstractFtile {
 				optionalStop == null ? diamond2 : new FtileEmpty(ftileFactory.skinParam()), optionalStop,
 				conditionEndStyle);
 
-		final List<Connection> conns = new ArrayList<Connection>();
+		final List<Connection> conns = new ArrayList<>();
 		conns.add(result.new ConnectionIn(thenBlock.getInLinkRendering().getRainbow(arrowColor)));
 		final boolean hasPointOut1 = thenBlock.calculateDimension(ftileFactory.getStringBounder()).hasPointOut();
 		if (optionalStop == null) {
@@ -205,6 +205,7 @@ public class FtileIfDown extends AbstractFtile {
 			ug.draw(snake);
 		}
 
+		@Override
 		public void drawTranslate(UGraphic ug, UTranslate translate1, UTranslate translate2) {
 			final StringBounder stringBounder = ug.getStringBounder();
 			final Point2D p1 = getP1(stringBounder);
@@ -266,6 +267,7 @@ public class FtileIfDown extends AbstractFtile {
 			ug.draw(snake);
 		}
 
+		@Override
 		public void drawTranslate(UGraphic ug, UTranslate translate1, UTranslate translate2) {
 
 			if (getFtile1().calculateDimension(ug.getStringBounder()).hasPointOut() == false) {
@@ -329,8 +331,7 @@ public class FtileIfDown extends AbstractFtile {
 			final double xmax = Math.max(x1 + Diamond.diamondHalfSize,
 					getTranslateForThen(stringBounder).getDx() + thenGeom.getWidth());
 
-			final Snake snake = Snake.create(endInlinkColor, Arrows.asToLeft())
-					.emphasizeDirection(Direction.DOWN);
+			final Snake snake = Snake.create(endInlinkColor, Arrows.asToLeft()).emphasizeDirection(Direction.DOWN);
 			snake.addPoint(x1, y1);
 			snake.addPoint(xmax, y1);
 			snake.addPoint(xmax, y2);

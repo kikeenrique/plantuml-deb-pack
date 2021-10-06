@@ -101,7 +101,7 @@ public class StyleLoader {
 
 	private void loadSkinInternal(final BlocLines lines) {
 		for (Style newStyle : getDeclaredStyles(lines, styleBuilder)) {
-			this.styleBuilder.put(newStyle.getSignature(), newStyle);
+			this.styleBuilder.loadInternal(newStyle.getSignature(), newStyle);
 		}
 	}
 
@@ -112,9 +112,9 @@ public class StyleLoader {
 
 	public static Collection<Style> getDeclaredStyles(BlocLines lines, AutomaticCounter counter) {
 		lines = lines.eventuallyMoveAllEmptyBracket();
-		final List<Style> result = new ArrayList<Style>();
+		final List<Style> result = new ArrayList<>();
 
-		final List<String> context = new ArrayList<String>();
+		final List<String> context = new ArrayList<>();
 		final List<Map<PName, Value>> maps = new ArrayList<Map<PName, Value>>();
 		boolean inComment = false;
 		for (StringLocated s : lines) {

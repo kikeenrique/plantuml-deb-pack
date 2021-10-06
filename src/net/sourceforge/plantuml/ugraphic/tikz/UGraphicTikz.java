@@ -37,8 +37,6 @@ package net.sourceforge.plantuml.ugraphic.tikz;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.TikzFontDistortion;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.creole.legacy.AtomText;
 import net.sourceforge.plantuml.graphic.StringBounder;
@@ -49,7 +47,6 @@ import net.sourceforge.plantuml.ugraphic.AbstractUGraphic;
 import net.sourceforge.plantuml.ugraphic.ClipContainer;
 import net.sourceforge.plantuml.ugraphic.UCenteredCharacter;
 import net.sourceforge.plantuml.ugraphic.UEllipse;
-import net.sourceforge.plantuml.ugraphic.UGraphic2;
 import net.sourceforge.plantuml.ugraphic.UImage;
 import net.sourceforge.plantuml.ugraphic.UImageSvg;
 import net.sourceforge.plantuml.ugraphic.ULine;
@@ -58,24 +55,13 @@ import net.sourceforge.plantuml.ugraphic.UPolygon;
 import net.sourceforge.plantuml.ugraphic.URectangle;
 import net.sourceforge.plantuml.ugraphic.UText;
 import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
+import net.sourceforge.plantuml.ugraphic.color.HColor;
 
-public class UGraphicTikz extends AbstractUGraphic<TikzGraphics> implements ClipContainer, UGraphic2 {
+public class UGraphicTikz extends AbstractUGraphic<TikzGraphics> implements ClipContainer {
 
-	private final StringBounder stringBounder;
-	private final TikzFontDistortion tikzFontDistortion;
-
-	private UGraphicTikz(ColorMapper colorMapper, TikzGraphics tikz, TikzFontDistortion tikzFontDistortion) {
-		super(colorMapper, tikz);
-		this.tikzFontDistortion = tikzFontDistortion;
-		this.stringBounder = FileFormat.LATEX.getDefaultStringBounder(tikzFontDistortion);
+	public UGraphicTikz(HColor defaultBackground, ColorMapper colorMapper, StringBounder stringBounder, double scale, boolean withPreamble) {
+		super(defaultBackground, colorMapper, stringBounder, new TikzGraphics(scale, withPreamble));
 		register();
-
-	}
-
-	public UGraphicTikz(ColorMapper colorMapper, double scale, boolean withPreamble,
-			TikzFontDistortion tikzFontDistortion) {
-		this(colorMapper, new TikzGraphics(scale, withPreamble), tikzFontDistortion);
-
 	}
 
 	@Override
@@ -85,8 +71,6 @@ public class UGraphicTikz extends AbstractUGraphic<TikzGraphics> implements Clip
 
 	private UGraphicTikz(UGraphicTikz other) {
 		super(other);
-		this.tikzFontDistortion = other.tikzFontDistortion;
-		this.stringBounder = other.stringBounder;
 		register();
 	}
 
@@ -105,10 +89,6 @@ public class UGraphicTikz extends AbstractUGraphic<TikzGraphics> implements Clip
 		registerDriver(UCenteredCharacter.class, new DriverCenteredCharacterTikz2());
 	}
 
-	public StringBounder getStringBounder() {
-		return stringBounder;
-	}
-
 	public void startUrl(Url url) {
 		getGraphicObject().openLink(url.getUrl(), url.getTooltip());
 	}
@@ -117,11 +97,8 @@ public class UGraphicTikz extends AbstractUGraphic<TikzGraphics> implements Clip
 		getGraphicObject().closeLink();
 	}
 
-	public void writeImageTOBEMOVED(OutputStream os, String metadata, int dpi) throws IOException {
-		createTikz(os);
-	}
-
-	public void createTikz(OutputStream os) throws IOException {
+	@Override
+	public void writeToStream(OutputStream os, String metadata, int dpi) throws IOException {
 		getGraphicObject().createData(os);
 	}
 

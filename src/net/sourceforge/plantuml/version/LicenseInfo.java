@@ -190,10 +190,12 @@ public class LicenseInfo {
 	}
 
 	public static Collection<SFile> fileCandidates() {
-		final Set<SFile> result = new TreeSet<SFile>();
+		final Set<SFile> result = new TreeSet<>();
 		final String classpath = System.getProperty("java.class.path");
 		String[] classpathEntries = classpath.split(SFile.pathSeparator);
 		for (String s : classpathEntries) {
+			if (s == null)
+				continue;
 			SFile dir = new SFile(s);
 			if (dir.isFile()) {
 				dir = dir.getParentFile();
@@ -217,13 +219,16 @@ public class LicenseInfo {
 		if (br == null) {
 			return null;
 		}
-		final String s = br.readLine();
-		br.close();
-		final LicenseInfo result = retrieveNamed(s);
-		if (result != null) {
-			Log.info("Reading license from " + f.getAbsolutePath());
+		try {
+			final String s = br.readLine();
+			final LicenseInfo result = retrieveNamed(s);
+			if (result != null) {
+				Log.info("Reading license from " + f.getAbsolutePath());
+			}
+			return result;
+		} finally {
+			br.close();
 		}
-		return result;
 	}
 
 	public static void main(String[] args) {

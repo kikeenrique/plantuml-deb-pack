@@ -90,11 +90,13 @@ public class FtileFactoryDelegatorRepeat extends FtileFactoryDelegator {
 					.getMergedStyle(skinParam().getCurrentStyleBuilder());
 			final Style styleDiamond = getDefaultStyleDefinitionDiamond()
 					.getMergedStyle(skinParam().getCurrentStyleBuilder());
-			borderColor = styleDiamond.value(PName.LineColor).asColor(skinParam().getIHtmlColorSet());
-			diamondColor = styleDiamond.value(PName.BackGroundColor).asColor(skinParam().getIHtmlColorSet());
-			arrowColor = Rainbow.build(styleArrow, skinParam().getIHtmlColorSet());
-			fcDiamond = styleDiamond.getFontConfiguration(skinParam().getIHtmlColorSet());
-			fcArrow = styleArrow.getFontConfiguration(skinParam().getIHtmlColorSet());
+			borderColor = styleDiamond.value(PName.LineColor).asColor(skinParam().getThemeStyle(),
+					skinParam().getIHtmlColorSet());
+			diamondColor = styleDiamond.value(PName.BackGroundColor).asColor(skinParam().getThemeStyle(),
+					skinParam().getIHtmlColorSet());
+			arrowColor = Rainbow.build(styleArrow, skinParam().getIHtmlColorSet(), skinParam().getThemeStyle());
+			fcDiamond = styleDiamond.getFontConfiguration(skinParam().getThemeStyle(), skinParam().getIHtmlColorSet());
+			fcArrow = styleArrow.getFontConfiguration(skinParam().getThemeStyle(), skinParam().getIHtmlColorSet());
 		} else {
 			borderColor = getRose().getHtmlColor(skinParam(), ColorParam.activityDiamondBorder);
 			// diamondColor = color == null ? getRose().getHtmlColor(skinParam(),
@@ -112,7 +114,7 @@ public class FtileFactoryDelegatorRepeat extends FtileFactoryDelegator {
 		final LinkRendering endRepeatLinkRendering = repeat.getOutLinkRendering();
 		final Rainbow endRepeatLinkColor = endRepeatLinkRendering == null ? null : endRepeatLinkRendering.getRainbow();
 
-		final Ftile entry = getEntry(swimlane, startLabel, colors, boxStyleIn);
+		final Ftile entry = getEntry(repeat.getSwimlaneIn(), startLabel, colors, boxStyleIn);
 
 		Ftile result = FtileRepeat.create(swimlane, swimlaneOut, entry, repeat, test, yes, out, borderColor,
 				diamondColor, arrowColor, endRepeatLinkColor, conditionStyle, this.skinParam(), fcDiamond, fcArrow,

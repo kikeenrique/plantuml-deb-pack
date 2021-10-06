@@ -65,7 +65,7 @@ class TurtleGraphicsPane {
 	private boolean showTurtle = true;
 	private HColor penColor = HColorUtils.BLACK;
 	private List<Rectangle2D.Double> lines = new ArrayList<Rectangle2D.Double>();
-	private List<HColor> colors = new ArrayList<HColor>();
+	private List<HColor> colors = new ArrayList<>();
 
 	private String message;
 
@@ -119,8 +119,8 @@ class TurtleGraphicsPane {
 		poly.rotate(angle);
 		// ug.setAntiAliasing(false);
 		final HColorSet htmlColorSet = HColorSet.instance();
-		final HColor turtleColor1 = htmlColorSet.getColorIfValid("OliveDrab");
-		final HColor turtleColor2 = htmlColorSet.getColorIfValid("MediumSpringGreen");
+		final HColor turtleColor1 = htmlColorSet.getColorOrWhite("OliveDrab");
+		final HColor turtleColor2 = htmlColorSet.getColorOrWhite("MediumSpringGreen");
 
 		ug.apply(turtleColor1).apply(turtleColor2.bg()).apply(new UTranslate(x, -y))
 				.draw(poly);

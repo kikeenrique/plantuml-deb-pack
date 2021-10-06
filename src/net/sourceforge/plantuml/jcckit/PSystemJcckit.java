@@ -49,6 +49,7 @@ import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.api.ImageDataSimple;
 import net.sourceforge.plantuml.core.DiagramDescription;
 import net.sourceforge.plantuml.core.ImageData;
+import net.sourceforge.plantuml.core.UmlSource;
 import net.sourceforge.plantuml.security.ImageIO;
 
 public class PSystemJcckit extends AbstractPSystem {
@@ -57,14 +58,15 @@ public class PSystemJcckit extends AbstractPSystem {
 	private final int width;
 	private final int height;
 
-	public PSystemJcckit(Properties p, int width, int height) {
+	public PSystemJcckit(UmlSource source, Properties p, int width, int height) {
+		super(source);
 		this.width = width;
 		this.height = height;
 		prop = new PropertiesBasedConfigData(p);
 	}
 
 	@Override
-	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat, long seed)
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat)
 			throws IOException {
 		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 

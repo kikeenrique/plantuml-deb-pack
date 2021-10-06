@@ -38,6 +38,10 @@ package net.sourceforge.plantuml.ugraphic;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
+import net.sourceforge.plantuml.ugraphic.color.HColor;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public interface UGraphic {
 
@@ -55,7 +59,7 @@ public interface UGraphic {
 
 	public void closeUrl();
 
-	public void startGroup(String id);
+	public void startGroup(UGroupType type, String ident);
 
 	public void closeGroup();
 
@@ -63,4 +67,7 @@ public interface UGraphic {
 
 	public boolean matchesProperty(String propertyName);
 
+	public HColor getDefaultBackground();
+
+	public void writeToStream(OutputStream os, String metadata, int dpi) throws IOException;
 }

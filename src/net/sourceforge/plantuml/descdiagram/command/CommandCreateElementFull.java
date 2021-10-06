@@ -66,10 +66,11 @@ import net.sourceforge.plantuml.graphic.color.ColorParser;
 import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.graphic.color.Colors;
 import net.sourceforge.plantuml.ugraphic.color.HColor;
+import net.sourceforge.plantuml.ugraphic.color.NoSuchColorException;
 
 public class CommandCreateElementFull extends SingleLineCommand2<DescriptionDiagram> {
 
-	public static final String ALL_TYPES = "artifact|actor/|actor|folder|card|file|package|rectangle|label|node|frame|cloud|database|queue|stack|storage|agent|usecase/|usecase|component|boundary|control|entity|interface|circle|collections|port|portin|portout";
+	public static final String ALL_TYPES = "person|artifact|actor/|actor|folder|card|file|package|rectangle|hexagon|label|node|frame|cloud|database|queue|stack|storage|agent|usecase/|usecase|component|boundary|control|entity|interface|circle|collections|port|portin|portout";
 
 	public CommandCreateElementFull() {
 		super(getRegexConcat());
@@ -137,13 +138,13 @@ public class CommandCreateElementFull extends SingleLineCommand2<DescriptionDiag
 		return ColorParser.simpleColor(ColorType.BACK, "COLOR2");
 	}
 
-	private static final String CODE_CORE = "[\\p{L}0-9_.]+|\\(\\)[%s]*[\\p{L}0-9_.]+|\\(\\)[%s]*[%g][^%g]+[%g]|:[^:]+:/?|\\([^()]+\\)/?|\\[[^\\[\\]]+\\]";
+	private static final String CODE_CORE = "[%pLN_.]+|\\(\\)[%s]*[%pLN_.]+|\\(\\)[%s]*[%g][^%g]+[%g]|:[^:]+:/?|\\([^()]+\\)/?|\\[[^\\[\\]]+\\]";
 	public static final String CODE = "(" + CODE_CORE + ")";
 	public static final String CODE_WITH_QUOTE = "(" + CODE_CORE + "|[%g].+?[%g])";
 
 	private static final String DISPLAY_CORE = "[%g].+?[%g]|:[^:]+:/?|\\([^()]+\\)/?|\\[[^\\[\\]]+\\]";
 	public static final String DISPLAY = "(" + DISPLAY_CORE + ")";
-	public static final String DISPLAY_WITHOUT_QUOTE = "(" + DISPLAY_CORE + "|[\\p{L}0-9_.]+)";
+	public static final String DISPLAY_WITHOUT_QUOTE = "(" + DISPLAY_CORE + "|[%pLN_.]+)";
 
 	@Override
 	final protected boolean isForbidden(CharSequence line) {
@@ -154,7 +155,8 @@ public class CommandCreateElementFull extends SingleLineCommand2<DescriptionDiag
 	}
 
 	@Override
-	protected CommandExecutionResult executeArg(DescriptionDiagram diagram, LineLocation location, RegexResult arg) {
+	protected CommandExecutionResult executeArg(DescriptionDiagram diagram, LineLocation location, RegexResult arg)
+			throws NoSuchColorException {
 		String codeRaw = arg.getLazzy("CODE", 0);
 		String displayRaw = arg.getLazzy("DISPLAY", 0);
 		final char codeChar = getCharEncoding(codeRaw);
@@ -260,9 +262,12 @@ public class CommandCreateElementFull extends SingleLineCommand2<DescriptionDiag
 			entity.addUrl(url);
 		}
 
-		Colors colors = color().getColor(arg, diagram.getSkinParam().getIHtmlColorSet());
+		Colors colors = color().getColor(diagram.getSkinParam().getThemeStyle(), arg,
+				diagram.getSkinParam().getIHtmlColorSet());
+		final String s = arg.get("LINECOLOR", 1);
 
-		final HColor lineColor = diagram.getSkinParam().getIHtmlColorSet().getColorIfValid(arg.get("LINECOLOR", 1));
+		final HColor lineColor = s == null ? null
+				: diagram.getSkinParam().getIHtmlColorSet().getColor(diagram.getSkinParam().getThemeStyle(), s);
 		if (lineColor != null) {
 			colors = colors.add(ColorType.LINE, lineColor);
 		}

@@ -35,26 +35,33 @@
  */
 package net.sourceforge.plantuml.project.draw;
 
+import java.util.Map;
+
 import net.sourceforge.plantuml.SpriteContainerEmpty;
+import net.sourceforge.plantuml.ThemeStyle;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.project.time.Day;
 import net.sourceforge.plantuml.project.timescale.TimeScale;
 import net.sourceforge.plantuml.project.timescale.TimeScaleWink;
+import net.sourceforge.plantuml.style.Style;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
-import net.sourceforge.plantuml.ugraphic.color.HColorUtils;
+import net.sourceforge.plantuml.ugraphic.color.HColor;
+import net.sourceforge.plantuml.ugraphic.color.HColorSet;
 
 public class TimeHeaderSimple extends TimeHeader {
+
+	private final Map<Day, HColor> colorDays;
 
 	@Override
 	public double getFullHeaderHeight() {
 		return getTimeHeaderHeight() + getHeaderNameDayHeight();
 	}
 
-	protected double getTimeHeaderHeight() {
+	public double getTimeHeaderHeight() {
 		return 16;
 	}
 
@@ -66,15 +73,17 @@ public class TimeHeaderSimple extends TimeHeader {
 		return 0;
 	}
 
-	public TimeHeaderSimple(Day min, Day max) {
-		super(min, max, new TimeScaleWink());
+	public TimeHeaderSimple(Style timelineStyle, Style closedStyle, double scale, Day min, Day max, HColorSet colorSet,
+			ThemeStyle themeStyle, Map<Day, HColor> colorDays) {
+		super(timelineStyle, closedStyle, min, max, new TimeScaleWink(scale), colorSet, themeStyle);
+		this.colorDays = colorDays;
 	}
 
 	private void drawSmallVlinesDay(UGraphic ug, TimeScale timeScale, double totalHeightWithoutFooter) {
 		final ULine vbar = ULine.vline(totalHeightWithoutFooter);
 		for (Day i = min; i.compareTo(max.increment()) <= 0; i = i.increment()) {
 			final double x1 = timeScale.getStartingPosition(i);
-			ug.apply(HColorUtils.LIGHT_GRAY).apply(UTranslate.dx(x1)).draw(vbar);
+			ug.apply(getBarColor()).apply(UTranslate.dx(x1)).draw(vbar);
 		}
 	}
 
@@ -82,7 +91,7 @@ public class TimeHeaderSimple extends TimeHeader {
 		for (Day i = min; i.compareTo(max.increment()) <= 0; i = i.increment()) {
 			final String number = "" + (i.getAbsoluteDayNum() + 1);
 			final TextBlock num = Display.getWithNewlines(number).create(
-					getFontConfiguration(10, false, HColorUtils.BLACK), HorizontalAlignment.LEFT,
+					getFontConfiguration(10, false, openFontColor()), HorizontalAlignment.LEFT,
 					new SpriteContainerEmpty());
 			final double x1 = timeScale.getStartingPosition(i);
 			final double x2 = timeScale.getEndingPosition(i);
@@ -96,12 +105,13 @@ public class TimeHeaderSimple extends TimeHeader {
 
 	@Override
 	public void drawTimeHeader(final UGraphic ug, double totalHeightWithoutFooter) {
+		drawTextsBackground(ug.apply(UTranslate.dy(-3)), totalHeightWithoutFooter + 6);
 		final double xmin = getTimeScale().getStartingPosition(min);
 		final double xmax = getTimeScale().getEndingPosition(max);
 		drawSmallVlinesDay(ug, getTimeScale(), totalHeightWithoutFooter);
 		drawSimpleDayCounter(ug, getTimeScale());
-		ug.apply(HColorUtils.LIGHT_GRAY).draw(ULine.hline(xmax - xmin));
-		ug.apply(HColorUtils.LIGHT_GRAY).apply(UTranslate.dy(getFullHeaderHeight() - 3)).draw(ULine.hline(xmax - xmin));
+		ug.apply(getBarColor()).draw(ULine.hline(xmax - xmin));
+		ug.apply(getBarColor()).apply(UTranslate.dy(getFullHeaderHeight() - 3)).draw(ULine.hline(xmax - xmin));
 
 	}
 
@@ -112,7 +122,59 @@ public class TimeHeaderSimple extends TimeHeader {
 		drawSmallVlinesDay(ug, getTimeScale(), getTimeFooterHeight());
 		ug = ug.apply(UTranslate.dy(3));
 		drawSimpleDayCounter(ug, getTimeScale());
-		ug.apply(HColorUtils.LIGHT_GRAY).draw(ULine.hline(xmax - xmin));
+		ug.apply(getBarColor()).draw(ULine.hline(xmax - xmin));
+	}
+
+	// Duplicate in TimeHeaderDaily
+	class Pending {
+		final double x1;
+		double x2;
+		final HColor color;
+
+		Pending(HColor color, double x1, double x2) {
+			this.x1 = x1;
+			this.x2 = x2;
+			this.color = color;
+		}
+
+		public void draw(UGraphic ug, double height) {
+			drawRectangle(ug.apply(color.bg()), height, x1, x2);
+		}
+	}
+
+	protected final void drawTextsBackground(UGraphic ug, double totalHeightWithoutFooter) {
+
+		final double height = totalHeightWithoutFooter - getFullHeaderHeight();
+		Pending pending = null;
+
+		for (Day wink = min; wink.compareTo(max) <= 0; wink = wink.increment()) {
+			final double x1 = getTimeScale().getStartingPosition(wink);
+			final double x2 = getTimeScale().getEndingPosition(wink);
+			HColor back = colorDays.get(wink);
+//			// Day of week should be stronger than period of time (back color).
+//			final HColor backDoW = colorDaysOfWeek.get(wink.getDayOfWeek());
+//			if (backDoW != null) {
+//				back = backDoW;
+//			}
+//			if (back == null && defaultPlan.getLoadAt(wink) == 0) {
+//				back = closedBackgroundColor();
+//			}
+			if (back == null) {
+				if (pending != null)
+					pending.draw(ug, height);
+				pending = null;
+			} else {
+				if (pending != null && pending.color.equals(back) == false) {
+					pending.draw(ug, height);
+					pending = null;
+				}
+				if (pending == null) {
+					pending = new Pending(back, x1, x2);
+				} else {
+					pending.x2 = x2;
+				}
+			}
+		}
 	}
 
 }

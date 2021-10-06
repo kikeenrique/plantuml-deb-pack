@@ -59,7 +59,6 @@ public class BodyEnhanced2 extends BodyEnhancedAbstract {
 	BodyEnhanced2(Display rawBody, FontParam fontParam, ISkinSimple skinParam, HorizontalAlignment align,
 			FontConfiguration titleConfig, LineBreakStrategy lineBreakStrategy) {
 		super(align, titleConfig);
-
 		this.rawBody = rawBody;
 		this.lineBreakStrategy = lineBreakStrategy;
 		this.skinParam = skinParam;
@@ -77,7 +76,7 @@ public class BodyEnhanced2 extends BodyEnhancedAbstract {
 			return area;
 		}
 		// urls.clear();
-		final List<TextBlock> blocks = new ArrayList<TextBlock>();
+		final List<TextBlock> blocks = new ArrayList<>();
 
 		char separator = 0;
 		TextBlock title = null;

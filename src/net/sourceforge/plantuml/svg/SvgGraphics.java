@@ -40,12 +40,15 @@ import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,12 +67,14 @@ import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import net.sourceforge.plantuml.FileUtils;
 import net.sourceforge.plantuml.Log;
 import net.sourceforge.plantuml.SignatureUtils;
 import net.sourceforge.plantuml.code.Base64Coder;
 import net.sourceforge.plantuml.security.ImageIO;
 import net.sourceforge.plantuml.security.SecurityUtils;
 import net.sourceforge.plantuml.tikz.TikzGraphics;
+import net.sourceforge.plantuml.ugraphic.UGroupType;
 import net.sourceforge.plantuml.ugraphic.UImageSvg;
 import net.sourceforge.plantuml.ugraphic.UPath;
 import net.sourceforge.plantuml.ugraphic.USegment;
@@ -120,6 +125,8 @@ public class SvgGraphics {
 	private final boolean svgDimensionStyle;
 	private final LengthAdjust lengthAdjust;
 
+	private final boolean INTERACTIVE = false;
+
 	final protected void ensureVisible(double x, double y) {
 		if (x > maxX) {
 			maxX = (int) (x + 1);
@@ -129,12 +136,7 @@ public class SvgGraphics {
 		}
 	}
 
-	public SvgGraphics(boolean svgDimensionStyle, Dimension2D minDim, double scale, String hover, long seed,
-			String preserveAspectRatio, LengthAdjust lengthAdjust) {
-		this(svgDimensionStyle, minDim, null, scale, hover, seed, preserveAspectRatio, lengthAdjust);
-	}
-
-	public SvgGraphics(boolean svgDimensionStyle, Dimension2D minDim, String backcolor, double scale, String hover,
+	public SvgGraphics(String backcolor, boolean svgDimensionStyle, Dimension2D minDim, double scale, String hover,
 			long seed, String preserveAspectRatio, LengthAdjust lengthAdjust) {
 		try {
 			this.lengthAdjust = lengthAdjust;
@@ -158,9 +160,52 @@ public class SvgGraphics {
 			if (hover != null) {
 				defs.appendChild(getPathHover(hover));
 			}
+
+			if (INTERACTIVE) {
+				final Element styles = getStylesForInteractiveMode();
+				if (styles != null) {
+					defs.appendChild(styles);
+				}
+				final Element script = getScriptForInteractiveMode();
+				if (script != null) {
+					defs.appendChild(script);
+				}
+			}
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 			throw new IllegalStateException(e);
+		}
+	}
+
+	private Element getStylesForInteractiveMode() {
+		final Element style = simpleElement("style");
+		final String text = getData("default.css");
+		if (text == null) {
+			return null;
+		}
+		final CDATASection cdata = document.createCDATASection(text);
+		style.setAttribute("type", "text/css");
+		style.appendChild(cdata);
+		return style;
+	}
+
+	private Element getScriptForInteractiveMode() {
+		final Element script = document.createElement("script");
+		final String text = getData("default.js");
+		if (text == null) {
+			return null;
+		}
+		script.setTextContent(text);
+		return script;
+	}
+
+	private static String getData(final String name) {
+		try {
+			final InputStream is = SvgGraphics.class.getResourceAsStream("/svg/" + name);
+			return FileUtils.readText(is);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 
@@ -312,7 +357,7 @@ public class SvgGraphics {
 		this.strokeDasharray = strokeDasharray;
 	}
 
-	private final List<Element> pendingAction = new ArrayList<Element>();
+	private final List<Element> pendingAction = new ArrayList<>();
 
 	public final Element getG() {
 		if (pendingAction.size() == 0) {
@@ -665,7 +710,14 @@ public class SvgGraphics {
 	}
 
 	private void fillMe(Element elt) {
-		if (fill.equals("#00000000") == false) {
+		if (fill.equals("#00000000")) {
+			return;
+		}
+		if (fill.matches("#[0-9A-Fa-f]{8}")) {
+			elt.setAttribute("fill", fill.substring(0, 7));
+			final double opacity = Integer.parseInt(fill.substring(7), 16) / 255.0;
+			elt.setAttribute("fill-opacity", String.format(Locale.US, "%1.5f", opacity));
+		} else {
 			elt.setAttribute("fill", fill);
 		}
 	}
@@ -872,9 +924,8 @@ public class SvgGraphics {
 	}
 
 	public void openLink(String url, String title, String target) {
-		if (url == null) {
-			throw new IllegalArgumentException();
-		}
+		Objects.requireNonNull(url);
+
 		// javascript: security issue
 		if (SecurityUtils.getJavascriptUnsecure() == false && url.toLowerCase().startsWith("javascript")) {
 			return;
@@ -927,9 +978,14 @@ public class SvgGraphics {
 		}
 	}
 
-	public void startGroup(String groupId) {
-		pendingAction.add(0, (Element) document.createElement("g"));
-		pendingAction.get(0).setAttribute("id", groupId);
+	public void startGroup(UGroupType type, String ident) {
+		if (type == UGroupType.ID) {
+			pendingAction.add(0, (Element) document.createElement("g"));
+			pendingAction.get(0).setAttribute("id", ident);
+		} else if (INTERACTIVE && type == UGroupType.CLASS) {
+			pendingAction.add(0, (Element) document.createElement("g"));
+			pendingAction.get(0).setAttribute("class", ident);
+		}
 	}
 
 	public void closeGroup() {

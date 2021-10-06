@@ -37,9 +37,14 @@ package net.sourceforge.plantuml.graphic;
 
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
+import net.sourceforge.plantuml.ugraphic.UGroupType;
 import net.sourceforge.plantuml.ugraphic.UParam;
 import net.sourceforge.plantuml.ugraphic.UShape;
 import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
+import net.sourceforge.plantuml.ugraphic.color.HColor;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public abstract class UGraphicDelegator implements UGraphic {
 
@@ -82,8 +87,8 @@ public abstract class UGraphicDelegator implements UGraphic {
 		ug.closeUrl();
 	}
 
-	public void startGroup(String groupId) {
-		ug.startGroup(groupId);
+	public void startGroup(UGroupType type, String ident) {
+		ug.startGroup(type, ident);
 	}
 
 	public void closeGroup() {
@@ -98,4 +103,13 @@ public abstract class UGraphicDelegator implements UGraphic {
 		ug.flushUg();
 	}
 
+	@Override
+	public HColor getDefaultBackground() {
+		return ug.getDefaultBackground();
+	}
+
+	@Override
+	public void writeToStream(OutputStream os, String metadata, int dpi) throws IOException {
+		ug.writeToStream(os, metadata, dpi);
+	}
 }

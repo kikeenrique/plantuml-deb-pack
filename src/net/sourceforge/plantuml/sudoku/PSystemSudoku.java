@@ -43,13 +43,14 @@ import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.core.DiagramDescription;
 import net.sourceforge.plantuml.core.ImageData;
+import net.sourceforge.plantuml.core.UmlSource;
 
 public class PSystemSudoku extends AbstractPSystem {
 
 	final private ISudoku sudoku;
 
 	@Override
-	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat, long seed)
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat)
 			throws IOException {
 		final GraphicsSudoku sud = new GraphicsSudoku(sudoku);
 		if (fileFormat.getFileFormat() == FileFormat.EPS) {
@@ -69,7 +70,8 @@ public class PSystemSudoku extends AbstractPSystem {
 		return new DiagramDescription("(Sudoku)");
 	}
 
-	public PSystemSudoku(Long seed) {
+	public PSystemSudoku(UmlSource source, Long seed) {
+		super(source);
 		sudoku = new SudokuDLX(seed);
 	}
 

@@ -57,8 +57,8 @@ import net.sourceforge.plantuml.style.Style;
 import net.sourceforge.plantuml.style.StyleSignature;
 import net.sourceforge.plantuml.svek.AbstractEntityImage;
 import net.sourceforge.plantuml.svek.Bibliotekon;
-import net.sourceforge.plantuml.svek.Node;
 import net.sourceforge.plantuml.svek.ShapeType;
+import net.sourceforge.plantuml.svek.SvekNode;
 import net.sourceforge.plantuml.ugraphic.Shadowable;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.URectangle;
@@ -84,7 +84,7 @@ public class EntityImageActivity extends AbstractEntityImage {
 		final HorizontalAlignment horizontalAlignment;
 		if (UseStyle.useBetaStyle()) {
 			final Style style = getDefaultStyleDefinition().getMergedStyle(getSkinParam().getCurrentStyleBuilder());
-			fontConfiguration = style.getFontConfiguration(skinParam.getIHtmlColorSet());
+			fontConfiguration = style.getFontConfiguration(skinParam.getThemeStyle(), skinParam.getIHtmlColorSet());
 			horizontalAlignment = style.getHorizontalAlignment();
 			shadowing = style.value(PName.Shadowing).asDouble();
 		} else {
@@ -120,8 +120,8 @@ public class EntityImageActivity extends AbstractEntityImage {
 	}
 
 	private UGraphic drawOctagon(UGraphic ug) {
-		final Node node = bibliotekon.getNode(getEntity());
-		final Shadowable octagon = node.getOctagon();
+		final SvekNode node = bibliotekon.getNode(getEntity());
+		final Shadowable octagon = node.getPolygon();
 		if (octagon == null) {
 			return drawNormal(ug);
 		}
@@ -167,10 +167,12 @@ public class EntityImageActivity extends AbstractEntityImage {
 
 		if (UseStyle.useBetaStyle()) {
 			final Style style = getDefaultStyleDefinition().getMergedStyle(getSkinParam().getCurrentStyleBuilder());
-			borderColor = style.value(PName.LineColor).asColor(getSkinParam().getIHtmlColorSet());
+			borderColor = style.value(PName.LineColor).asColor(getSkinParam().getThemeStyle(),
+					getSkinParam().getIHtmlColorSet());
 			backcolor = getEntity().getColors(getSkinParam()).getColor(ColorType.BACK);
 			if (backcolor == null) {
-				backcolor = style.value(PName.BackGroundColor).asColor(getSkinParam().getIHtmlColorSet());
+				backcolor = style.value(PName.BackGroundColor).asColor(getSkinParam().getThemeStyle(),
+						getSkinParam().getIHtmlColorSet());
 			}
 		}
 		ug = ug.apply(borderColor);

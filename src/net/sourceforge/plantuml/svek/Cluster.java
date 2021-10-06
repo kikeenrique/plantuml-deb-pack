@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import net.sourceforge.plantuml.AlignmentParam;
@@ -98,8 +99,8 @@ public class Cluster implements Moveable {
 
 	private final Cluster parentCluster;
 	private final IGroup group;
-	private final List<Node> nodes = new ArrayList<Node>();
-	private final List<Cluster> children = new ArrayList<Cluster>();
+	private final List<SvekNode> nodes = new ArrayList<>();
+	private final List<Cluster> children = new ArrayList<>();
 	private final int color;
 	private final int colorTitle;
 	private final ISkinParam skinParam;
@@ -129,7 +130,7 @@ public class Cluster implements Moveable {
 
 	private Set<EntityPosition> entityPositionsExceptNormal() {
 		final Set<EntityPosition> result = EnumSet.<EntityPosition>noneOf(EntityPosition.class);
-		for (Node sh : nodes) {
+		for (SvekNode sh : nodes) {
 			if (sh.getEntityPosition() != EntityPosition.NORMAL) {
 				result.add(sh.getEntityPosition());
 			}
@@ -166,25 +167,22 @@ public class Cluster implements Moveable {
 		return parentCluster;
 	}
 
-	public void addNode(Node node) {
-		if (node == null) {
-			throw new IllegalArgumentException();
-		}
-		this.nodes.add(node);
+	public void addNode(SvekNode node) {
+		this.nodes.add(Objects.requireNonNull(node));
 		node.setCluster(this);
 	}
 
-	public final List<Node> getNodes() {
+	public final List<SvekNode> getNodes() {
 		return Collections.unmodifiableList(nodes);
 	}
 
-	private List<Node> getNodesOrderedTop(Collection<Line> lines) {
-		final List<Node> firsts = new ArrayList<Node>();
-		final Set<String> tops = new HashSet<String>();
-		final Map<String, Node> shs = new HashMap<String, Node>();
+	private List<SvekNode> getNodesOrderedTop(Collection<SvekLine> lines) {
+		final List<SvekNode> firsts = new ArrayList<>();
+		final Set<String> tops = new HashSet<>();
+		final Map<String, SvekNode> shs = new HashMap<String, SvekNode>();
 
-		for (final Iterator<Node> it = nodes.iterator(); it.hasNext();) {
-			final Node node = it.next();
+		for (final Iterator<SvekNode> it = nodes.iterator(); it.hasNext();) {
+			final SvekNode node = it.next();
 			shs.put(node.getUid(), node);
 			if (node.isTop() && node.getEntityPosition() == EntityPosition.NORMAL) {
 				firsts.add(node);
@@ -192,16 +190,16 @@ public class Cluster implements Moveable {
 			}
 		}
 
-		for (Line l : lines) {
+		for (SvekLine l : lines) {
 			if (tops.contains(l.getStartUidPrefix())) {
-				final Node sh = shs.get(l.getEndUidPrefix());
+				final SvekNode sh = shs.get(l.getEndUidPrefix());
 				if (sh != null && sh.getEntityPosition() == EntityPosition.NORMAL) {
 					firsts.add(0, sh);
 				}
 			}
 
 			if (l.isInverted()) {
-				final Node sh = shs.get(l.getStartUidPrefix());
+				final SvekNode sh = shs.get(l.getStartUidPrefix());
 				if (sh != null && sh.getEntityPosition() == EntityPosition.NORMAL) {
 					firsts.add(0, sh);
 				}
@@ -211,13 +209,13 @@ public class Cluster implements Moveable {
 		return firsts;
 	}
 
-	private List<Node> getNodesOrderedWithoutTop(Collection<Line> lines) {
-		final List<Node> all = new ArrayList<Node>(nodes);
-		final Set<String> tops = new HashSet<String>();
-		final Map<String, Node> shs = new HashMap<String, Node>();
+	private List<SvekNode> getNodesOrderedWithoutTop(Collection<SvekLine> lines) {
+		final List<SvekNode> all = new ArrayList<>(nodes);
+		final Set<String> tops = new HashSet<>();
+		final Map<String, SvekNode> shs = new HashMap<String, SvekNode>();
 
-		for (final Iterator<Node> it = all.iterator(); it.hasNext();) {
-			final Node sh = it.next();
+		for (final Iterator<SvekNode> it = all.iterator(); it.hasNext();) {
+			final SvekNode sh = it.next();
 			if (sh.getEntityPosition() != EntityPosition.NORMAL) {
 				it.remove();
 				continue;
@@ -229,16 +227,16 @@ public class Cluster implements Moveable {
 			}
 		}
 
-		for (Line l : lines) {
+		for (SvekLine l : lines) {
 			if (tops.contains(l.getStartUidPrefix())) {
-				final Node sh = shs.get(l.getEndUidPrefix());
+				final SvekNode sh = shs.get(l.getEndUidPrefix());
 				if (sh != null) {
 					all.remove(sh);
 				}
 			}
 
 			if (l.isInverted()) {
-				final Node sh = shs.get(l.getStartUidPrefix());
+				final SvekNode sh = shs.get(l.getStartUidPrefix());
 				if (sh != null) {
 					all.remove(sh);
 				}
@@ -297,7 +295,16 @@ public class Cluster implements Moveable {
 	}
 
 	static public StyleSignature getDefaultStyleDefinition(SName styleName) {
+		if (styleName == SName.stateDiagram)
+			return StyleSignature.of(SName.root, SName.element, SName.stateDiagram, SName.state, SName.group);
 		return StyleSignature.of(SName.root, SName.element, styleName, SName.group);
+	}
+
+	static public StyleSignature getDefaultStyleDefinitionStateGroup(Stereotype stereotype) {
+		if (stereotype == null)
+			return StyleSignature.of(SName.root, SName.element, SName.stateDiagram, SName.state, SName.group);
+		return StyleSignature.of(SName.root, SName.element, SName.stateDiagram, SName.state, SName.group)
+				.with(stereotype);
 	}
 
 	public void drawU(UGraphic ug, UStroke strokeForState, UmlDiagramType umlDiagramType, ISkinParam skinParam2) {
@@ -308,20 +315,21 @@ public class Cluster implements Moveable {
 		if (fullName.startsWith("##") == false) {
 			ug.draw(new UComment("cluster " + fullName));
 		}
-		final Stereotype stereotype = group.getStereotype();
 		HColor borderColor;
+		Style style = null;
 		if (UseStyle.useBetaStyle()) {
-			final Style style = getDefaultStyleDefinition(umlDiagramType.getStyleName())
+			style = getDefaultStyleDefinition(umlDiagramType.getStyleName())
 					.getMergedStyle(skinParam.getCurrentStyleBuilder());
-			borderColor = style.value(PName.LineColor).asColor(skinParam2.getIHtmlColorSet());
+			borderColor = style.value(PName.LineColor).asColor(skinParam2.getThemeStyle(),
+					skinParam2.getIHtmlColorSet());
 
 		} else {
 			if (umlDiagramType == UmlDiagramType.STATE) {
-				borderColor = getColor(ColorParam.stateBorder, skinParam, stereotype);
+				borderColor = getColor(ColorParam.stateBorder, skinParam, group.getStereotype());
 			} else if (umlDiagramType == UmlDiagramType.ACTIVITY) {
-				borderColor = getColor(ColorParam.packageBorder, skinParam, stereotype);
+				borderColor = getColor(ColorParam.packageBorder, skinParam, group.getStereotype());
 			} else {
-				borderColor = getColor(ColorParam.packageBorder, skinParam, stereotype);
+				borderColor = getColor(ColorParam.packageBorder, skinParam, group.getStereotype());
 			}
 		}
 
@@ -362,8 +370,6 @@ public class Cluster implements Moveable {
 			final double shadowing;
 			final UStroke stroke;
 			if (UseStyle.useBetaStyle()) {
-				final Style style = getDefaultStyleDefinition(umlDiagramType.getStyleName())
-						.getMergedStyle(skinParam.getCurrentStyleBuilder());
 				shadowing = style.value(PName.Shadowing).asDouble();
 				stroke = style.getStroke();
 			} else {
@@ -374,18 +380,18 @@ public class Cluster implements Moveable {
 					shadowing = skinParam2.shadowing2(group.getStereotype(), group.getUSymbol().getSkinParameter()) ? 3
 							: 0;
 				}
-				stroke = getStrokeInternal(skinParam2);
+				stroke = getStrokeInternal(group, skinParam2);
 			}
-			HColor backColor = getBackColor(umlDiagramType);
+			HColor backColor = getBackColor(umlDiagramType, style);
 			backColor = getBackColor(backColor, skinParam2, group.getStereotype(), umlDiagramType.getStyleName());
 			if (ztitle != null || zstereo != null) {
 				final double roundCorner = group.getUSymbol() == null ? 0
-						: group.getUSymbol().getSkinParameter().getRoundCorner(skinParam, stereotype);
+						: group.getUSymbol().getSkinParameter().getRoundCorner(skinParam, group.getStereotype());
 
 				final ClusterDecoration decoration = new ClusterDecoration(packageStyle, group.getUSymbol(), ztitle,
 						zstereo, minX, minY, maxX, maxY, stroke);
 				decoration.drawU(ug, backColor, borderColor, shadowing, roundCorner,
-						skinParam2.getHorizontalAlignment(AlignmentParam.packageTitleAlignment, null, false),
+						skinParam2.getHorizontalAlignment(AlignmentParam.packageTitleAlignment, null, false, null),
 						skinParam2.getStereotypeAlignment());
 				return;
 			}
@@ -402,7 +408,7 @@ public class Cluster implements Moveable {
 
 	}
 
-	private UStroke getStrokeInternal(ISkinParam skinParam) {
+	static public UStroke getStrokeInternal(IGroup group, ISkinParam skinParam) {
 		final Colors colors = group.getColors(skinParam);
 		if (colors.getSpecificLineStroke() != null) {
 			return colors.getSpecificLineStroke();
@@ -411,17 +417,12 @@ public class Cluster implements Moveable {
 			return group.getUSymbol().getSkinParameter().getStroke(skinParam, group.getStereotype());
 		}
 		return GeneralImageBuilder.getForcedStroke(group.getStereotype(), skinParam);
-//		UStroke stroke = skinParam.getThickness(LineParam.packageBorder, group.getStereotype());
-//		if (stroke == null) {
-//			stroke = new UStroke(1.5);
-//		}
-//		return stroke;
 	}
 
 	public void manageEntryExitPoint(StringBounder stringBounder) {
-		final Collection<ClusterPosition> insides = new ArrayList<ClusterPosition>();
-		final List<Point2D> points = new ArrayList<Point2D>();
-		for (Node sh : nodes) {
+		final Collection<ClusterPosition> insides = new ArrayList<>();
+		final List<Point2D> points = new ArrayList<>();
+		for (SvekNode sh : nodes) {
 			if (sh.getEntityPosition() == EntityPosition.NORMAL) {
 				insides.add(sh.getClusterPosition());
 			} else {
@@ -457,7 +458,7 @@ public class Cluster implements Moveable {
 
 	}
 
-	private HColor getColor(ISkinParam skinParam, ColorParam colorParam, Stereotype stereo) {
+	private HColor getColorLegacy(ISkinParam skinParam, ColorParam colorParam, Stereotype stereo) {
 		return new Rose().getHtmlColor(skinParam, stereo, colorParam);
 	}
 
@@ -472,13 +473,18 @@ public class Cluster implements Moveable {
 					+ IEntityImage.MARGIN_LINE;
 		}
 
-		HColor stateBack = getBackColor(umlDiagramType);
+		final Style styleGroup = getDefaultStyleDefinitionStateGroup(group.getStereotype())
+				.getMergedStyle(skinParam.getCurrentStyleBuilder());
+
+		HColor stateBack = getBackColor(umlDiagramType, styleGroup);
 		if (stateBack == null) {
-			stateBack = getColor(skinParam2, ColorParam.stateBackground, group.getStereotype());
+			stateBack = getColorLegacy(skinParam2, ColorParam.stateBackground, group.getStereotype());
 		}
-		final HColor background = getColor(skinParam2, ColorParam.background, null);
-		final Style style = getStyle(FontParam.STATE_ATTRIBUTE, skinParam2);
-		final TextBlock attribute = GeneralImageBuilder.stateHeader(group, style, skinParam2);
+		final HColor background = getColorLegacy(skinParam2, ColorParam.background, null);
+
+		// final Style style = getStyle(FontParam.STATE_ATTRIBUTE, skinParam2);
+
+		final TextBlock attribute = GeneralImageBuilder.stateHeader(group, styleGroup, skinParam2);
 		final double attributeHeight = attribute.calculateDimension(ug.getStringBounder()).getHeight();
 		if (total.getWidth() == 0) {
 			System.err.println("Cluster::drawUState issue");
@@ -517,8 +523,8 @@ public class Cluster implements Moveable {
 		return fontParam.getStyleDefinition(SName.stateDiagram).getMergedStyle(skinParam.getCurrentStyleBuilder());
 	}
 
-	private boolean isThereALinkFromOrToGroup(Collection<Line> lines) {
-		for (Line line : lines) {
+	private boolean isThereALinkFromOrToGroup(Collection<SvekLine> lines) {
+		for (SvekLine line : lines) {
 			if (line.isLinkFromOrTo(group)) {
 				return true;
 			}
@@ -526,14 +532,14 @@ public class Cluster implements Moveable {
 		return false;
 	}
 
-	public void printCluster1(StringBuilder sb, Collection<Line> lines, StringBounder stringBounder) {
-		for (Node node : getNodesOrderedTop(lines)) {
+	public void printCluster1(StringBuilder sb, Collection<SvekLine> lines, StringBounder stringBounder) {
+		for (SvekNode node : getNodesOrderedTop(lines)) {
 			node.appendShape(sb, stringBounder);
 		}
 	}
 
 	private List<IShapePseudo> addProtection(List<? extends IShapePseudo> entries, double width) {
-		final List<IShapePseudo> result = new ArrayList<IShapePseudo>();
+		final List<IShapePseudo> result = new ArrayList<>();
 		result.add(entries.get(0));
 		for (int i = 1; i < entries.size(); i++) {
 			// Pseudo space for the label
@@ -592,7 +598,7 @@ public class Cluster implements Moveable {
 
 	private List<? extends IShapePseudo> withPositionProtected(StringBounder stringBounder,
 			Set<EntityPosition> targets) {
-		final List<Node> result = withPosition(targets);
+		final List<SvekNode> result = withPosition(targets);
 		final double maxWith = getMaxWidthFromLabelForEntryExit(result, stringBounder);
 		final double naturalSpace = 70;
 		if (maxWith > naturalSpace) {
@@ -601,10 +607,10 @@ public class Cluster implements Moveable {
 		return result;
 	}
 
-	private List<Node> withPosition(Set<EntityPosition> positions) {
-		final List<Node> result = new ArrayList<Node>();
-		for (final Iterator<Node> it = nodes.iterator(); it.hasNext();) {
-			final Node sh = it.next();
+	private List<SvekNode> withPosition(Set<EntityPosition> positions) {
+		final List<SvekNode> result = new ArrayList<>();
+		for (final Iterator<SvekNode> it = nodes.iterator(); it.hasNext();) {
+			final SvekNode sh = it.next();
 			if (positions.contains(sh.getEntityPosition())) {
 				result.add(sh);
 			}
@@ -618,11 +624,11 @@ public class Cluster implements Moveable {
 		printRanks(RANK_SINK, withPositionProtected(stringBounder, EntityPosition.getOutputs()), sb, stringBounder);
 	}
 
-	public Node printCluster2(StringBuilder sb, Collection<Line> lines, StringBounder stringBounder, DotMode dotMode,
-			GraphvizVersion graphvizVersion, UmlDiagramType type) {
+	public SvekNode printCluster2(StringBuilder sb, Collection<SvekLine> lines, StringBounder stringBounder,
+			DotMode dotMode, GraphvizVersion graphvizVersion, UmlDiagramType type) {
 
-		Node added = null;
-		for (Node node : getNodesOrderedWithoutTop(lines)) {
+		SvekNode added = null;
+		for (SvekNode node : getNodesOrderedWithoutTop(lines)) {
 			node.appendShape(sb, stringBounder);
 			added = node;
 		}
@@ -639,16 +645,16 @@ public class Cluster implements Moveable {
 		return added;
 	}
 
-	private void appendRankSame(StringBuilder sb, Collection<Line> lines) {
+	private void appendRankSame(StringBuilder sb, Collection<SvekLine> lines) {
 		for (String same : getRankSame(lines)) {
 			sb.append(same);
 			SvekUtils.println(sb);
 		}
 	}
 
-	private Set<String> getRankSame(Collection<Line> lines) {
-		final Set<String> rankSame = new HashSet<String>();
-		for (Line l : lines) {
+	private Set<String> getRankSame(Collection<SvekLine> lines) {
+		final Set<String> rankSame = new HashSet<>();
+		for (SvekLine l : lines) {
 			if (l.hasEntryPoint()) {
 				continue;
 			}
@@ -665,7 +671,7 @@ public class Cluster implements Moveable {
 	}
 
 	public void fillRankMin(Set<String> rankMin) {
-		for (Node sh : getNodes()) {
+		for (SvekNode sh : getNodes()) {
 			if (sh.isTop()) {
 				rankMin.add(sh.getUid());
 			}
@@ -677,7 +683,7 @@ public class Cluster implements Moveable {
 	}
 
 	private boolean isInCluster(String uid) {
-		for (Node node : nodes) {
+		for (SvekNode node : nodes) {
 			if (node.getUid().equals(uid)) {
 				return true;
 			}
@@ -738,8 +744,8 @@ public class Cluster implements Moveable {
 		return null;
 	}
 
-	private void printInternal(StringBuilder sb, Collection<Line> lines, StringBounder stringBounder, DotMode dotMode,
-			GraphvizVersion graphvizVersion, UmlDiagramType type) {
+	private void printInternal(StringBuilder sb, Collection<SvekLine> lines, StringBounder stringBounder,
+			DotMode dotMode, GraphvizVersion graphvizVersion, UmlDiagramType type) {
 		final boolean thereALinkFromOrToGroup2 = isThereALinkFromOrToGroup(lines);
 		boolean thereALinkFromOrToGroup1 = thereALinkFromOrToGroup2;
 		final boolean useProtectionWhenThereALinkFromOrToGroup = graphvizVersion
@@ -753,7 +759,7 @@ public class Cluster implements Moveable {
 		}
 		final Set<EntityPosition> entityPositionsExceptNormal = entityPositionsExceptNormal();
 		if (entityPositionsExceptNormal.size() > 0) {
-			for (Line line : lines) {
+			for (SvekLine line : lines) {
 				if (line.isLinkFromOrTo(group)) {
 					line.setProjectionCluster(this);
 				}
@@ -779,11 +785,11 @@ public class Cluster implements Moveable {
 		final String label;
 		if (isLabel()) {
 			final StringBuilder sblabel = new StringBuilder("<");
-			Line.appendTable(sblabel, getTitleAndAttributeWidth(), getTitleAndAttributeHeight() - 5, colorTitle);
+			SvekLine.appendTable(sblabel, getTitleAndAttributeWidth(), getTitleAndAttributeHeight() - 5, colorTitle);
 			sblabel.append(">");
 			label = sblabel.toString();
 			final HorizontalAlignment align = skinParam.getHorizontalAlignment(AlignmentParam.packageTitleAlignment,
-					null, false);
+					null, false, null);
 			sb.append("labeljust=\"" + align.getGraphVizValue() + "\";");
 		} else {
 			label = "\"\"";
@@ -827,7 +833,7 @@ public class Cluster implements Moveable {
 		SvekUtils.println(sb);
 		printCluster1(sb, lines, stringBounder);
 
-		final Node added = printCluster2(sb, lines, stringBounder, dotMode, graphvizVersion, type);
+		final SvekNode added = printCluster2(sb, lines, stringBounder, dotMode, graphvizVersion, type);
 		if (entityPositionsExceptNormal.size() > 0) {
 			if (hasPort()) {
 				sb.append(empty() + " [shape=rect,width=.01,height=.01,label=");
@@ -894,7 +900,7 @@ public class Cluster implements Moveable {
 		return colorTitle;
 	}
 
-	private final HColor getBackColor(final UmlDiagramType umlDiagramType) {
+	private final HColor getBackColor(UmlDiagramType umlDiagramType, Style style) {
 		if (EntityUtils.groupRoot(group)) {
 			return null;
 		}
@@ -903,6 +909,11 @@ public class Cluster implements Moveable {
 			return result;
 		}
 		final Stereotype stereo = group.getStereotype();
+
+		if (UseStyle.useBetaStyle()) {
+			return style.value(PName.BackGroundColor).asColor(skinParam.getThemeStyle(), skinParam.getIHtmlColorSet());
+		}
+
 		final USymbol sym = group.getUSymbol() == null ? USymbol.PACKAGE : group.getUSymbol();
 		final ColorParam backparam = umlDiagramType == UmlDiagramType.ACTIVITY ? ColorParam.partitionBackground
 				: sym.getColorParamBack();
@@ -913,7 +924,7 @@ public class Cluster implements Moveable {
 		if (parentCluster == null) {
 			return null;
 		}
-		return parentCluster.getBackColor(umlDiagramType);
+		return parentCluster.getBackColor(umlDiagramType, style);
 	}
 
 	public boolean isClusterOf(IEntity ent) {
@@ -927,7 +938,8 @@ public class Cluster implements Moveable {
 		if (UseStyle.useBetaStyle()) {
 			final Style style = getDefaultStyleDefinition(styleName).getMergedStyle(skinParam.getCurrentStyleBuilder());
 			if (backColor == null) {
-				backColor = style.value(PName.BackGroundColor).asColor(skinParam.getIHtmlColorSet());
+				backColor = style.value(PName.BackGroundColor).asColor(skinParam.getThemeStyle(),
+						skinParam.getIHtmlColorSet());
 			}
 			if (backColor == null || backColor.equals(HColorUtils.transparent())) {
 				backColor = new HColorBackground(skinParam.getBackgroundColor(false));

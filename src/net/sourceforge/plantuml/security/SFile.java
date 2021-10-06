@@ -50,6 +50,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -75,7 +76,7 @@ public class SFile implements Comparable<SFile> {
 
 	public static char separatorChar = File.separatorChar;
 
-	public final File internal;
+	private final File internal;
 
 	@Override
 	public String toString() {
@@ -114,7 +115,7 @@ public class SFile implements Comparable<SFile> {
 	}
 
 	public boolean exists() {
-		if (isFileOk())
+		if (internal != null && isFileOk())
 			return internal.exists();
 		return false;
 	}
@@ -124,11 +125,11 @@ public class SFile implements Comparable<SFile> {
 	}
 
 	public boolean isAbsolute() {
-		return internal.isAbsolute();
+		return internal != null && internal.isAbsolute();
 	}
 
 	public boolean isDirectory() {
-		return internal.exists() && internal.isDirectory();
+		return internal != null && internal.exists() && internal.isDirectory();
 	}
 
 	public String getName() {
@@ -136,7 +137,7 @@ public class SFile implements Comparable<SFile> {
 	}
 
 	public boolean isFile() {
-		return internal.isFile();
+		return internal != null && internal.isFile();
 	}
 
 	public long lastModified() {
@@ -169,7 +170,7 @@ public class SFile implements Comparable<SFile> {
 
 	public Collection<SFile> listFiles() {
 		final File[] tmp = internal.listFiles();
-		final List<SFile> result = new ArrayList<SFile>(tmp.length);
+		final List<SFile> result = new ArrayList<>(tmp.length);
 		for (File f : tmp) {
 			result.add(new SFile(f));
 		}
@@ -315,7 +316,7 @@ public class SFile implements Comparable<SFile> {
 		return null;
 	}
 
-	public File conv() throws FileNotFoundException {
+	public File conv() {
 		return internal;
 	}
 
@@ -356,6 +357,10 @@ public class SFile implements Comparable<SFile> {
 
 	public PrintStream createPrintStream(String charset) throws FileNotFoundException, UnsupportedEncodingException {
 		return new PrintStream(internal, charset);
+	}
+
+	public PrintStream createPrintStream(Charset charset) throws FileNotFoundException, UnsupportedEncodingException {
+		return new PrintStream(internal, charset.name());
 	}
 
 }

@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import net.sourceforge.plantuml.Direction;
 import net.sourceforge.plantuml.cucadiagram.LinkStyle;
@@ -80,10 +81,7 @@ public class Worm implements Iterable<Point2D.Double> {
 
 	public void drawInternalOneColor(UPolygon startDecoration, UGraphic ug, HtmlColorAndStyle colorAndStyle,
 			double stroke, Direction emphasizeDirection, UPolygon endDecoration) {
-		final HColor arrowColor = colorAndStyle.getArrowColor();
-		if (arrowColor == null) {
-			throw new IllegalArgumentException();
-		}
+		final HColor arrowColor = Objects.requireNonNull(colorAndStyle.getArrowColor());
 		final LinkStyle style = colorAndStyle.getStyle();
 		if (style.isInvisible()) {
 			return;
@@ -311,12 +309,19 @@ public class Worm implements Iterable<Point2D.Double> {
 		this.points.add(i, pt);
 	}
 
-	private Point2D getFirst() {
+	public Point2D getFirst() {
 		return points.get(0);
 	}
 
 	public Point2D getLast() {
 		return points.get(points.size() - 1);
+	}
+
+	public double getMinX() {
+		double result = points.get(0).getX();
+		for (Point2D.Double pt : points)
+			result = Math.min(result, pt.getX());
+		return result;
 	}
 
 	public Worm merge(Worm other, MergeStrategy merge) {

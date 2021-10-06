@@ -60,6 +60,7 @@ import net.sourceforge.plantuml.graphic.USymbol;
 import net.sourceforge.plantuml.graphic.color.ColorParser;
 import net.sourceforge.plantuml.graphic.color.ColorType;
 import net.sourceforge.plantuml.graphic.color.Colors;
+import net.sourceforge.plantuml.ugraphic.color.NoSuchColorException;
 import net.sourceforge.plantuml.utils.UniqueSequence;
 
 public class CommandPackage extends SingleLineCommand2<AbstractEntityDiagram> {
@@ -78,7 +79,7 @@ public class CommandPackage extends SingleLineCommand2<AbstractEntityDiagram> {
 								RegexLeaf.spaceOneOrMore(), //
 								new RegexLeaf("as"), //
 								RegexLeaf.spaceOneOrMore(), //
-								new RegexLeaf("AS", "([\\p{L}0-9_.]+)") //
+								new RegexLeaf("AS", "([%pLN_.]+)") //
 						)), //
 				RegexLeaf.spaceZeroOrMore(), //
 				new RegexLeaf("STEREOTYPE", "(\\<\\<.*\\>\\>)?"), //
@@ -101,7 +102,8 @@ public class CommandPackage extends SingleLineCommand2<AbstractEntityDiagram> {
 	}
 
 	@Override
-	protected CommandExecutionResult executeArg(AbstractEntityDiagram diagram, LineLocation location, RegexResult arg) {
+	protected CommandExecutionResult executeArg(AbstractEntityDiagram diagram, LineLocation location, RegexResult arg)
+			throws NoSuchColorException {
 		final String idShort;
 		/* final */String display;
 		final String name = StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote(arg.get("NAME", 0));
@@ -153,7 +155,8 @@ public class CommandPackage extends SingleLineCommand2<AbstractEntityDiagram> {
 			p.addUrl(url);
 		}
 
-		final Colors colors = color().getColor(arg, diagram.getSkinParam().getIHtmlColorSet());
+		final Colors colors = color().getColor(diagram.getSkinParam().getThemeStyle(), arg,
+				diagram.getSkinParam().getIHtmlColorSet());
 		p.setColors(colors);
 
 		return CommandExecutionResult.ok();

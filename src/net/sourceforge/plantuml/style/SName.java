@@ -46,6 +46,7 @@ public enum SName {
 	artifact, //
 	boundary, //
 	box, //
+	boxless, //
 	caption, //
 	card, //
 	circle, //
@@ -53,13 +54,14 @@ public enum SName {
 	class_, //
 	clickable, //
 	cloud, //
+	closed, //
 	collection, //
 	collections, //
 	component, //
 	componentDiagram, //
+	constraintArrow, //
 	control, //
 	database, //
-	databse, //
 	delay, //
 	destroy, //
 	diamond, //
@@ -74,20 +76,27 @@ public enum SName {
 	group, //
 	groupHeader, //
 	header, //
+	hexagon, //
+	highlight, //
 	interface_, //
 	jsonDiagram, //
 	gitDiagram, //
+	label, //
 	leafNode, //
 	legend, //
 	lifeLine, //
 	milestone, //
 	mindmapDiagram, //
+	network, //
 	node, //
 	note, //
+	nwdiagDiagram, //
 	objectDiagram, //
+	object, //
 	package_, //
 	participant, //
 	partition, //
+	person, //
 	queue, //
 	rectangle, //
 	reference, //
@@ -97,15 +106,21 @@ public enum SName {
 	saltDiagram, //
 	separator, //
 	sequenceDiagram, //
+	server, //
 	stack, //
 	stateDiagram, //
+	state, //
 	stereotype, //
 	storage, //
 	swimlane, //
 	task, //
+	timeline, //
+	timingDiagram, //
 	title, //
+	unstartedTask, //
 	usecase, //
-	wbsDiagram; //
+	wbsDiagram, //
+	yamlDiagram; //
 
 	public static String depth(int level) {
 		return "depth(" + level + ")";

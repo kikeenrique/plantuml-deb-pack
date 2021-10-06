@@ -61,7 +61,7 @@ import net.sourceforge.plantuml.ugraphic.color.HColorUtils;
 
 public class PlayerBinary extends Player {
 
-	private final List<TimeConstraint> constraints = new ArrayList<TimeConstraint>();
+	private final List<TimeConstraint> constraints = new ArrayList<>();
 	private final SortedMap<TimeTick, Boolean> values = new TreeMap<TimeTick, Boolean>();
 	private Boolean initialState;
 
@@ -76,9 +76,6 @@ public class PlayerBinary extends Player {
 
 	public double getFullHeight(StringBounder stringBounder) {
 		return getHeightForConstraints(stringBounder) + suggestedHeight;
-	}
-
-	public void drawFrameTitle(UGraphic ug) {
 	}
 
 	private SymbolContext getContext() {

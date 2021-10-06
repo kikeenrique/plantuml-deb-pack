@@ -54,6 +54,7 @@ import net.sourceforge.plantuml.command.note.CommandFactoryNoteOnEntity;
 import net.sourceforge.plantuml.command.note.CommandFactoryNoteOnLink;
 import net.sourceforge.plantuml.command.regex.RegexLeaf;
 import net.sourceforge.plantuml.command.regex.RegexOr;
+import net.sourceforge.plantuml.core.UmlSource;
 import net.sourceforge.plantuml.descdiagram.command.CommandArchimate;
 import net.sourceforge.plantuml.descdiagram.command.CommandArchimateMultilines;
 import net.sourceforge.plantuml.descdiagram.command.CommandCreateElementFull;
@@ -64,20 +65,14 @@ import net.sourceforge.plantuml.descdiagram.command.CommandPackageWithUSymbol;
 
 public class DescriptionDiagramFactory extends PSystemCommandFactory {
 
-	private final ISkinSimple skinParam;
-
-	public DescriptionDiagramFactory(ISkinSimple skinParam) {
-		this.skinParam = skinParam;
-	}
-
 	@Override
-	public DescriptionDiagram createEmptyDiagram() {
-		return new DescriptionDiagram(skinParam);
+	public DescriptionDiagram createEmptyDiagram(UmlSource source, ISkinSimple skinParam) {
+		return new DescriptionDiagram(source, skinParam);
 	}
 
 	@Override
 	protected List<Command> createCommands() {
-		final List<Command> cmds = new ArrayList<Command>();
+		final List<Command> cmds = new ArrayList<>();
 
 		cmds.add(new CommandFootboxIgnored());
 		cmds.add(new CommandNamespaceSeparator());
@@ -85,7 +80,6 @@ public class DescriptionDiagramFactory extends PSystemCommandFactory {
 		cmds.add(new CommandNewpage(this));
 		addCommonCommands1(cmds);
 
-		cmds.add(new CommandPage());
 		cmds.add(new CommandLinkElement());
 		cmds.add(new CommandHideShow2());
 		cmds.add(new CommandRemoveRestore());
@@ -101,8 +95,8 @@ public class DescriptionDiagramFactory extends PSystemCommandFactory {
 		
 		final CommandFactoryNoteOnEntity factoryNoteOnEntityCommand = new CommandFactoryNoteOnEntity("desc",
 				new RegexOr("ENTITY", //
-						new RegexLeaf("[\\p{L}0-9_.]+"), //
-						new RegexLeaf("\\(\\)[%s]*[\\p{L}0-9_.]+"), //
+						new RegexLeaf("[%pLN_.]+"), //
+						new RegexLeaf("\\(\\)[%s]*[%pLN_.]+"), //
 						new RegexLeaf("\\(\\)[%s]*[%g][^%g]+[%g]"), //
 						new RegexLeaf("\\[[^\\]*]+[^\\]]*\\]"), //
 						new RegexLeaf("\\((?!\\*\\))[^\\)]+\\)"), //

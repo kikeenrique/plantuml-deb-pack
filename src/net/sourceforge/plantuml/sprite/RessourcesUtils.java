@@ -35,6 +35,8 @@
  */
 package net.sourceforge.plantuml.sprite;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -70,9 +72,9 @@ public class RessourcesUtils {
 			final URL versionURL = Version.class.getClassLoader().getResource(classFile);
 			final String jarPath = versionURL.getPath().substring(5, versionURL.getPath().indexOf("!"));
 			if (folder) {
-				return listFolders(new JarFile(URLDecoder.decode(jarPath, "UTF-8")), path + "/");
+				return listFolders(new JarFile(URLDecoder.decode(jarPath, UTF_8.name())), path + "/");
 			} else {
-				return listFiles(new JarFile(URLDecoder.decode(jarPath, "UTF-8")), path + "/");
+				return listFiles(new JarFile(URLDecoder.decode(jarPath, UTF_8.name())), path + "/");
 
 			}
 		}
@@ -86,7 +88,7 @@ public class RessourcesUtils {
 
 	private static Set<String> listFiles(JarFile jarFile, String path) {
 		final Enumeration<JarEntry> entries = jarFile.entries();
-		final Set<String> result = new TreeSet<String>();
+		final Set<String> result = new TreeSet<>();
 		while (entries.hasMoreElements()) {
 			final String name = entries.nextElement().getName();
 			if (name.startsWith(path)) {
@@ -98,7 +100,7 @@ public class RessourcesUtils {
 
 	private static Set<String> listFolders(JarFile jarFile, String path) {
 		final Enumeration<JarEntry> entries = jarFile.entries();
-		final Set<String> result = new TreeSet<String>();
+		final Set<String> result = new TreeSet<>();
 		while (entries.hasMoreElements()) {
 			final String name = entries.nextElement().getName();
 			if (name.startsWith(path)) {
@@ -113,7 +115,7 @@ public class RessourcesUtils {
 	}
 
 	private static Set<String> listEntry(SFile dir) {
-		final Set<String> result = new TreeSet<String>();
+		final Set<String> result = new TreeSet<>();
 		for (String n : dir.list()) {
 			result.add(n);
 		}

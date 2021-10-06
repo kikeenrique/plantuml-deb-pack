@@ -106,7 +106,8 @@ public class StripeTable implements Stripe {
 			}
 			final String[] color = line.substring(idx1, idx2).split(",");
 			if (idx < color.length) {
-				return skinParam.getIHtmlColorSet().getColorIfValid(color[idx]);
+				final String s = color[idx];
+				return s == null ? null : skinParam.getIHtmlColorSet().getColorOrWhite(skinParam.getThemeStyle(), s);
 			}
 		}
 		return null;
@@ -141,7 +142,7 @@ public class StripeTable implements Stripe {
 				v = withouBackColor(v);
 			}
 			final List<String> lines = getWithNewlinesInternal(v);
-			final List<StripeSimple> cells = new ArrayList<StripeSimple>();
+			final List<StripeSimple> cells = new ArrayList<>();
 			for (String s : lines) {
 				final StripeSimple cell = new StripeSimple(getFontConfiguration(mode), stripeStyle, new CreoleContext(),
 						skinParam, CreoleMode.FULL);
@@ -157,7 +158,7 @@ public class StripeTable implements Stripe {
 	}
 
 	static List<String> getWithNewlinesInternal(String s) {
-		final List<String> result = new ArrayList<String>();
+		final List<String> result = new ArrayList<>();
 		final StringBuilder current = new StringBuilder();
 		for (int i = 0; i < s.length(); i++) {
 			final char c = s.charAt(i);

@@ -38,16 +38,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.TikzFontDistortion;
 import net.sourceforge.plantuml.creole.legacy.AtomText;
-import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.posimo.DotPath;
 import net.sourceforge.plantuml.ugraphic.AbstractCommonUGraphic;
 import net.sourceforge.plantuml.ugraphic.AbstractUGraphic;
 import net.sourceforge.plantuml.ugraphic.ClipContainer;
 import net.sourceforge.plantuml.ugraphic.UCenteredCharacter;
 import net.sourceforge.plantuml.ugraphic.UEllipse;
-import net.sourceforge.plantuml.ugraphic.UGraphic2;
 import net.sourceforge.plantuml.ugraphic.UImage;
 import net.sourceforge.plantuml.ugraphic.UImageSvg;
 import net.sourceforge.plantuml.ugraphic.ULine;
@@ -56,24 +53,22 @@ import net.sourceforge.plantuml.ugraphic.UPolygon;
 import net.sourceforge.plantuml.ugraphic.URectangle;
 import net.sourceforge.plantuml.ugraphic.UText;
 import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
+import net.sourceforge.plantuml.ugraphic.color.HColor;
 
-public class UGraphicVdx extends AbstractUGraphic<VisioGraphics> implements ClipContainer, UGraphic2 {
-
-	private final StringBounder stringBounder;
+public class UGraphicVdx extends AbstractUGraphic<VisioGraphics> implements ClipContainer {
 
 	public double dpiFactor() {
 		return 1;
 	}
 
-	private UGraphicVdx(ColorMapper colorMapper, VisioGraphics visio) {
-		super(colorMapper, visio);
-		this.stringBounder = FileFormat.PNG.getDefaultStringBounder(TikzFontDistortion.getDefault());
+	private UGraphicVdx(HColor defaultBackground, ColorMapper colorMapper, VisioGraphics visio) {
+		super(defaultBackground, colorMapper, FileFormat.PNG.getDefaultStringBounder(), visio);
 		register();
 
 	}
 
-	public UGraphicVdx(ColorMapper colorMapper) {
-		this(colorMapper, new VisioGraphics());
+	public UGraphicVdx(HColor defaultBackground, ColorMapper colorMapper) {
+		this(defaultBackground, colorMapper, new VisioGraphics());
 
 	}
 
@@ -84,13 +79,12 @@ public class UGraphicVdx extends AbstractUGraphic<VisioGraphics> implements Clip
 
 	private UGraphicVdx(UGraphicVdx other) {
 		super(other);
-		this.stringBounder = other.stringBounder;
 		register();
 	}
 
 	private void register() {
 		registerDriver(URectangle.class, new DriverRectangleVdx());
-		registerDriver(UText.class, new DriverTextVdx(stringBounder));
+		registerDriver(UText.class, new DriverTextVdx(getStringBounder()));
 		registerDriver(AtomText.class, new DriverNoneVdx());
 		registerDriver(ULine.class, new DriverLineVdx());
 		registerDriver(UPolygon.class, new DriverPolygonVdx());
@@ -102,15 +96,8 @@ public class UGraphicVdx extends AbstractUGraphic<VisioGraphics> implements Clip
 		registerDriver(UCenteredCharacter.class, new DriverNoneVdx());
 	}
 
-	public StringBounder getStringBounder() {
-		return stringBounder;
-	}
-
-	public void writeImageTOBEMOVED(OutputStream os, String metadata, int dpi) throws IOException {
-		createVsd(os);
-	}
-
-	public void createVsd(OutputStream os) throws IOException {
+	@Override
+	public void writeToStream(OutputStream os, String metadata, int dpi) throws IOException {
 		getGraphicObject().createVsd(os);
 	}
 

@@ -38,11 +38,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.TikzFontDistortion;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.eps.EpsGraphics;
 import net.sourceforge.plantuml.eps.EpsStrategy;
-import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.UDrawable;
 import net.sourceforge.plantuml.posimo.DotPath;
 import net.sourceforge.plantuml.ugraphic.AbstractCommonUGraphic;
@@ -50,7 +48,6 @@ import net.sourceforge.plantuml.ugraphic.AbstractUGraphic;
 import net.sourceforge.plantuml.ugraphic.ClipContainer;
 import net.sourceforge.plantuml.ugraphic.UCenteredCharacter;
 import net.sourceforge.plantuml.ugraphic.UEllipse;
-import net.sourceforge.plantuml.ugraphic.UGraphic2;
 import net.sourceforge.plantuml.ugraphic.UImage;
 import net.sourceforge.plantuml.ugraphic.ULine;
 import net.sourceforge.plantuml.ugraphic.UPath;
@@ -58,10 +55,9 @@ import net.sourceforge.plantuml.ugraphic.UPolygon;
 import net.sourceforge.plantuml.ugraphic.URectangle;
 import net.sourceforge.plantuml.ugraphic.UText;
 import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
+import net.sourceforge.plantuml.ugraphic.color.HColor;
 
-public class UGraphicEps extends AbstractUGraphic<EpsGraphics> implements ClipContainer, UGraphic2 {
-
-	private final StringBounder stringBounder;
+public class UGraphicEps extends AbstractUGraphic<EpsGraphics> implements ClipContainer {
 
 	private final EpsStrategy strategyTOBEREMOVED;
 
@@ -72,19 +68,17 @@ public class UGraphicEps extends AbstractUGraphic<EpsGraphics> implements ClipCo
 
 	protected UGraphicEps(UGraphicEps other) {
 		super(other);
-		this.stringBounder = other.stringBounder;
 		this.strategyTOBEREMOVED = other.strategyTOBEREMOVED;
 		register(strategyTOBEREMOVED);
 	}
 
-	public UGraphicEps(ColorMapper colorMapper, EpsStrategy strategy) {
-		this(colorMapper, strategy, strategy.creatEpsGraphics());
+	public UGraphicEps(HColor defaultBackground, ColorMapper colorMapper, EpsStrategy strategy) {
+		this(defaultBackground, colorMapper, strategy, strategy.creatEpsGraphics());
 	}
 
-	private UGraphicEps(ColorMapper colorMapper, EpsStrategy strategy, EpsGraphics eps) {
-		super(colorMapper, eps);
+	private UGraphicEps(HColor defaultBackground, ColorMapper colorMapper, EpsStrategy strategy, EpsGraphics eps) {
+		super(defaultBackground, colorMapper, FileFormat.PNG.getDefaultStringBounder(), eps);
 		this.strategyTOBEREMOVED = strategy;
-		this.stringBounder = FileFormat.PNG.getDefaultStringBounder(TikzFontDistortion.getDefault());
 		register(strategy);
 	}
 
@@ -112,17 +106,13 @@ public class UGraphicEps extends AbstractUGraphic<EpsGraphics> implements ClipCo
 		return this.getGraphicObject();
 	}
 
-	public StringBounder getStringBounder() {
-		return stringBounder;
-	}
-
 	public void drawEps(String eps, double x, double y) {
 		this.getGraphicObject().drawEps(eps, x, y);
 	}
 
-	static public String getEpsString(ColorMapper colorMapper, EpsStrategy epsStrategy, UDrawable udrawable)
-			throws IOException {
-		final UGraphicEps ug = new UGraphicEps(colorMapper, epsStrategy);
+	static public String getEpsString(HColor defaultBackground, ColorMapper colorMapper, EpsStrategy epsStrategy,
+			UDrawable udrawable) throws IOException {
+		final UGraphicEps ug = new UGraphicEps(defaultBackground, colorMapper, epsStrategy);
 		udrawable.drawU(ug);
 		return ug.getEPSCode();
 	}
@@ -135,7 +125,8 @@ public class UGraphicEps extends AbstractUGraphic<EpsGraphics> implements ClipCo
 		getGraphicObject().closeLink();
 	}
 
-	public void writeImageTOBEMOVED(OutputStream os, String metadata, int dpi) throws IOException {
+	@Override
+	public void writeToStream(OutputStream os, String metadata, int dpi) throws IOException {
 		os.write(getEPSCode().getBytes());
 	}
 

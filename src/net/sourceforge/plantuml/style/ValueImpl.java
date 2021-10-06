@@ -36,7 +36,9 @@
 package net.sourceforge.plantuml.style;
 
 import java.awt.Font;
+import java.util.Objects;
 
+import net.sourceforge.plantuml.ThemeStyle;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
 import net.sourceforge.plantuml.ugraphic.color.HColor;
 import net.sourceforge.plantuml.ugraphic.color.HColorSet;
@@ -48,8 +50,13 @@ public class ValueImpl implements Value {
 	private final int priority;
 
 	public ValueImpl(String value, AutomaticCounter counter) {
-		this.value = value;
+		this.value = Objects.requireNonNull(value);
 		this.priority = counter.getNextInt();
+	}
+
+	public ValueImpl(String value, int priority) {
+		this.value = value;
+		this.priority = priority;
 	}
 
 	@Override
@@ -61,14 +68,17 @@ public class ValueImpl implements Value {
 		return value;
 	}
 
-	public HColor asColor(HColorSet set) {
+	public HColor asColor(ThemeStyle themeStyle, HColorSet set) {
 		if ("none".equalsIgnoreCase(value)) {
 			return null;
 		}
 		if ("transparent".equalsIgnoreCase(value)) {
 			return HColorUtils.transparent();
 		}
-		return set.getColorIfValid(value);
+		if (value == null) {
+			return null;
+		}
+		return set.getColorOrWhite(themeStyle, value);
 	}
 
 	public boolean asBoolean() {

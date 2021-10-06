@@ -37,15 +37,14 @@ package net.sourceforge.plantuml.donors;
 
 import java.awt.geom.Dimension2D;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import net.sourceforge.plantuml.AbstractPSystem;
 import net.sourceforge.plantuml.BackSlash;
 import net.sourceforge.plantuml.FileFormatOption;
+import net.sourceforge.plantuml.PlainDiagram;
 import net.sourceforge.plantuml.code.AsciiEncoder;
 import net.sourceforge.plantuml.code.CompressionBrotli;
 import net.sourceforge.plantuml.code.NoPlantumlCompressionException;
@@ -53,51 +52,47 @@ import net.sourceforge.plantuml.code.StringCompressorNone;
 import net.sourceforge.plantuml.code.Transcoder;
 import net.sourceforge.plantuml.code.TranscoderImpl;
 import net.sourceforge.plantuml.core.DiagramDescription;
-import net.sourceforge.plantuml.core.ImageData;
+import net.sourceforge.plantuml.core.UmlSource;
 import net.sourceforge.plantuml.graphic.GraphicStrings;
 import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.graphic.UDrawable;
-import net.sourceforge.plantuml.style.ClockwiseTopRightBottomLeft;
 import net.sourceforge.plantuml.svek.TextBlockBackcolored;
 import net.sourceforge.plantuml.ugraphic.AffineTransformType;
-import net.sourceforge.plantuml.ugraphic.ImageBuilder;
-import net.sourceforge.plantuml.ugraphic.ImageParameter;
 import net.sourceforge.plantuml.ugraphic.PixelImage;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.UImage;
 import net.sourceforge.plantuml.ugraphic.UTranslate;
-import net.sourceforge.plantuml.ugraphic.color.ColorMapperIdentity;
-import net.sourceforge.plantuml.ugraphic.color.HColor;
-import net.sourceforge.plantuml.ugraphic.color.HColorUtils;
 import net.sourceforge.plantuml.version.PSystemVersion;
 
-public class PSystemDonors extends AbstractPSystem {
+public class PSystemDonors extends PlainDiagram {
 
 	private static final int COLS = 6;
 	private static final int FREE_LINES = 6;
 
-	public static final String DONORS = "6wyC0AmFkBap0wp4H6CjU-RENbb-8cPf4i7oFA4uiOZJNK3y0UwT7lSRwI-YAxltJJEYrckJSWPHVH3q"
-			+ "W7UtXVQXzBy-27EYV0Z-tGWU80D4ITH6ZIpt9Djjcof3Il3lEr_v9UWTth51ehbAgiMHwq-_8GFlEsFp"
-			+ "x3I-UFLeWZO2FmRsrVcVQ_NQ7kb2GV9veXHAkanefoODi_-N3j9O0j_0itRHbhPsqaY72koem6DV-ULh"
-			+ "vyEZoQeOMOeKGIka8D0RCmHoqdk3RFH1uPVw8RJPN64fovb076seHzVNQnFRHWpVAF61m0sn81E1EP1o"
-			+ "p2oYo7FJZG9N10w-MSp6MagEF9c4O1vQo9i_r9CIZvHdJeUB0iyZG23mD0gGj4O1JJXRSXYGEP8j4fQu"
-			+ "wi9nOmwFm_AKUYGDdoOMF1RK0jGGv7_G1PqMQtmqETlLO4lgQP9xjqxKdn6FSsrMz5MN9WdpjVRIR2Ak"
-			+ "CMM9L6CRdwEzvX60kwLMZlWo-XZa2EhzvbM8rOyMa1-17ge9I_9dsGyMeY2gRTY7tdLsdpnc4Gx8a6bY"
-			+ "7RoBBQ-fN-WITLQGP0LOvE_ChmkRu84jT2NaOU09BNCkwtm2avPMxnSz6jRk4wunYzshuvxeQ5XA__sg"
-			+ "3pE3uW0jb9W5tMbWK4RJAbvi80AxXHuFk2cGAw7SNPTYzt6HFl8J06zIUj0LDaY24CylIcuwX8Y6TEr9"
-			+ "iGAOU4gfYmBV0WjsROAkHfL-UbcjzZXTBTENZGdtIHiyhpKOGt5CHwalp7Ul2hSmDAj6itgpzYxc55p9"
-			+ "nq5UzPx5kGhWqiAxueDh_f41UQPNHaGQJLVVjk4VcPjL66QXvzoiIdTLFxXvwF21krZKnOmoUSXKq7YG"
-			+ "Y9hwbU2d9SFVOiYg_DMDyWvMf-km46P6FBYzDBcW9aSKkAQp71OR1CognIjEYONh2TQmw6Isi2aYprZT"
-			+ "3ndoE-2Ji5Gp2qq0kuQx0C_8FGhauRn7LYshroPqBY17DXFqfGLJBOMAzBL01emrwUcqHcn_Mc01MzfZ"
-			+ "TAnmA7pPH6kL6nIO0gQRa7xX81Bb3T4IlQX98e3_-NENUlAv3kBupXW-6GUIFIGXe0f5TzY9qbEw7js6"
-			+ "iLwZxzTBkVa8_lnhZpOv1UsUdoOGhOFayS-401pbAFJWQU2loISdxrvOanMSYmnNBbPwF92mO1ZlxA8k"
-			+ "NcR4xiHakPfSj8hyKERVubguc1nYGugBVb3HOab9BpUhGIMsVVXTXuiSAFubgfH4SbchpcGa-0HcSUwE"
-			+ "VRLXgDig6X11TLGce7VNRwTPxXfpla9Iqt0PaE-toAcaHMZ1cfhQ-qAWMupzlIdxAK-B_sH4Fx7MwkEg"
-			+ "7W87ERhSBgBXcn58EwOdCLmat110lppdX0TklkaXBwe5fM5ftGmxJh12VeMNy4B27jluW2BBgpIht923"
-			+ "RY5xeHge3oYg2Hx8mA93roGMb78y84LIOCxPCZABb8CsuBcU0N2A0llxUmt2gHFDBsZMtfvHIEPYpCru"
-			+ "1X4VpiyWOPCfcnyvi2_BNBPwHMwY5kcm0z-ExpXV_uYwUX218X1bIV2YBjBXndopD6mgvZTrtCUbDcyc"
-			+ "ty2bQEkKWUqoazq0cm4bdWH0xA2WGiKhylDyOCivYVnxlp4LDcl2KsOyim00";
+	public static final String DONORS = "6mOE03mSRygAqa-2sUB1zgHs3y67oAViE8BbUK9nOX6dku3u0zmxFUutqbz4LtRlcsP4hTScvGoY-Y3e"
+			+ "0Uzk2-r3wNzz4EOiUH7ScH9SG0g8ukWI-P5kP3jzKcL82RxyZVJFg8c_kaepeSDd0_UtWMiJ21dDARPx"
+			+ "cJAlLqYb59-_yX7w138rLbrJbICmjvO2rb-oUYLzo_zDdQtBGo7CqjqAZC2eQ8JBFFOO_vygg70ATWur"
+			+ "xFHZEfLKBOTgLMApxKqHhQIvOrQeR_9Hg-QY62r5YdyqKl2BP8R6dCm-ILxqcyOVTHCwN9yAoN9FG6TR"
+			+ "FJgVz7QkAx7y8j67W2VuWcm6Hi1of2wY-RdfHiF30mxrkwZ6bfRSyoG9Wane8H_-KPYINf9dLy1Dmwi6"
+			+ "8FpUXWAI7DIeXhELkm6LbDYYqy9L5_k5kMKTbgTod3GyXLXucQW5L0aI7tH1PzGyRqtkxWPRfAT4Ozeg"
+			+ "bCy2EsYR2_h6bXB1V6qVcYNuAqQvbDGupdlltxKNWDtIygg7CKSuPw0kMoZ4U6k1-X7eiJbXYRwct5d8"
+			+ "WgYFqvi-TAuvgLM4Kt9BMQpJbx3bjPmVkgJ91YLv2YpwU-ANOWjui4bNKwe1NsYLf5dd2vYqpD-N7Yt_"
+			+ "VI-ufaJith1e8rmXwQ_V4PiP2W4wE8NPq4q136MLLXt51YBOBNHiW7O4qWdbo779H_oIFl8J06yk8Rh2"
+			+ "HaWJ-FFBaeSEBc8WKzUcS06m-PIYBXe-3x1GeIdeLbG9fRVny9qvMlOvRMnQ9ktcURl16FandQLOcAzG"
+			+ "uH669Nf6SyxRsaVO9NWM7wTvrNkMSnNWKk4zQkFQBpBWvmmP4IawNV5UpsoPXmd3BFQSbodTyyZWuA5R"
+			+ "3jpDeZdCA9E7B1i6XnDHhO-4_hOO_fOXcvtN6bIVOEjqdH7SpCY2rrkJMwevek6noI9EDWb8CnUlE2KB"
+			+ "5n2iPTd971Kb8j-nUX8ov7UgJy9IfIuqZTXOxYeyetiKvE6y9rOzvayVw5n0bMeJXAG5Crj2-SpyW0oi"
+			+ "LVJCjYHs__U51MFhsnCJX-BB9jf-SWF159WUmddW81B9G5gYbpKn0lZkZxlLqsiTvl6tBwSO1qaBIGHK"
+			+ "GQOptb1cwgazmiPwY_wVj6MB2t_-jKURd9hisdi8edKG5u08Bz1HBWWXdW9V7pPC1vnWYOiECbovPkbP"
+			+ "8B9W2trm4tLvcz6uunVBZSj5QyyFLVBTt0uNyy4tfBW85ULzJIcPjfb1DT8ltdMuoK7nTr5bM2INlJcP"
+			+ "Z8HDe8fpT-pMDjHZoG0pc0EL2UpT_LbPQ6ZC_Ggaod02vFijaaf6XHPMQreH2u4rSk7stfQJyepwJ4Rq"
+			+ "axNE6Nlrq3Z8rVKN8GhV3WbvGPYuNIHE1EZDDISMTFDD0FcYMYY9fHqTTkvWXVmF_WZUI3Xc6nzOv0cb"
+			+ "UPODENIJx8EpG7qWxo4ia8d5Ibr5B9HoF90YAPYpMiQpIDjf2yxe7K2dA1Z_tziGBYVH_8fcbrxLIEPo"
+			+ "pBsuWiY6-xj8R56oDI0T-rhcigqpSZld8Xrswd_WEyvtFg9kNKH00b5BWjUMWtHtOvzQ6ZQrvteLnt6P"
+			+ "fuF9BsHNjFELWQtnOWkodCr0YIS1X1q85P9NuLVx1wuvvyYlzwbI6AZXUUOMTEEvDp0MAvR4KzA0waqM"
+			+ "vTht1-xanGc54ui5BYmLRlGmgLihd6h7JPlrf569NALYl8Snkxcav9yg1fNIDRcze6P9Q5rtbj4Pd6nX"
+			+ "Bi_xl7jX1fNw9UfJmHu33TU7RvmXlRAiOXyX50RLk31POW00";
 
 	/*
 	 * Special thanks to our sponsors and donors:
@@ -105,19 +100,12 @@ public class PSystemDonors extends AbstractPSystem {
 	 * - Noam Tamim
 	 */
 
-	@Override
-	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat, long seed)
-			throws IOException {
-		final UDrawable result = getGraphicStrings();
-		HColor backcolor = HColorUtils.WHITE;
-		final ImageParameter imageParameter = new ImageParameter(new ColorMapperIdentity(), false, null, 1.0,
-				getMetadata(), null, ClockwiseTopRightBottomLeft.none(), backcolor);
-		final ImageBuilder imageBuilder = ImageBuilder.build(imageParameter);
-		imageBuilder.setUDrawable(result);
-		return imageBuilder.writeImageTOBEMOVED(fileFormat, seed, os);
+	public PSystemDonors(UmlSource source) {
+		super(source);
 	}
 
-	private UDrawable getGraphicStrings() throws IOException {
+	@Override
+	protected UDrawable getRootDrawable(FileFormatOption fileFormatOption) throws IOException {
 		final List<TextBlock> cols = getCols(getDonors(), COLS, FREE_LINES);
 		return new UDrawable() {
 			public void drawU(UGraphic ug) {
@@ -144,7 +132,7 @@ public class PSystemDonors extends AbstractPSystem {
 	}
 
 	public static List<TextBlock> getCols(List<String> lines, final int nbCol, final int reserved) throws IOException {
-		final List<TextBlock> result = new ArrayList<TextBlock>();
+		final List<TextBlock> result = new ArrayList<>();
 		final int maxLine = (lines.size() + (nbCol - 1) + reserved) / nbCol;
 		for (int i = 0; i < lines.size(); i += maxLine) {
 			final List<String> current = lines.subList(i, Math.min(lines.size(), i + maxLine));
@@ -154,7 +142,7 @@ public class PSystemDonors extends AbstractPSystem {
 	}
 
 	private List<String> getDonors() throws IOException {
-		final List<String> lines = new ArrayList<String>();
+		final List<String> lines = new ArrayList<>();
 		final Transcoder t = TranscoderImpl.utf8(new AsciiEncoder(), new StringCompressorNone(),
 				new CompressionBrotli());
 		try {
@@ -173,8 +161,8 @@ public class PSystemDonors extends AbstractPSystem {
 		return new DiagramDescription("(Donors)");
 	}
 
-	public static PSystemDonors create() {
-		return new PSystemDonors();
+	public static PSystemDonors create(UmlSource source) {
+		return new PSystemDonors(source);
 	}
 
 }

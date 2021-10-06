@@ -35,6 +35,7 @@
  */
 package net.sourceforge.plantuml.graphic;
 
+import net.sourceforge.plantuml.ThemeStyle;
 import net.sourceforge.plantuml.command.regex.Matcher2;
 import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.command.regex.Pattern2;
@@ -43,17 +44,18 @@ import net.sourceforge.plantuml.ugraphic.color.HColorSet;
 
 class ColorAndSizeChange implements FontChange {
 
-	static final Pattern2 colorPattern = MyPattern.cmpile("(?i)color\\s*=\\s*[%g]?(#[0-9a-fA-F]{6}|\\w+)[%g]?");
+	static final Pattern2 colorPattern = MyPattern.cmpile("color\\s*=\\s*[%g]?(#[0-9a-fA-F]{6}|\\w+)[%g]?");
 
-	static final Pattern2 sizePattern = MyPattern.cmpile("(?i)size\\s*=\\s*[%g]?(\\d+)[%g]?");
+	static final Pattern2 sizePattern = MyPattern.cmpile("size\\s*=\\s*[%g]?(\\d+)[%g]?");
 
 	private final HColor color;
 	private final Integer size;
 
-	ColorAndSizeChange(String s) {
+	ColorAndSizeChange(ThemeStyle themeStyle, String s) {
 		final Matcher2 matcherColor = colorPattern.matcher(s);
 		if (matcherColor.find()) {
-			color = HColorSet.instance().getColorIfValid(matcherColor.group(1));
+			final String s1 = matcherColor.group(1);
+			color = HColorSet.instance().getColorOrWhite(themeStyle, s1);
 		} else {
 			color = null;
 		}

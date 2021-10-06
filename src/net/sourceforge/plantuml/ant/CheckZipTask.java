@@ -55,8 +55,8 @@ import net.sourceforge.plantuml.security.SecurityUtils;
 public class CheckZipTask extends Task {
 
 	private String zipfile = null;
-	private List<FileSet> filesets = new ArrayList<FileSet>();
-	private List<FileList> filelists = new ArrayList<FileList>();
+	private List<FileSet> filesets = new ArrayList<>();
+	private List<FileList> filelists = new ArrayList<>();
 
 	/**
 	 * Add a set of files to touch
@@ -107,29 +107,29 @@ public class CheckZipTask extends Task {
 		return entries.contains(s);
 	}
 
-	private final List<String> entries = new ArrayList<String>();
+	private final List<String> entries = new ArrayList<>();
 
 	private void loadZipFile(SFile file) throws IOException {
 
 		this.entries.clear();
-		final PrintWriter pw = SecurityUtils.createPrintWriter("tmp.txt");
 		final InputStream tmp = file.openFile();
 		if (tmp == null) {
 			throw new FileNotFoundException();
 		}
-		final ZipInputStream zis = new ZipInputStream(tmp);
-		ZipEntry ze = zis.getNextEntry();
-
-		while (ze != null) {
-			final String fileName = ze.getName();
-			this.entries.add(fileName);
-			if (fileName.endsWith("/") == false) {
-				pw.println("<file name=\"" + fileName + "\" />");
+		try (
+			final PrintWriter pw = SecurityUtils.createPrintWriter("tmp.txt");
+			final ZipInputStream zis = new ZipInputStream(tmp);
+		) {
+			ZipEntry ze = zis.getNextEntry();
+			while (ze != null) {
+				final String fileName = ze.getName();
+				this.entries.add(fileName);
+				if (fileName.endsWith("/") == false) {
+					pw.println("<file name=\"" + fileName + "\" />");
+				}
+				ze = zis.getNextEntry();
 			}
-			ze = zis.getNextEntry();
 		}
-		pw.close();
-		zis.close();
 	}
 
 	private synchronized void myLog(String s) {

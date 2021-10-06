@@ -45,15 +45,17 @@ import net.sourceforge.plantuml.command.PSystemBasicFactory;
 import net.sourceforge.plantuml.command.regex.Matcher2;
 import net.sourceforge.plantuml.command.regex.MyPattern;
 import net.sourceforge.plantuml.command.regex.Pattern2;
+import net.sourceforge.plantuml.core.UmlSource;
 
 public class PSystemXearthFactory extends PSystemBasicFactory<PSystemXearth> {
 
 	private final Map<String, String> config = new LinkedHashMap<String, String>();
-	private final List<Marker> markers = new ArrayList<Marker>();
+	private final List<Marker> markers = new ArrayList<>();
 	private int width;
 	private int height;
 
-	public PSystemXearth init(String startLine) {
+	@Override
+	public PSystemXearth initDiagram(UmlSource source, String startLine) {
 		this.width = 512;
 		this.height = 512;
 		this.config.clear();
@@ -72,10 +74,10 @@ public class PSystemXearthFactory extends PSystemBasicFactory<PSystemXearth> {
 	}
 
 	@Override
-	public PSystemXearth executeLine(PSystemXearth system, String line) {
+	public PSystemXearth executeLine(UmlSource source, PSystemXearth system, String line) {
 		if (system == null && line.startsWith("xearth")) {
 			extractDimension(line);
-			system = new PSystemXearth(width, height, config, markers);
+			system = new PSystemXearth(source, width, height, config, markers);
 			return system;
 		}
 		if (system == null) {

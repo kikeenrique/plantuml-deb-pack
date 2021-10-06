@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sourceforge.plantuml.EmbeddedDiagram;
 import net.sourceforge.plantuml.FontParam;
@@ -66,17 +68,15 @@ public class BodyEnhanced1 extends BodyEnhancedAbstract implements TextBlock, Wi
 	private final FontParam fontParam;
 	private final ISkinParam skinParam;
 	private final boolean lineFirst;
-	private final List<Url> urls = new ArrayList<Url>();
+	private final List<Url> urls = new ArrayList<>();
 	private final Stereotype stereotype;
 	private final ILeaf entity;
 	private final boolean inEllipse;
 	private final Style style;
 
-	BodyEnhanced1(List<CharSequence> rawBody, FontParam fontParam, ISkinParam skinParam, Stereotype stereotype,
-			ILeaf entity, Style style) {
-		super(skinParam.getDefaultTextAlignment(HorizontalAlignment.LEFT),
-				new FontConfiguration(skinParam, fontParam, stereotype));
-
+	BodyEnhanced1(HorizontalAlignment align, List<CharSequence> rawBody, FontParam fontParam, ISkinParam skinParam,
+			Stereotype stereotype, ILeaf entity, Style style) {
+		super(align, new FontConfiguration(skinParam, fontParam, stereotype));
 		this.style = style;
 		this.rawBody2 = Display.create(rawBody);
 		this.stereotype = stereotype;
@@ -89,11 +89,10 @@ public class BodyEnhanced1 extends BodyEnhancedAbstract implements TextBlock, Wi
 		this.inEllipse = false;
 	}
 
-	BodyEnhanced1(Display display, FontParam fontParam, ISkinParam skinParam, HorizontalAlignment align,
+	BodyEnhanced1(HorizontalAlignment align, Display display, FontParam fontParam, ISkinParam skinParam,
 			Stereotype stereotype, ILeaf entity, Style style) {
-		super(skinParam.getDefaultTextAlignment(align),
-				style == null ? new FontConfiguration(skinParam, fontParam, stereotype)
-						: style.getFontConfiguration(skinParam.getIHtmlColorSet()));
+		super(align, style == null ? new FontConfiguration(skinParam, fontParam, stereotype)
+				: style.getFontConfiguration(skinParam.getThemeStyle(), skinParam.getIHtmlColorSet()));
 
 		this.style = style;
 		this.entity = entity;
@@ -118,6 +117,7 @@ public class BodyEnhanced1 extends BodyEnhancedAbstract implements TextBlock, Wi
 	}
 
 	private static boolean isTreeOrTable(String s) {
+		s = StringUtils.trinNoTrace(s);
 		return Parser.isTreeStart(s) || CreoleParser.isTableLine(s);
 	}
 
@@ -127,7 +127,7 @@ public class BodyEnhanced1 extends BodyEnhancedAbstract implements TextBlock, Wi
 			return area;
 		}
 		urls.clear();
-		final List<TextBlock> blocks = new ArrayList<TextBlock>();
+		final List<TextBlock> blocks = new ArrayList<>();
 
 		char separator = lineFirst ? '_' : 0;
 		TextBlock title = null;
@@ -198,12 +198,18 @@ public class BodyEnhanced1 extends BodyEnhancedAbstract implements TextBlock, Wi
 	}
 
 	private static List<CharSequence> buildTreeOrTable(String init, ListIterator<CharSequence> it) {
-		final List<CharSequence> result = new ArrayList<CharSequence>();
-		result.add(init);
+		final List<CharSequence> result = new ArrayList<>();
+		final Pattern p = Pattern.compile("^(\\s+)");
+		final Matcher m = p.matcher(init);
+		String start = "";
+		if (m.find()) {
+			start = m.group(1);
+		}
+		result.add(purge(init, start));
 		while (it.hasNext()) {
-			final CharSequence s = it.next();
-			if (isTreeOrTable(StringUtils.trinNoTrace(s))) {
-				result.add(s);
+			String s = it.next().toString();
+			if (isTreeOrTable(s)) {
+				result.add(purge(s, start));
 			} else {
 				it.previous();
 				return result;
@@ -211,6 +217,13 @@ public class BodyEnhanced1 extends BodyEnhancedAbstract implements TextBlock, Wi
 
 		}
 		return result;
+	}
+
+	private static String purge(String s, String start) {
+		if (s.startsWith(start)) {
+			return s.substring(start.length());
+		}
+		return s;
 	}
 
 	public Ports getPorts(StringBounder stringBounder) {

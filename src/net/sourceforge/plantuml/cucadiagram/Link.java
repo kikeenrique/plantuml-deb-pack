@@ -36,6 +36,7 @@
 package net.sourceforge.plantuml.cucadiagram;
 
 import java.awt.geom.Dimension2D;
+import java.util.Objects;
 
 import net.sourceforge.plantuml.Hideable;
 import net.sourceforge.plantuml.ISkinSimple;
@@ -98,6 +99,7 @@ public class Link extends WithLinkType implements Hideable, Removeable {
 	private String sametail;
 	private VisibilityModifier visibilityModifier;
 	private final StyleBuilder styleBuilder;
+	private Stereotype stereotype;
 
 	private Url url;
 
@@ -137,16 +139,9 @@ public class Link extends WithLinkType implements Hideable, Removeable {
 		if (length < 1) {
 			throw new IllegalArgumentException();
 		}
-		if (cl1 == null) {
-			throw new IllegalArgumentException();
-		}
-		if (cl2 == null) {
-			throw new IllegalArgumentException();
-		}
-
 		this.styleBuilder = styleBuilder;
-		this.cl1 = cl1;
-		this.cl2 = cl2;
+		this.cl1 = Objects.requireNonNull(cl1);
+		this.cl2 = Objects.requireNonNull(cl2);
 		this.type = type;
 		if (Display.isNull(label)) {
 			this.label = Display.NULL;
@@ -197,6 +192,7 @@ public class Link extends WithLinkType implements Hideable, Removeable {
 		result.port2 = this.port1;
 		result.url = this.url;
 		result.linkConstraint = this.linkConstraint;
+		result.stereotype = stereotype;
 		return result;
 	}
 
@@ -593,6 +589,14 @@ public class Link extends WithLinkType implements Hideable, Removeable {
 
 	public void setCodeLine(LineLocation location) {
 		this.codeLine = location;
+	}
+
+	public void setStereotype(Stereotype stereotype) {
+		this.stereotype = stereotype;
+	}
+
+	public final Stereotype getStereotype() {
+		return stereotype;
 	}
 
 }

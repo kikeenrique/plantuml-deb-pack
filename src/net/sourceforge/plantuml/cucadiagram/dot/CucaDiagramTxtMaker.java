@@ -35,6 +35,8 @@
  */
 package net.sourceforge.plantuml.cucadiagram.dot;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -105,7 +107,7 @@ public final class CucaDiagramTxtMaker {
 
 		final GraphvizSolverB solver = new GraphvizSolverB();
 
-		final Collection<Path> paths = new ArrayList<Path>();
+		final Collection<Path> paths = new ArrayList<>();
 		for (Link link : diagram.getLinks()) {
 			final Block b1 = blocks.get(link.getEntity1());
 			final Block b2 = blocks.get(link.getEntity2());
@@ -131,7 +133,7 @@ public final class CucaDiagramTxtMaker {
 		final int w = getWidth(ent);
 		final int h = getHeight(ent);
 		ug.getCharArea().drawBoxSimple(0, 0, w, h);
-		ug.getCharArea().drawStringsLRSimple(ent.getDisplay().as(), 1, 1);
+		ug.getCharArea().drawStringsLRSimple(ent.getDisplay().asList(), 1, 1);
 		if (showMember(ent)) {
 			int y = 2;
 			ug.getCharArea().drawHLine('-', y, 1, w - 1);
@@ -158,7 +160,7 @@ public final class CucaDiagramTxtMaker {
 
 	public List<SFile> createFiles(SFile suggestedFile) throws IOException {
 		if (fileFormat == FileFormat.UTXT) {
-			globalUg.getCharArea().print(suggestedFile.createPrintStream("UTF-8"));
+			globalUg.getCharArea().print(suggestedFile.createPrintStream(UTF_8));
 		} else {
 			globalUg.getCharArea().print(suggestedFile.createPrintStream());
 		}

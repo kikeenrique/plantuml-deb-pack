@@ -37,7 +37,6 @@ package net.sourceforge.plantuml.cucadiagram.dot;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,11 +56,7 @@ class GraphvizWindowsOld extends AbstractGraphviz {
 				specificDotExe = specificDotExeSlow();
 			}
 			if (specificDotExe == null)
-				try {
-					specificDotExe = new WindowsDotArchive().getWindowsExeLite();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				specificDotExe = WindowsDotArchive.getInstance().getWindowsExeLite();
 
 			return specificDotExe;
 		}
@@ -94,7 +89,7 @@ class GraphvizWindowsOld extends AbstractGraphviz {
 		if (dir.exists() == false || dir.isDirectory() == false) {
 			return null;
 		}
-		final List<File> dots = new ArrayList<File>();
+		final List<File> dots = new ArrayList<>();
 		final File[] files = dir.listFiles(new FileFilter() {
 			public boolean accept(java.io.File pathname) {
 				return pathname.isDirectory() && StringUtils.goLowerCase(pathname.getName()).startsWith("graphviz");

@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.sourceforge.plantuml.security.SFile;
@@ -62,9 +63,7 @@ public class FileUtils {
 		if (suffix.startsWith(".") == false) {
 			throw new IllegalArgumentException();
 		}
-		if (prefix == null) {
-			throw new IllegalArgumentException();
-		}
+		Objects.requireNonNull(prefix);
 		final File f;
 		if (counter == null) {
 			f = File.createTempFile(prefix, suffix);
@@ -81,9 +80,7 @@ public class FileUtils {
 		if (suffix.startsWith(".") == false) {
 			throw new IllegalArgumentException();
 		}
-		if (prefix == null) {
-			throw new IllegalArgumentException();
-		}
+		Objects.requireNonNull(prefix);
 		final SFile f;
 		if (counter == null) {
 			f = SFile.createTempFile(prefix, suffix);
@@ -142,9 +139,9 @@ public class FileUtils {
 	}
 
 	static public void copyToFile(byte[] src, SFile dest) throws IOException {
-		final OutputStream fos = dest.createBufferedOutputStream();
-		fos.write(src);
-		fos.close();
+		try (OutputStream fos = dest.createBufferedOutputStream()) {
+			fos.write(src);
+		}
 	}
 
 	static public String readSvg(SFile svgFile) throws IOException {
@@ -158,6 +155,11 @@ public class FileUtils {
 	static public String readSvg(InputStream is) throws IOException {
 		final BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		return readSvg(br, false, false);
+	}
+
+	static public String readText(InputStream is) throws IOException {
+		final BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		return readSvg(br, true, true);
 	}
 
 	static public String readFile(SFile svgFile) throws IOException {

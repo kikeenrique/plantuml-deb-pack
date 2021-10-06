@@ -35,8 +35,12 @@
  */
 package net.sourceforge.plantuml;
 
+import static java.util.Objects.requireNonNull;
+import static net.sourceforge.plantuml.utils.CharsetUtils.charsetOrDefault;
+
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -55,32 +59,42 @@ import net.sourceforge.plantuml.utils.StartUtils;
 
 public final class BlockUmlBuilder implements DefinitionsContainer {
 
-	private final List<BlockUml> blocks = new ArrayList<BlockUml>();
-	private Set<FileWithSuffix> usedFiles = new HashSet<FileWithSuffix>();
+	private final List<BlockUml> blocks = new ArrayList<>();
+	private Set<FileWithSuffix> usedFiles = new HashSet<>();
 	private final UncommentReadLine reader;
 	private final Defines defines;
 	private final ImportedFiles importedFiles;
-	private final String charset;
+	private final Charset charset;
 
+	/**
+	 * @deprecated being kept for backwards compatibility, perhaps other projects are using this? 
+	 */
+	@Deprecated
 	public BlockUmlBuilder(List<String> config, String charset, Defines defines, Reader readerInit, SFile newCurrentDir,
 			String desc) throws IOException {
-		ReadLineNumbered includer = null;
+		
+		this(config, charsetOrDefault(charset), defines, readerInit, newCurrentDir, desc);
+	}
+	
+	public BlockUmlBuilder(List<String> config, Charset charset, Defines defines, Reader readerInit, SFile newCurrentDir,
+			String desc) throws IOException {
+		
 		this.defines = defines;
-		this.charset = charset;
-		try {
-			this.reader = new UncommentReadLine(ReadLineReader.create(readerInit, desc));
-			this.importedFiles = ImportedFiles.createImportedFiles(new AParentFolderRegular(newCurrentDir));
-			includer = new Preprocessor(config, reader);
+		this.charset = requireNonNull(charset);
+		this.reader = new UncommentReadLine(ReadLineReader.create(readerInit, desc));
+		this.importedFiles = ImportedFiles.createImportedFiles(new AParentFolderRegular(newCurrentDir));
+		
+		try (ReadLineNumbered includer = new Preprocessor(config, reader)) {
 			init(includer);
 		} finally {
-			if (includer != null) {
-				includer.close();
-				// usedFiles = includer.getFilesUsedTOBEREMOVED();
-			}
 			readerInit.close();
 		}
 	}
 
+	/**
+	 * @deprecated being kept for backwards compatibility, perhaps other projects are using this? 
+	 */
+	@Deprecated
 	public BlockUmlBuilder(List<String> config, String charset, Defines defines, Reader reader) throws IOException {
 		this(config, charset, defines, reader, null, null);
 	}
@@ -92,7 +106,7 @@ public final class BlockUmlBuilder implements DefinitionsContainer {
 
 		while ((s = includer.readLine()) != null) {
 			if (StartUtils.isArobaseStartDiagram(s.getString())) {
-				current = new ArrayList<StringLocated>();
+				current = new ArrayList<>();
 				paused = false;
 			}
 			if (StartUtils.isArobasePauseDiagram(s.getString())) {
@@ -120,7 +134,7 @@ public final class BlockUmlBuilder implements DefinitionsContainer {
 				if (paused) {
 					current.add(s);
 				}
-				final BlockUml uml = new BlockUml(current, defines.cloneMe(), null, this);
+				final BlockUml uml = new BlockUml(current, defines.cloneMe(), null, this, charset);
 				usedFiles.addAll(uml.getIncluded());
 				blocks.add(uml);
 				current = null;
@@ -150,8 +164,12 @@ public final class BlockUmlBuilder implements DefinitionsContainer {
 		return importedFiles;
 	}
 
+	/**
+	 * @deprecated being kept for backwards compatibility, perhaps other projects are using this? 
+	 */
+	@Deprecated
 	public final String getCharset() {
-		return charset;
+		return charset.name();
 	}
 
 }

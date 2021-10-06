@@ -47,14 +47,13 @@ import net.sourceforge.plantuml.Dimension2DDouble;
 import net.sourceforge.plantuml.EmptyImageBuilder;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.SpriteContainerEmpty;
-import net.sourceforge.plantuml.SvgCharSizeHack;
-import net.sourceforge.plantuml.TikzFontDistortion;
 import net.sourceforge.plantuml.api.ImageDataSimple;
 import net.sourceforge.plantuml.core.ImageData;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.eps.EpsStrategy;
 import net.sourceforge.plantuml.graphic.FontConfiguration;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
+import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.graphic.TextBlock;
 import net.sourceforge.plantuml.png.PngIO;
 import net.sourceforge.plantuml.svg.LengthAdjust;
@@ -81,35 +80,38 @@ public class GraphicsSudoku {
 	}
 
 	public ImageData writeImageEps(OutputStream os) throws IOException {
-		final UGraphicEps ug = new UGraphicEps(new ColorMapperIdentity(), EpsStrategy.WITH_MACRO_AND_TEXT);
+		final UGraphicEps ug = new UGraphicEps(HColorUtils.WHITE, new ColorMapperIdentity(),
+				EpsStrategy.WITH_MACRO_AND_TEXT);
 		drawInternal(ug);
 		os.write(ug.getEPSCode().getBytes());
 		return ImageDataSimple.ok();
 	}
 
 	public ImageData writeImageSvg(OutputStream os) throws IOException {
-		final UGraphicSvg ug = new UGraphicSvg(true, new Dimension2DDouble(0, 0), new ColorMapperIdentity(),
-				(String) null, false, 1.0, null, null, 0, "none", SvgCharSizeHack.NO_HACK, LengthAdjust.defaultValue());
+		final UGraphicSvg ug = new UGraphicSvg(HColorUtils.WHITE, true, new Dimension2DDouble(0, 0),
+				new ColorMapperIdentity(), false, 1.0, null, null, 0, "none", FileFormat.SVG.getDefaultStringBounder(),
+				LengthAdjust.defaultValue());
 		drawInternal(ug);
-		ug.createXml(os, null);
+		ug.writeToStream(os, null, -1); // dpi param is not used
 		return ImageDataSimple.ok();
 	}
 
 	public ImageData writeImageLatex(OutputStream os, FileFormat fileFormat) throws IOException {
-		final UGraphicTikz ug = new UGraphicTikz(new ColorMapperIdentity(), 1, fileFormat == FileFormat.LATEX,
-				TikzFontDistortion.getDefault());
+		final UGraphicTikz ug = new UGraphicTikz(HColorUtils.WHITE, new ColorMapperIdentity(), FileFormat.LATEX.getDefaultStringBounder(), 1,
+				fileFormat == FileFormat.LATEX);
 		drawInternal(ug);
-		ug.createTikz(os);
+		ug.writeToStream(os, null, -1); // dpi param is not used
 		return ImageDataSimple.ok();
 	}
 
 	public ImageData writeImagePng(OutputStream os) throws IOException {
+		final StringBounder stringBounder = FileFormat.PNG.getDefaultStringBounder();
 		final EmptyImageBuilder builder = new EmptyImageBuilder(null, sudoWidth, sudoHeight + textTotalHeight,
-				Color.WHITE);
+				Color.WHITE, stringBounder);
 		final BufferedImage im = builder.getBufferedImage();
 		final Graphics2D g3d = builder.getGraphics2D();
 
-		final UGraphic ug = new UGraphicG2d(new ColorMapperIdentity(), g3d, 1.0);
+		final UGraphic ug = new UGraphicG2d(HColorUtils.WHITE, new ColorMapperIdentity(), stringBounder, g3d, 1.0);
 
 		drawInternal(ug);
 		g3d.dispose();
@@ -160,7 +162,7 @@ public class GraphicsSudoku {
 		}
 
 		ug = ug.apply(UTranslate.dy(sudoHeight));
-		final List<String> texts = new ArrayList<String>();
+		final List<String> texts = new ArrayList<>();
 		texts.add("http://plantuml.com");
 		texts.add("Seed " + Long.toString(sudoku.getSeed(), 36));
 		texts.add("Difficulty " + sudoku.getRatting());

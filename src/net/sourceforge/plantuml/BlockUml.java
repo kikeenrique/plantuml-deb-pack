@@ -35,7 +35,11 @@
  */
 package net.sourceforge.plantuml;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static net.sourceforge.plantuml.utils.CharsetUtils.charsetOrDefault;
+
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,14 +69,14 @@ public class BlockUml {
 	private Diagram system;
 	private final Defines localDefines;
 	private final ISkinSimple skinParam;
-	private final Set<FileWithSuffix> included = new HashSet<FileWithSuffix>();
+	private final Set<FileWithSuffix> included = new HashSet<>();
 
 	public Set<FileWithSuffix> getIncluded() {
 		return Collections.unmodifiableSet(included);
 	}
 
 	BlockUml(String... strings) {
-		this(convert(strings), Defines.createEmpty(), null, null);
+		this(convert(strings), Defines.createEmpty(), null, null, null);
 	}
 
 	public String getEncodedUrl() throws IOException {
@@ -97,7 +101,7 @@ public class BlockUml {
 	}
 
 	public static List<StringLocated> convert(List<String> strings) {
-		final List<StringLocated> result = new ArrayList<StringLocated>();
+		final List<StringLocated> result = new ArrayList<>();
 		LineLocationImpl location = new LineLocationImpl("block", null);
 		for (String s : strings) {
 			location = location.oneLineRead();
@@ -108,8 +112,16 @@ public class BlockUml {
 
 	private boolean preprocessorError;
 
+	/**
+	 * @deprecated being kept for backwards compatibility, perhaps other projects are using this? 
+	 */
+	@Deprecated
 	public BlockUml(List<StringLocated> strings, Defines defines, ISkinSimple skinParam, PreprocessorModeSet mode) {
-		this.rawSource = new ArrayList<StringLocated>(strings);
+		this(strings, defines, skinParam, mode, charsetOrDefault(mode.getCharset()));
+	}
+	
+	public BlockUml(List<StringLocated> strings, Defines defines, ISkinSimple skinParam, PreprocessorModeSet mode, Charset charset) {
+		this.rawSource = new ArrayList<>(strings);
 		this.localDefines = defines;
 		this.skinParam = skinParam;
 		final String s0 = strings.get(0).getTrimmed().getString();
@@ -117,9 +129,9 @@ public class BlockUml {
 			throw new IllegalArgumentException();
 		}
 		if (mode == null) {
-			this.data = new ArrayList<StringLocated>(strings);
+			this.data = new ArrayList<>(strings);
 		} else {
-			final TimLoader timLoader = new TimLoader(mode.getImportedFiles(), defines, mode.getCharset(),
+			final TimLoader timLoader = new TimLoader(mode.getImportedFiles(), defines, charset,
 					(DefinitionsContainer) mode);
 			this.included.addAll(timLoader.load(strings));
 			this.data = timLoader.getResultList();
@@ -175,7 +187,7 @@ public class BlockUml {
 			final AsciiEncoder coder = new AsciiEncoder();
 			final MessageDigest msgDigest = MessageDigest.getInstance("MD5");
 			for (StringLocated s : data) {
-				msgDigest.update(s.getString().getBytes("UTF-8"));
+				msgDigest.update(s.getString().getBytes(UTF_8));
 			}
 			final byte[] digest = msgDigest.digest();
 			return coder.encode(digest);
@@ -199,7 +211,7 @@ public class BlockUml {
 	}
 
 	public List<String> getDefinition(boolean withHeader) {
-		final List<String> result = new ArrayList<String>();
+		final List<String> result = new ArrayList<>();
 		for (StringLocated s : data) {
 			result.add(s.getString());
 		}

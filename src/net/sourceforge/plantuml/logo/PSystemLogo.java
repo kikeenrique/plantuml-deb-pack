@@ -44,30 +44,36 @@ import java.util.List;
 
 import net.sourceforge.plantuml.AbstractPSystem;
 import net.sourceforge.plantuml.EmptyImageBuilder;
+import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.api.ImageDataSimple;
 import net.sourceforge.plantuml.core.DiagramDescription;
 import net.sourceforge.plantuml.core.ImageData;
+import net.sourceforge.plantuml.core.UmlSource;
+import net.sourceforge.plantuml.graphic.StringBounder;
 import net.sourceforge.plantuml.png.PngIO;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.color.ColorMapperIdentity;
+import net.sourceforge.plantuml.ugraphic.color.HColorUtils;
 import net.sourceforge.plantuml.ugraphic.g2d.UGraphicG2d;
 
 public class PSystemLogo extends AbstractPSystem {
 
-	private final List<String> lines = new ArrayList<String>();
+	private final List<String> lines = new ArrayList<>();
 
-	public PSystemLogo() {
+	public PSystemLogo(UmlSource source) {
+		super(source);
 	}
 
 	@Override
-	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat, long seed)
+	final protected ImageData exportDiagramNow(OutputStream os, int num, FileFormatOption fileFormat)
 			throws IOException {
 		final int width = 640;
 		final int height = 480;
-		final EmptyImageBuilder builder = new EmptyImageBuilder(fileFormat.getWatermark(), width, height, Color.WHITE);
+		final StringBounder stringBounder = FileFormat.PNG.getDefaultStringBounder();
+		final EmptyImageBuilder builder = new EmptyImageBuilder(fileFormat.getWatermark(), width, height, Color.WHITE, stringBounder);
 		final BufferedImage im = builder.getBufferedImage();
-		final UGraphic ug = new UGraphicG2d(new ColorMapperIdentity(), builder.getGraphics2D(), 1.0);
+		final UGraphic ug = new UGraphicG2d(HColorUtils.WHITE, new ColorMapperIdentity(), stringBounder, builder.getGraphics2D(), 1.0);
 		((UGraphicG2d) ug).setBufferedImage(im);
 
 		final TurtleGraphicsPane turtleGraphicsPane = new TurtleGraphicsPane(width, height);

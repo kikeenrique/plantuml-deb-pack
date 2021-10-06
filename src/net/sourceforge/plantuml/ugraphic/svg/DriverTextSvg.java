@@ -52,6 +52,7 @@ import net.sourceforge.plantuml.ugraphic.UText;
 import net.sourceforge.plantuml.ugraphic.color.ColorMapper;
 import net.sourceforge.plantuml.ugraphic.color.HColor;
 import net.sourceforge.plantuml.ugraphic.color.HColorGradient;
+import net.sourceforge.plantuml.ugraphic.color.HColorUtils;
 
 public class DriverTextSvg implements UDriver<SvgGraphics> {
 
@@ -72,6 +73,9 @@ public class DriverTextSvg implements UDriver<SvgGraphics> {
 
 		final UText shape = (UText) ushape;
 		final FontConfiguration fontConfiguration = shape.getFontConfiguration();
+		if (HColorUtils.isTransparent(fontConfiguration.getColor())) {
+			return;
+		}
 		final UFont font = fontConfiguration.getFont();
 		String fontWeight = null;
 		if (fontConfiguration.containsStyle(FontStyle.BOLD) || font.isBold()) {
@@ -86,6 +90,11 @@ public class DriverTextSvg implements UDriver<SvgGraphics> {
 			textDecoration = "underline";
 		} else if (fontConfiguration.containsStyle(FontStyle.STRIKE)) {
 			textDecoration = "line-through";
+		} else if (fontConfiguration.containsStyle(FontStyle.WAVE)) {
+			// Beware that some current SVG implementations do not render the wave properly
+			// (e.g. Chrome just draws a straight line)
+			// Works ok on Firefox 85.
+			textDecoration = "wavy underline";
 		}
 
 		String text = shape.getText();

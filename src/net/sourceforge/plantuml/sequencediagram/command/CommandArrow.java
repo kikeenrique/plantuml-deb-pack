@@ -35,10 +35,14 @@
  */
 package net.sourceforge.plantuml.sequencediagram.command;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import net.sourceforge.plantuml.LineLocation;
 import net.sourceforge.plantuml.StringUtils;
+import net.sourceforge.plantuml.ThemeStyle;
 import net.sourceforge.plantuml.Url;
 import net.sourceforge.plantuml.UrlBuilder;
 import net.sourceforge.plantuml.UrlBuilder.ModeUrl;
@@ -63,10 +67,11 @@ import net.sourceforge.plantuml.skin.ArrowHead;
 import net.sourceforge.plantuml.skin.ArrowPart;
 import net.sourceforge.plantuml.ugraphic.color.HColor;
 import net.sourceforge.plantuml.ugraphic.color.HColorSet;
+import net.sourceforge.plantuml.ugraphic.color.NoSuchColorException;
 
 public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 
-	static final String ANCHOR = "(\\{([\\p{L}0-9_]+)\\}[%s]+)?";
+	static final String ANCHOR = "(\\{([%pLN_]+)\\}[%s]+)?";
 
 	public CommandArrow() {
 		super(getRegexConcat());
@@ -81,10 +86,10 @@ public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 				new RegexLeaf("PARALLEL", "(&[%s]*)?"), //
 				new RegexLeaf("ANCHOR", ANCHOR), //
 				new RegexOr("PART1", //
-						new RegexLeaf("PART1CODE", "([\\p{L}0-9_.@]+)"), //
+						new RegexLeaf("PART1CODE", "([%pLN_.@]+)"), //
 						new RegexLeaf("PART1LONG", "[%g]([^%g]+)[%g]"), //
-						new RegexLeaf("PART1LONGCODE", "[%g]([^%g]+)[%g][%s]*as[%s]+([\\p{L}0-9_.@]+)"), //
-						new RegexLeaf("PART1CODELONG", "([\\p{L}0-9_.@]+)[%s]+as[%s]*[%g]([^%g]+)[%g]")), //
+						new RegexLeaf("PART1LONGCODE", "[%g]([^%g]+)[%g][%s]*as[%s]+([%pLN_.@]+)"), //
+						new RegexLeaf("PART1CODELONG", "([%pLN_.@]+)[%s]+as[%s]*[%g]([^%g]+)[%g]")), //
 				new RegexLeaf("PART1ANCHOR", ANCHOR), //
 				RegexLeaf.spaceZeroOrMore(), //
 				new RegexLeaf("ARROW_DRESSING1",
@@ -101,20 +106,40 @@ public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 						"(_?>>?(?:[ox][%s])?|//?(?:[ox][%s])?|\\\\\\\\?(?:[ox][%s])?|[ox][%s])?"), //
 				RegexLeaf.spaceZeroOrMore(), //
 				new RegexOr("PART2", //
-						new RegexLeaf("PART2CODE", "([\\p{L}0-9_.@]+)"), //
+						new RegexLeaf("PART2CODE", "([%pLN_.@]+)"), //
 						new RegexLeaf("PART2LONG", "[%g]([^%g]+)[%g]"), //
-						new RegexLeaf("PART2LONGCODE", "[%g]([^%g]+)[%g][%s]*as[%s]+([\\p{L}0-9_.@]+)"), //
-						new RegexLeaf("PART2CODELONG", "([\\p{L}0-9_.@]+)[%s]+as[%s]*[%g]([^%g]+)[%g]")), //
+						new RegexLeaf("PART2LONGCODE", "[%g]([^%g]+)[%g][%s]*as[%s]+([%pLN_.@]+)"), //
+						new RegexLeaf("PART2CODELONG", "([%pLN_.@]+)[%s]+as[%s]*[%g]([^%g]+)[%g]")), //
+				new RegexLeaf("MULTICAST", "((?:\\s&\\s[%pLN_.@]+)*)"), //
 				new RegexLeaf("PART2ANCHOR", ANCHOR), //
 				RegexLeaf.spaceZeroOrMore(), //
-				new RegexLeaf("ACTIVATION", "(?:([+*!-]+)?)"), //
+				new RegexLeaf("ACTIVATION", "(?:(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?)"), //
 				RegexLeaf.spaceZeroOrMore(), //
 				new RegexLeaf("LIFECOLOR", "(?:(#\\w+)?)"), //
 				RegexLeaf.spaceZeroOrMore(), //
 				new RegexLeaf("URL", "(" + UrlBuilder.getRegexp() + ")?"), //
 				RegexLeaf.spaceZeroOrMore(), //
 				new RegexLeaf("MESSAGE", "(?::[%s]*(.*))?"), //
-				RegexLeaf.end());
+				RegexLeaf.end()).protectSize(2000);
+	}
+
+	private List<Participant> getMulticasts(SequenceDiagram system, RegexResult arg2) {
+		final String multicast = arg2.get("MULTICAST", 0);
+		if (multicast != null) {
+			final List<Participant> result = new ArrayList<>();
+			for (String s : multicast.split("&")) {
+				s = s.trim();
+				if (s.length() == 0) {
+					continue;
+				}
+				final Participant participant = system.getOrCreateParticipant(s);
+				if (participant != null) {
+					result.add(participant);
+				}
+			}
+			return Collections.unmodifiableList(result);
+		}
+		return Collections.emptyList();
 	}
 
 	private Participant getOrCreateParticipant(SequenceDiagram system, RegexResult arg2, String n) {
@@ -156,7 +181,8 @@ public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 	}
 
 	@Override
-	protected CommandExecutionResult executeArg(SequenceDiagram diagram, LineLocation location, RegexResult arg) {
+	protected CommandExecutionResult executeArg(SequenceDiagram diagram, LineLocation location, RegexResult arg)
+			throws NoSuchColorException {
 
 		Participant p1;
 		Participant p2;
@@ -239,7 +265,7 @@ public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 			config = config.reverseDefine();
 		}
 
-		config = applyStyle(arg.getLazzy("ARROW_STYLE", 0), config);
+		config = applyStyle(diagram.getSkinParam().getThemeStyle(), arg.getLazzy("ARROW_STYLE", 0), config);
 
 		final String activationSpec = arg.get("ACTIVATION", 0);
 
@@ -250,6 +276,7 @@ public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 		final String messageNumber = diagram.getNextMessageNumber();
 		final Message msg = new Message(diagram.getSkinParam().getCurrentStyleBuilder(), p1, p2,
 				diagram.manageVariable(labels), config, messageNumber);
+		msg.setMulticast(getMulticasts(diagram, arg));
 		final String url = arg.get("URL", 0);
 		if (url != null) {
 			final UrlBuilder urlBuilder = new UrlBuilder(diagram.getSkinParam().getValue("topurl"), ModeUrl.STRICT);
@@ -269,32 +296,47 @@ public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 		if (error != null) {
 			return CommandExecutionResult.error(error);
 		}
+		final String s = arg.get("LIFECOLOR", 0);
 
-		final HColor activationColor = diagram.getSkinParam().getIHtmlColorSet()
-				.getColorIfValid(arg.get("LIFECOLOR", 0));
+		final HColor activationColor = s == null ? null
+				: diagram.getSkinParam().getIHtmlColorSet().getColor(diagram.getSkinParam().getThemeStyle(), s);
 
 		if (activationSpec != null) {
-			switch (activationSpec.charAt(0)) {
+			return manageActivations(activationSpec, diagram, p1, p2, activationColor);
+		}
+
+		if (diagram.isAutoactivate() && (config.getHead() == ArrowHead.NORMAL || config.getHead() == ArrowHead.ASYNC)) {
+			if (config.isDotted()) {
+				diagram.activate(p1, LifeEventType.DEACTIVATE, null);
+			} else {
+				diagram.activate(p2, LifeEventType.ACTIVATE, activationColor);
+			}
+		}
+		return CommandExecutionResult.ok();
+	}
+
+	private CommandExecutionResult manageActivations(String spec, SequenceDiagram diagram, Participant p1,
+			Participant p2, HColor activationColor) {
+		switch (spec.charAt(0)) {
+		case '+':
+			diagram.activate(p2, LifeEventType.ACTIVATE, activationColor);
+			break;
+		case '-':
+			diagram.activate(p1, LifeEventType.DEACTIVATE, null);
+			break;
+		case '!':
+			diagram.activate(p2, LifeEventType.DESTROY, null);
+			break;
+		}
+		if (spec.length() == 4) {
+			switch (spec.charAt(2)) {
 			case '+':
 				diagram.activate(p2, LifeEventType.ACTIVATE, activationColor);
 				break;
 			case '-':
 				diagram.activate(p1, LifeEventType.DEACTIVATE, null);
 				break;
-			case '!':
-				diagram.activate(p2, LifeEventType.DESTROY, null);
-				break;
-			default:
-				break;
 			}
-		} else if (diagram.isAutoactivate()
-				&& (config.getHead() == ArrowHead.NORMAL || config.getHead() == ArrowHead.ASYNC)) {
-			if (config.isDotted()) {
-				diagram.activate(p1, LifeEventType.DEACTIVATE, null);
-			} else {
-				diagram.activate(p2, LifeEventType.ACTIVATE, activationColor);
-			}
-
 		}
 		return CommandExecutionResult.ok();
 	}
@@ -311,7 +353,8 @@ public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 		return sa.length() + sb.length();
 	}
 
-	public static ArrowConfiguration applyStyle(String arrowStyle, ArrowConfiguration config) {
+	public static ArrowConfiguration applyStyle(ThemeStyle themeStyle, String arrowStyle, ArrowConfiguration config)
+			throws NoSuchColorException {
 		if (arrowStyle == null) {
 			return config;
 		}
@@ -330,7 +373,7 @@ public class CommandArrow extends SingleLineCommand2<SequenceDiagram> {
 				config = config.withBody(ArrowBody.HIDDEN);
 				// link.goHidden();
 			} else {
-				config = config.withColor(HColorSet.instance().getColorIfValid(s));
+				config = config.withColor(HColorSet.instance().getColor(themeStyle, s));
 			}
 		}
 		return config;

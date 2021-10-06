@@ -52,11 +52,13 @@ import net.sourceforge.plantuml.openiconic.data.DummyIcon;
 import net.sourceforge.plantuml.security.SFile;
 import net.sourceforge.plantuml.ugraphic.UGraphic;
 import net.sourceforge.plantuml.ugraphic.color.HColor;
+import net.sourceforge.plantuml.ugraphic.color.HColorAutomaticLegacy;
+import net.sourceforge.plantuml.ugraphic.color.HColorSimple;
 
 public class OpenIcon {
 
 	private SvgPath svgPath;
-	private List<String> rawData = new ArrayList<String>();
+	private List<String> rawData = new ArrayList<>();
 	private final String id;
 
 	public static OpenIcon retrieve(String name) {
@@ -83,30 +85,28 @@ public class OpenIcon {
 
 	private OpenIcon(InputStream is, String id) throws IOException {
 		this.id = id;
-		BufferedReader br = new BufferedReader(new InputStreamReader(is));
-		String s = null;
-		while ((s = br.readLine()) != null) {
-			rawData.add(s);
-			if (s.contains("<path")) {
-				final int x1 = s.indexOf('"');
-				final int x2 = s.indexOf('"', x1 + 1);
-				svgPath = new SvgPath(s.substring(x1 + 1, x2));
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+			String s = null;
+			while ((s = br.readLine()) != null) {
+				rawData.add(s);
+				if (s.contains("<path")) {
+					final int x1 = s.indexOf('"');
+					final int x2 = s.indexOf('"', x1 + 1);
+					svgPath = new SvgPath(s.substring(x1 + 1, x2));
+				}
 			}
 		}
-		br.close();
-		is.close();
 		if (rawData.size() != 3 && rawData.size() != 4) {
 			throw new IllegalStateException();
 		}
 	}
 
 	void saveCopy(SFile fnew) throws IOException {
-		final PrintWriter pw = fnew.createPrintWriter();
-		pw.println(rawData.get(0));
-		pw.println(svgPath.toSvg());
-		pw.println(rawData.get(rawData.size() - 1));
-		pw.close();
-
+		try(PrintWriter pw = fnew.createPrintWriter()) {
+			pw.println(rawData.get(0));
+			pw.println(svgPath.toSvg());
+			pw.println(rawData.get(rawData.size() - 1));
+		}
 	}
 
 	private Dimension2D getDimension(double factor) {
@@ -134,7 +134,11 @@ public class OpenIcon {
 	public TextBlock asTextBlock(final HColor color, final double factor) {
 		return new AbstractTextBlock() {
 			public void drawU(UGraphic ug) {
-				svgPath.drawMe(ug.apply(color), factor);
+				HColor textColor = color;
+				if (textColor instanceof HColorAutomaticLegacy && ug.getParam().getBackcolor() != null) {
+					textColor = ((HColorSimple) ug.getParam().getBackcolor()).opposite();
+				}
+				svgPath.drawMe(ug.apply(textColor), factor);
 			}
 
 			public Dimension2D calculateDimension(StringBounder stringBounder) {

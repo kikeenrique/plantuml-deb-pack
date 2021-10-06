@@ -42,19 +42,20 @@ import net.sourceforge.plantuml.UseStyle;
 import net.sourceforge.plantuml.command.regex.Matcher2;
 import net.sourceforge.plantuml.cucadiagram.Display;
 import net.sourceforge.plantuml.graphic.HorizontalAlignment;
+import net.sourceforge.plantuml.ugraphic.color.NoSuchColorException;
 
 public class CommandMultilinesHeader extends CommandMultilines<TitledDiagram> {
 
 	public CommandMultilinesHeader() {
-		super("(?i)^(?:(left|right|center)?[%s]*)header$");
+		super("^(?:(left|right|center)?[%s]*)header$");
 	}
 
 	@Override
 	public String getPatternEnd() {
-		return "(?i)^end[%s]?header$";
+		return "^end[%s]?header$";
 	}
 
-	public CommandExecutionResult execute(final TitledDiagram diagram, BlocLines lines) {
+	public CommandExecutionResult execute(final TitledDiagram diagram, BlocLines lines) throws NoSuchColorException {
 		lines = lines.trim();
 		final Matcher2 m = getStartingPattern().matcher(lines.getFirst().getTrimmed().getString());
 		if (m.find() == false) {
